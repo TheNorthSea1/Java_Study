@@ -4,5 +4,5 @@
 | ctrl + P | 显示方法参数             |
 | ctrl + F10 | 运行程序               |
 | ctrl + alt + L | java格式化代码          |
-| alt + enter |        |
-|           |                    |
+| alt + enter | 快速生成赋值变量 |
+| ctrl + alt + t | 产生try...catch |

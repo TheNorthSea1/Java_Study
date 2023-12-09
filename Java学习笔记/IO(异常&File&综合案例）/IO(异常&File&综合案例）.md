@@ -247,6 +247,14 @@ public class TryCatchDemo {
 }
 ```
 
+
+
+灵魂四问
+
+![图片](imgs\try_catch.png)
+
+
+
 如何获取异常信息：
 
 Throwable类中定义了一些查看方法:

@@ -336,13 +336,16 @@ public class ImmutableDemo4 {
 
 - 常见方法
 
-  | 方法名                                      | 说明                                       |
-  | ---------------------------------------- | ---------------------------------------- |
-  | Stream<T> filter(Predicate predicate)    | 用于对流中的数据进行过滤                             |
-  | Stream<T> limit(long maxSize)            | 返回此流中的元素组成的流，截取前指定参数个数的数据                |
-  | Stream<T> skip(long n)                   | 跳过指定参数个数的数据，返回由该流的剩余元素组成的流               |
-  | static <T> Stream<T> concat(Stream a, Stream b) | 合并a和b两个流为一个流                             |
-  | Stream<T> distinct()                     | 返回由该流的不同元素（根据Object.equals(Object) ）组成的流 |
+  | 方法名                                          | 说明                                                       |
+  | ----------------------------------------------- | ---------------------------------------------------------- |
+  | Stream<T> filter(Predicate predicate)           | 用于对流中的数据进行过滤                                   |
+  | Stream<T> limit(long maxSize)                   | 返回此流中的元素组成的流，截取前指定参数个数的数据         |
+  | Stream<T> skip(long n)                          | 跳过指定参数个数的数据，返回由该流的剩余元素组成的流       |
+  | static <T> Stream<T> concat(Stream a, Stream b) | 合并a和b两个流为一个流                                     |
+  | Stream<T> distinct()                            | 返回由该流的不同元素（根据Object.equals(Object) ）组成的流 |
+  | Stream<T> map()                                 | 用于对流中的数据进行替换                                   |
+
+  
 
 - filter代码演示
 
@@ -835,6 +838,7 @@ public class ImmutableDemo4 {
           //引用对象的实例方法
           PrintString ps = new PrintString();
           usePrinter(ps::printUpper);
+          usePrinter(new PrintString()::printUpper);
   
       }
   
@@ -856,6 +860,8 @@ public class ImmutableDemo4 {
 - 格式
 
   类名::成员方法
+
+  <img src="C:\Users\北海\Desktop\JAVA学习\Java学习笔记\集合\img\方法引用.png"  />
 
 - 范例
 
