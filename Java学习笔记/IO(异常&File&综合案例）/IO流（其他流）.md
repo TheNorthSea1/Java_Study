@@ -1,4 +1,4 @@
-# 1. 缓冲流
+# 1. 缓冲
 
 昨天学习了基本的一些流，作为IO流的入门，今天我们要见识一些更强大的流。比如能够高效读写的缓冲流，能够转换编码的转换流，能够持久化存储对象的序列化流等等。这些功能更为强大的流，都是在基本的流对象基础之上创建而来的，就像穿上铠甲的武士一样，相当于是对基本流对象的一种增强。
 
@@ -186,6 +186,14 @@ public class BufferedWriterDemo throws IOException {
 程序
 员
   ```
+
+### 总结
+
+![](img\缓冲流总结.png)
+
+
+
+
 
 ## 1.4 练习:文本排序
 
@@ -404,6 +412,15 @@ public class OutputDemo {
 }
 ```
 
+### *jdk11 替代转换流
+
+```java
+FileReader fr = new FileReader(src, Charset.forName("GBK"));
+FileWriter fw = new FileWriter("Test.txt",Charset.forName("GBK"));
+```
+
+
+
 ### 转换流理解图解
 
 **转换流是字节与字符间的桥梁！**![](img/2_zhuanhuan.jpg)
@@ -428,8 +445,10 @@ public class TransDemo {
 		// 2.创建流对象
     	// 2.1 转换输入流,指定GBK编码
         InputStreamReader isr = new InputStreamReader(new FileInputStream(srcFile) , "GBK");
+     	FileReader isr = new FileReader(src, Charset.forName("GBK"));
     	// 2.2 转换输出流,默认utf8编码
         OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(destFile));
+        FileWriter fw = new FileWriter("Test.txt",Charset.forName("UTF-8"));
 		// 3.读写数据
     	// 3.1 定义数组
         char[] cbuf = new char[1024];
@@ -446,6 +465,10 @@ public class TransDemo {
   	}
 }
 ```
+
+### 总结
+
+![](img\字符传化流.png)
 
 # 3. 序列化
 
@@ -574,6 +597,10 @@ public class DeserializeDemo {
 
 `Serializable` 接口给需要序列化的类，提供了一个序列版本号。`serialVersionUID` 该版本号的目的在于验证序列化的对象和对应类是否版本匹配。
 
+***对于serialVersionUID的设置：***
+
+setting -> inspections -> JVMLanguages -> serialVersionUID
+
 ```java
 public class Employee implements java.io.Serializable {
      // 加入序列版本号
@@ -589,7 +616,9 @@ public class Employee implements java.io.Serializable {
 }
 ```
 
+### 总结
 
+![](img\序列化.png)
 
 ## 3.4 练习：序列化集合
 

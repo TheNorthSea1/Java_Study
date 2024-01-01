@@ -586,7 +586,7 @@ public class FileWriterConstructor {
 public class FWWrite {
     public static void main(String[] args) throws IOException {
         // 使用文件名称创建流对象
-        FileWriter fw = new FileWriter("fw.txt");     
+        FileWriter fw = new FileWriter("fw.txt");   // 创建时会清空fw.txt的文件
       	// 写出数据
       	fw.write(97); // 写出第1个字符
       	fw.write('b'); // 写出第2个字符
@@ -711,6 +711,12 @@ public class FWWrite {
 > 小贴士：字符流，只能操作文本文件，不能操作图片，视频等非文本文件。
 >
 > 当我们单纯读或者写文本文件时  使用字符流 其他情况使用字节流
+
+
+
+## 字符原理解析
+
+![hello](img\output.png)
 
 # 4. IO异常的处理
 
@@ -845,9 +851,7 @@ public class Test01 {
 
         //3.调用方法开始拷贝
         copydir(src,dest);
-
-
-
+        
     }
 
     /*
@@ -859,14 +863,14 @@ public class Test01 {
     private static void copydir(File src, File dest) throws IOException {
         dest.mkdirs();
         //递归
-        //1.进入数据源
+        //1.进入数据源 
         File[] files = src.listFiles();
         //2.遍历数组
         for (File file : files) {
             if(file.isFile()){
                 //3.判断文件，拷贝
                 FileInputStream fis = new FileInputStream(file);
-                FileOutputStream fos = new FileOutputStream(new File(dest,file.getName()));
+                FileOutputStream fos = new FileOutputStream(new  File(dest,file.getName()));
                 byte[] bytes = new byte[1024];
                 int len;
                 while((len = fis.read(bytes)) != -1){
