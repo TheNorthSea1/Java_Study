@@ -63,7 +63,7 @@
 
    ![image-20220624161025788](day05.assets/image-20220624161025788.png)
 
-4. 注意：直接打开 idb 文件是二进制文件，是乱码的，如果想去查看和观察，mysql 提供了一个指令 idb2sdi (sdi-是新版本的存储表结构的方式，frm-之前版本的)
+4. 注意：直接打开 idb 文件是二进制文件，是乱码的，如果想去查看和观察，mysql 提供了一个指令 ibd2sdi (sdi-是新版本的存储表结构的方式，frm-之前版本的)
 
    ![image-20220624162238501](day05.assets/image-20220624162238501.png)
 
@@ -292,21 +292,21 @@
 
      ![image-20220627180630840](day05.assets/image-20220627180630840.png)
 
-#### 演示
+#### 演示 （开两个命令窗口）
 
 1. 脏读(read uncommitted 未提交读)
 
-   | 会话1                                                    | 会话2                  |
-   | -------------------------------------------------------- | ---------------------- |
-   | use transaction;                                         | use transaction;       |
-   | set global transaction isolation level read uncommitted; |                        |
-   | start transaction;                                       |                        |
-   |                                                          | start transaction;     |
-   | insert into account values(2,'sy',100);                  |                        |
-   |                                                          | select * from account; |
-   | rollback;                                                |                        |
-   |                                                          | select * from account; |
-   |                                                          |                        |
+   | 会话1                                                    | 会话2                                  |
+   | -------------------------------------------------------- | -------------------------------------- |
+   | use transaction;                                         | use transaction;                       |
+   | set global transaction isolation level read uncommitted; |                                        |
+   | start transaction;                                       |                                        |
+   |                                                          | start transaction;                     |
+   | insert into account values(2,'sy',100);                  |                                        |
+   |                                                          | select * from account;(查询出数据)     |
+   | rollback;                                                |                                        |
+   |                                                          | select * from account;(不能查询出数据) |
+   |                                                          |                                        |
 
 2. read committed(已提交读)
 
@@ -319,7 +319,7 @@
    | select * from account;                                 |                                        |
    |                                                        | select * from account;(不能查询出数据) |
    | commit;                                                |                                        |
-   |                                                        | select * from account;(查询出数据)     |
+   |                                                        | select * from account;                 |
    |                                                        |                                        |
 
 3. repeatable read(可重复读)
