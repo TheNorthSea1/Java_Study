@@ -44,7 +44,7 @@
 
 ![image-20220628114629236](day06.assets/image-20220628114629236.png)
 
-1. 存储引擎层支持索引，也就是说不通的存储引擎可能支持不同的索引。
+1. 存储引擎层支持索引，也就是说不同的存储引擎可能支持不同的索引。
 
 ![image-20220628114722155](day06.assets/image-20220628114722155.png)
 
@@ -114,7 +114,7 @@
 3. 特点：
    - 5阶B数，每一个节点最多有4个K，有5个指针。
    - 当存储元素达到key 的数量时，中间元素向上分裂。
-   - 叶子节点和非叶子节点都会存放数据。
+   - **叶子节点和非叶子节点都会存放数据**。
 
 ### B+Tree
 
@@ -122,7 +122,7 @@
 
 1. 注意：
 
-   - 叶子节点存放数据，非叶子节点存放索引结构。
+   - **叶子节点存放数据，非叶子节点存放索引结构**。
    - 叶子节点通过一个指针进行关联，编程了一个链表的结构
    - 当需要裂变的时候，非叶子节点的数据也会出现在叶子节点
    - 蓝色框的只存索引结构
@@ -385,7 +385,7 @@
      
      explain select * from emp where id = 1;
      
-     explain select * from user where phone = '13508895543'
+     explain select * from user where phone = '13508895543'; ref
      
      
      ```
@@ -467,63 +467,63 @@
    - ABC
    - BC(X)
    - AC(使用A索引)
-   - CBA
+   - CBA( 顺序无关，只要列存在即可)
 
    
 
 ### 索引失效
 
-1. 字符串不加引号
+#### 字符串不加引号
 
-   ```sql
-   explain select *from user where phone = 13708822169;
-   ```
+```sql
+explain select *from user where phone = 13708822169;
+```
 
-   ![image-20220629134822900](day06.assets/image-20220629134822900.png)
+![image-20220629134822900](day06.assets/image-20220629134822900.png)
 
-2. or 连接（or 前后没有建立索引的时候不会被用到）
+#### or 连接（or 前后没有建立索引的时候不会被用到）
 
-   ```sql
-   explain select *from user where phone = 13708822169 or status = 0;
-   ```
+```sql
+explain select *from user where phone = 13708822169 or status = 0;
+```
 
-   ![image-20220629134951518](day06.assets/image-20220629134951518.png)
+![image-20220629134951518](day06.assets/image-20220629134951518.png)
 
-   ![image-20220629135255944](day06.assets/image-20220629135255944.png)
+![image-20220629135255944](day06.assets/image-20220629135255944.png)
 
-3. 模糊查询
+#### 模糊查询
 
-   ```sql
-   explain select * from user where phone like '%0' ;
-   ```
+```sql
+explain select * from user where phone like '%0' ;
+```
 
-   ![image-20220629135515799](day06.assets/image-20220629135515799.png)
+![image-20220629135515799](day06.assets/image-20220629135515799.png)
 
-4. 对于索引使用函数运算
+#### 对于索引使用函数运算
 
-   ```sql
-   explain select * from user where substring(phone,1,2) = '19' ;
-   ```
+```sql
+explain select * from user where substring(phone,1,2) = '19' ;
+```
 
-   ![image-20220629135710106](day06.assets/image-20220629135710106.png)
+![image-20220629135710106](day06.assets/image-20220629135710106.png)
 
-5. 数据分布影响
+#### 数据分布影响
 
-   ```sql
-   explain select * from user where phone > '13508822168';
-   ```
+```sql
+explain select * from user where phone > '13508822168';
+```
 
-   ![image-20220629135903131](day06.assets/image-20220629135903131.png)
+![image-20220629135903131](day06.assets/image-20220629135903131.png)
 
-   ```sql
-   explain select * from user where gender = 1;
-   ```
+```sql
+explain select * from user where gender = 1;
+```
 
-   
 
-   ![image-20220629140019630](day06.assets/image-20220629140019630.png)
 
-   
+![image-20220629140019630](day06.assets/image-20220629140019630.png)
+
+
 
 ## 索引的使用和设计原则
 
@@ -551,7 +551,7 @@
 
 3. 单列索引和联合索引
 
-   - 使用多个单列索引查询时，并不会全用索引，会根据mysql优化器的指引进行选择
+   - 使用多个单列索引查询时，并不会全用索引，会根据mysql优化器的指引进行选择某一个
 
      ![image-20220629150014967](day06.assets/image-20220629150014967.png)
 
