@@ -60,6 +60,114 @@ update account set money = money -1000 where user_name = ?
 update account set money = money + 1000 where user_name = ?
 ```
 
+#### 1.1创建Druid工具类
+
+```java
+public class DruidUtil {
+
+    static private DataSource source = null;
+
+    static {
+        Properties properties = new Properties();
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties");
+        try {
+            properties.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            source = DruidDataSourceFactory.createDataSource(properties);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 获取Druid连接池中的连接对象
+     * @return
+     * @throws Exception
+     */
+    public static Connection getConn() throws Exception {
+       return source.getConnection();
+    }
+
+    public static void main(String[] args) throws Exception {
+        Connection conn = getConn();
+//        System.out.println(conn);
+    }
+
+    public static void update(Connection con,String sql,Object ...args){
+        PreparedStatement statement = null;
+
+        try {
+            statement = con.prepareStatement(sql);
+            for (int i = 0; i < args.length; i++) {
+                statement.setObject(i+1,args[i]);
+            }
+            System.out.println(statement);
+            boolean execute = statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }finally {
+            if (statement != null){
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+}
+```
+
+#### 1.2创建AccountDemo实现类
+
+```java
+public class AccountDemo {
+
+    @Test
+    public void accountTest(){
+        Connection connection = null;
+        try{
+
+            connection = DruidUtil.getConn();
+            //             设置自动提交为false
+            connection.setAutoCommit(false);
+
+            String sql1 = "update account set money  = money - 100 where user_name = ?";
+
+
+            DruidUtil.update(connection,sql1,"bwh");
+
+
+            String sql2 = "update account set money  = money + 100 where user_name = ?";
+//            PreparedStatement statement1 = connection.prepareStatement(sql2);
+//            statement1.setString(1,"zkw");
+//            statement1.execute();
+            
+            DruidUtil.update(connection,sql2,"zkw");
+
+            connection.commit();
+            
+
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+    }
+    
+}
+```
+
 
 
 # 二、批量处理
@@ -77,7 +185,14 @@ update account set money = money + 1000 where user_name = ?
 ## 3.业务场景
 
 - 多条SQL语句的批量处理
+
 - 一个SQL语句的批量传参
+
+  ```sql
+  intsert into account values(..),values(...),values(...)
+  ```
+
+  
 
 ## 4.批量处理案例
 
@@ -123,6 +238,16 @@ update account set money = money + 1000 where user_name = ?
 
 - addBatch() / executeBatch() / clearBatch()
 
+- **注意在url中加入rewriteBatchedStatements=true**
+
+  **加入参数 用 ？**
+  
+  ```java
+  url = jdbc:mysql://localhost:3306/jdbc?rewriteBatchedStatements=true
+  ```
+  
+  
+  
   ```java
   public void test3() throws SQLException {
           long begin = System.currentTimeMillis();
