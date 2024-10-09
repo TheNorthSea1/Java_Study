@@ -238,15 +238,15 @@ public class AccountDemo {
 
 - addBatch() / executeBatch() / clearBatch()
 
-- **注意在url中加入rewriteBatchedStatements=true**
+- **MySQL Jdbc驱动在默认情况下会无视executeBatch()语句，把我们期望批量执行的一组sql语句拆散，一条一条地发给MySQL数据库，直接造成较低的性能。**
 
-  **加入参数 用 ？**
+  **只有把rewriteBatchedStatements参数置为true, 驱动才会帮你批量执行SQL** 
   
   ```java
   url = jdbc:mysql://localhost:3306/jdbc?rewriteBatchedStatements=true
   ```
   
-  
+  [参考文章](https://blog.csdn.net/lh155136/article/details/122437056?ops_request_misc=%257B%2522request%255Fid%2522%253A%252271336B73-1F9E-4461-8F5C-B8B3294FFB94%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&request_id=71336B73-1F9E-4461-8F5C-B8B3294FFB94&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-4-122437056-null-null.142^v100^pc_search_result_base5&utm_term=jdbc%20rewitebatch%20mysql&spm=1018.2226.3001.4187)
   
   ```java
   public void test3() throws SQLException {
@@ -269,7 +269,7 @@ public class AccountDemo {
       }
   ```
 
-### 4.4实现方式四
+### 4.4实现方式4
 
 - 批处理+事务
 

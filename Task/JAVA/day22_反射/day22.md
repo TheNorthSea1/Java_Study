@@ -328,3 +328,23 @@ public static void main(String[] args) throws Exception {
    当要知道Test包上层的包时，用..\\返回上一层
    
    ![image-20240926205613429](./assets/image-20240926205613429.png)
+
+# 补充
+
+- ##### **利用反射机制，设计可以输出任何类的字段和字段值**
+
+```java
+public <T> void out(Class<T> cls, T obj) {
+        System.out.println("Fields of object of type " + cls.getName() + ":");
+        for (Field field : cls.getDeclaredFields()) {
+            field.setAccessible(true); // 绕过Java的访问控制检查
+            try {
+                Object value = field.get(obj);
+                System.out.println(field.getName() + " = " + value);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+```
+

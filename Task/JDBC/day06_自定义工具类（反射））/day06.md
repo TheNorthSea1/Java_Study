@@ -135,9 +135,62 @@ public static int update(Connection conn,String sql,Object...args){
     }
 ```
 
-## 5.查询方法
+### Note:
 
-- 注意，要通过反射来灵活处理工具类
+- ​	**conn.close。 并不是真正的关闭，而是放回连接池。**
+
+  ```java
+   public static void main(String[] args) {
+  
+          System.out.println(JDBCUtil.dataSource);
+  
+          String sql = "update account set money = ?";
+  
+          JDBCUtil.update(JDBCUtil.getConn(),sql,"2000");
+  
+          System.out.println(JDBCUtil.dataSource);
+  
+   }
+  ```
+
+  con关闭前datasource输出情况
+
+  ```java
+  {
+  	CreateTime:"2024-10-09 10:33:36",
+  	ActiveCount:0,
+  	PoolingCount:0,
+  	CreateCount:0,
+  	DestroyCount:0,
+  	CloseCount:0,
+  	ConnectCount:0,
+  	Connections:[
+  	]
+  }
+  ```
+
+  con关闭后datasource输出情况
+
+  ```java
+  {
+  	CreateTime:"2024-10-09 10:33:36",
+  	ActiveCount:0,
+  	PoolingCount:1,
+  	CreateCount:1,
+  	DestroyCount:0,
+  	CloseCount:1,
+  	ConnectCount:1,
+  	Connections:[
+  		{ID:314337396, ConnectTime:"2024-10-09 10:33:37", UseCount:1, LastActiveTime:"2024-10-09 10:33:37"}
+  	]
+  }
+  ```
+
+  
+
+## 5.查询方法(⭐️)
+
+- 注意，要通过**反射**来灵活处理工具类
 
   ```java
    public static <T> List<T>  query(Connection conn,String sql,Class<T> clz,Object...args){
@@ -147,7 +200,7 @@ public static int update(Connection conn,String sql,Object...args){
           try {
               statement = conn.prepareStatement(sql);
               for (int i = 0; i < args.length; i++) {
-                  statement.setObject(i+1,args[0]);
+                  statement.setObject(i+1,args[i]);
               }
               //查询操作
               resultSet = statement.executeQuery();
@@ -183,8 +236,17 @@ public static int update(Connection conn,String sql,Object...args){
       }
   ```
 
+  #### Note
+  
+  - ##### 数据库中设置字段名，单词和单词之间采用下划线的方式
+  
+  - ##### Java类中设置字段名，单词和单词之间采用驼峰命名。
+  
+  - ##### 所以，需用写一个方法去修改字段名。  （下次,学 mybits的时候回顾一下）
+  
   ```java
-   private static String changeColumn(String column){
+  //The method was written by teacher.
+  private static String changeColumn(String column){
       String name = column;
       int index = name.indexOf("_");
       if(index > 0 && name.length() != index + 1){
@@ -199,5 +261,29 @@ public static int update(Connection conn,String sql,Object...args){
       return changeColumn(column);
   }
   ```
-
+  
+  ```java
+  // The method was written by me.
+  public static String changeColumn(String column){
+  
+          StringBuilder stringBuilder = new StringBuilder();
+          char[] charArray = column.toCharArray();
+          int flag = 0;
+          for (int i = 0; i < charArray.length; i++) {
+              if (charArray[i] == '_'){
+                  flag = 1;
+              }else {
+                  if (flag == 1){
+                      stringBuilder.append(Character.toUpperCase(charArray[i]));
+                      flag = 0 ;
+                  }else {
+                      stringBuilder.append(charArray[i]);
+                  }
+              }
+  
+          }
+          return stringBuilder.toString();
+      }
+  ```
+  
   
