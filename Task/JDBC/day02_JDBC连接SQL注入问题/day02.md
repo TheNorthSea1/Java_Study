@@ -214,7 +214,7 @@ connection.commit();
 
 ### 1.PreparedStatement 
 
-1. 作用：预编译SQL语句并执行，预防SQL注入问题
+1. 作用：预编译SQL语句并执行，预防SQL注入问题（需要手动开启预编译）
 
 2. 获取PreparedStatement 对象(? 代表占位符)
 
@@ -252,6 +252,8 @@ connection.commit();
 
     - 检查SQL和编译SQL时间比执行SQL时间还要长，使用预编译语句不需要重复检查SQL语句和编译，还可以提高性能
 
+  - **PreparedStatement的预编译功能默认是关闭的**，要让其生效，必须在JDBC连接的URL设置`useServerPrepStmts=true`，让其打开
+
   - ```java
     useServerPrepStmts=true
     ```
@@ -260,7 +262,7 @@ connection.commit();
 
 - 通过查询日志来看原理
 
-  - 开启预编译功能（刚才只是解决了SQL注入问题，预编译还没开启）
+  - **开启预编译功能（刚才只是解决了SQL注入问题，预编译还没开启）**
     - 开启：在url 加上如下参数 ？ userServerPrepstmts=true
   - 配置MySQL 执行日志
     - ![image-20241007143756147](./assets/image-20241007143756147.png)
