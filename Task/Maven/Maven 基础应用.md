@@ -28,13 +28,13 @@
 
 - 进入官网
 
-  <img src="picture/image-20220928155612253.png" alt="image-20220928155612253" style="zoom: 25%;" />
+  <img src="picture/image-20220928155612253.png" alt="image-20220928155612253" style="zoom: 50%;" />
 
 - 创建第一个 Maven 项目
 
   - 使用idea 创建感受一下
 
-    ![image-20220928155741850](picture/image-20220928155741850.png)
+    <img src="./assets/image-20241010110039769.png" alt="image-20241010110039769" style="zoom:67%;" />
 
   - 创建项目的结构
 
@@ -115,8 +115,10 @@
 
   ![image-20220928164759122](picture/image-20220928164759122.png)
 
-  ![image-20220928164816743](picture/image-20220928164816743.png)
+  path路径里：
 
+  ![image-20220928164816743](picture/image-20220928164816743.png)
+  
   ![image-20220928164835560](picture/image-20220928164835560.png)
 
 
@@ -153,7 +155,8 @@
 
   ![image-20220928172051166](picture/image-20220928172051166.png)
 
-- 配置阿里私服，因为中央仓库在国外，所以下载很慢，阿里规模很大，阿里建了一个私服
+  - 配置阿里私服，因为中央仓库在国外，所以下载很慢，阿里规模很大，阿里建了一个私服
+
 
   ```java
   <mirror> 
@@ -170,6 +173,7 @@
   ```
 
   ![image-20220928173002659](picture/image-20220928173002659.png)
+
 
 # 五、Maven 常用命令
 
@@ -195,11 +199,13 @@
 - test：测试
 
   - 会去编译并且执行test
+  - ![image-20241010164732890](./assets/image-20241010164732890.png)
   - <img src="picture/image-20220928180806815.png" alt="image-20220928180806815" style="zoom:50%;" />
 
 - package：打包
 
   - 打jar 包
+  - ![image-20241010170617628](./assets/image-20241010170617628.png)
   - <img src="picture/image-20220928181011415.png" alt="image-20220928181011415" style="zoom:50%;" />
 
 - install：安装

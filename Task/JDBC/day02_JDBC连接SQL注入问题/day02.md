@@ -265,9 +265,12 @@ connection.commit();
   - **开启预编译功能（刚才只是解决了SQL注入问题，预编译还没开启）**
     - 开启：在url 加上如下参数 ？ userServerPrepstmts=true
   - 配置MySQL 执行日志
+    - 重启mysql服务，在计算机中搜索服务
+    - 
     - ![image-20241007143756147](./assets/image-20241007143756147.png)
   
-
+  
+  
   ![image-20220709141525834](day02.assets/image-20220709141525834.png)
   
   

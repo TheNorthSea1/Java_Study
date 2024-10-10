@@ -1,11 +1,3 @@
-------
-
-**讲师：上云**
-
-**网址：www.sycoder.cn**
-
-------
-
 # 一、Request 与 Response
 
 ## 1.概述
