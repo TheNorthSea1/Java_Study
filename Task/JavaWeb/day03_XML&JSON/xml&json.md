@@ -135,7 +135,7 @@
 
     ```xml
     <person>
-      <sex>man</sex>
+      <sex>female</sex>
       <firstname>Anna</firstname>
       <lastname>Smith</lastname>
     </person> 
@@ -219,22 +219,26 @@
     <message>if salary &lt; 1000 then</message>
     ```
 
-    
 
-
-## 6.XML 约束
-
-### 1.DTD约束
+## 6.**使用模板生成 xml 文件**
 
 - **使用模板生成 xml 文件**
 
-  <img src="xml&json.assets/image-20221006111629888.png" alt="image-20221006111629888" style="zoom:50%;" />
+  <img src="xml&json.assets/image-20221006111629888.png" alt="image-20221006111629888" style="zoom: 67%;" />
 
-  <img src="xml&json.assets/image-20221006111704677.png" alt="image-20221006111704677" style="zoom: 25%;" />
+  <img src="xml&json.assets/image-20221006111704677.png" alt="image-20221006111704677" style="zoom: 67%;" />
 
-  <img src="xml&json.assets/image-20221006111844028.png" alt="image-20221006111844028" style="zoom: 25%;" />
+  <img src="xml&json.assets/image-20221006111844028.png" alt="image-20221006111844028" style="zoom: 50%;" />
 
-  
+  ![image-20241011094310603](./assets/image-20241011094310603.png)
+
+## 7.XML 约束（验证）
+
+### 1.DTD约束
+
+- 定义：可定义合法的XML文档构建模块。它使用一系列合法的元素来定义文档的结构。
+
+  DTD 可被成行地声明于 XML 文档中，也可作为一个外部引用。
 
 - 编写 DTD 约束文件，后缀是以 .dtd 结尾
 
@@ -257,7 +261,7 @@
   ]>
   ```
 
-  
+  ​	
 
   ![image-20221006112945379](xml&json.assets/image-20221006112945379.png)
 
@@ -279,7 +283,7 @@
 
 
 
-## 7.XML的解析
+## 8.XML的解析
 
 - 方式
   - **DOM**
@@ -292,15 +296,17 @@
     - 缺点：只能读，不能够增删改
 - 常见的解析器
   - JAXP：sum 公司提供的解析器。支持 dom sax
-  - **DOM4J**：比较优秀
+  - **DOM4J**：比较优秀 [官网地址](https://dom4j.github.io/)
   - jsoup：HTML 解析
 
 - 使用
   - 挑选 dom4j 的版本 2.1.3以上
 
-## 8.xml 检索
+## 9.xml 检索
 
-- 使用 XPath
+- 使用 XPath 
+
+  - XPath 使用路径表达式在 XML 文档中进行导航
 
 - 先导入包
 
@@ -385,7 +391,7 @@
   </head>
   <body>
   <script>
-      var json  = {"name":"sy","age":18};
+      var json  = {name:"sy",age:18};
       window.alert("这里是我们的弹框")
       console.log(json);
   
@@ -460,3 +466,6 @@ Person person1 = JSON.parseObject(jsonString, Person.class);
 System.out.println(person1.getUsername());
 ```
 
+#### 课上演示出现导入fastjson依赖后，依旧无法使用的问题
+
+<img src="./assets/image-20241011144136877.png" alt="image-20241011144136877" style="zoom: 80%;" />

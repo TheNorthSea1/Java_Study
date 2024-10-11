@@ -64,7 +64,7 @@
 
 - 访问流程
 
-  <img src="webTomcatServlet.assets/image-20221006193309409.png" alt="image-20221006193309409" style="zoom:25%;" />
+  <img src="webTomcatServlet.assets/image-20221006193309409.png" alt="image-20221006193309409" style="zoom: 67%;" />
 
 ### 1.5HTTP 协议
 
@@ -80,7 +80,7 @@
 
 - HTTP : 超文本传输协议，规定了 b/s 之间的数据传输规则
 
-  ![image-20221006194728946](webTomcatServlet.assets/image-20221006194728946.png)
+  <img src="webTomcatServlet.assets/image-20221006194728946.png" alt="image-20221006194728946" style="zoom: 80%;" />
 
 - 数据传输：请求数据去请求后端服务器，服务器按照指定的格式返回给浏览器
 
@@ -98,27 +98,32 @@
 
   - **请求行**
 
-    <img src="webTomcatServlet.assets/image-20221007100250619.png" alt="image-20221007100250619" style="zoom:50%;" />
+    <img src="webTomcatServlet.assets/image-20221007100250619.png" alt="image-20221007100250619" style="zoom: 67%;" />
 
-    - 请求方式有7种最常用：get post delete put
+    - **请求方法**：描述了客户端希望服务器对资源执行的动作。HTTP/1.1协议中定义了八种请求方法，常用的有GET和POST两种。GET方法用于请求访问已被URI识别的资源，POST方法用于向指定资源提交数据，请求服务器进行处理（例如提交表单或者上传文件）。
+    - **请求URL**：命名了所请求的资源，可以是完整URL，也可以是URL路径组件。通过URL可以定位到网络中的某个资源。
+    - **HTTP协议版本**：指明了客户端使用的HTTP协议版本，如HTTP/1.1。
 
   - **请求头**
 
-    <img src="webTomcatServlet.assets/image-20221007100352129.png" alt="image-20221007100352129" style="zoom: 33%;" />
-
-    - host: 表示请求的服务器地址
-    - accept:表示浏览器能接受的资源类型 application/json,text/plain 
-    - token：自定义的token
-    - User-agent: 浏览器的版本信息
+    <img src="webTomcatServlet.assets/image-20221007100352129.png" alt="image-20221007100352129" style="zoom: 67%;" />
+  
+    - **Host**：指明了请求的资源所在的服务器和端口号。
+    - **User-Agent**：描述了客户端浏览器的版本信息，服务器可以根据这个头信息来解决浏览器的兼容性问题。
+    - **Referer**：描述了当前请求的来源页面，可以用于防盗链和统计工作。
+    - **Cookie**：包含了客户端发送给服务器的各种Cookie信息，用于维持会话状态等。
+    - **Content-Type**：描述了请求体的数据格式以及编码格式，仅当请求方法包含请求体时才需要此头信息。
+    - **Content-Length**：描述了请求体的长度，仅当请求方法包含请求体时才需要此头信息。
 
   - **请求体**
 
     ![image-20221007100509421](webTomcatServlet.assets/image-20221007100509421.png)
-
+  
     ![image-20221007100524884](webTomcatServlet.assets/image-20221007100524884.png)
-
+  
+    - 请求体是请求数据的最后一部分，包含了要发送给服务器的数据。只有当请求方法需要时（如POST、PUT等），请求体才存在。请求体的数据格式由Content-Type头信息指定。
     - 如果是 Get 请求或者 delete 请求，请求体放置到请求行位置
-    - POST 防止到请求体中
+    - POST 放置到请求体中
     - get 请求参数大小是有限制的，Post没有大小限制
 
 ### 2.3响应数据格式
@@ -127,13 +132,25 @@
 
   <img src="webTomcatServlet.assets/image-20221007101819007.png" alt="image-20221007101819007" style="zoom:50%;" />
 
+  - **HTTP协议版本**：指明了服务器使用的HTTP协议版本，如HTTP/1.1。
+  - **状态码**：一个三位数的整数，用于表示请求的处理结果。状态码分为五类，分别以1xx、2xx、3xx、4xx和5xx开头，每类状态码都有特定的含义。例如，200表示请求成功，404表示未找到资源。
+  - **状态信息**：对状态码的简短描述，如“OK”表示请求成功，“Not Found”表示未找到资源。
+
 - **响应头**
 
   <img src="webTomcatServlet.assets/image-20221007101900668.png" alt="image-20221007101900668" style="zoom:50%;" />
 
+  - **Date**：表示响应生成的时间。
+  - **Server**：包含了服务器的信息，如服务器的名称和版本。
+  - **Content-Type**：描述了响应体的数据格式以及编码格式，如text/html表示HTML格式的数据，application/json表示JSON格式的数据等。
+  - **Content-Length**：描述了响应体的长度，以字节为单位。
+  - **Set-Cookie**：包含了服务器发送给客户端的Cookie信息，用于维持会话状态等。
+  - **Cache-Control**：用于指定缓存策略，如no-cache表示不允许缓存，max-age=3600表示缓存时间为3600秒等。
+
 - **响应体**
 
   - 提供数据给前端进行数据展示的
+  - 服务器返回给客户端的数据。响应体的数据格式由Content-Type头信息指定。根据请求的不同，响应体可以包含HTML页面、JSON数据、图片、视频等多种类型的数据。
 
   <img src="webTomcatServlet.assets/image-20221007101928076.png" alt="image-20221007101928076" style="zoom:50%;" />
 
@@ -152,6 +169,8 @@
     
 
   - 500 服务器报错
+  
+  - [服务端状态码](服务器状态码.md)
 
 ## 3.Tomcat
 
@@ -170,7 +189,7 @@
 - 如何学习 tomcat 可以参考mysql
 
   - 下载
-  - 安装
+  - 安装 [参考csdn](https://blog.csdn.net/weixin_47700137/article/details/116055222?ops_request_misc=%257B%2522request%255Fid%2522%253A%25226D58964B-35A0-4552-ACD4-C9441A93E4F6%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=6D58964B-35A0-4552-ACD4-C9441A93E4F6&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-116055222-null-null.142^v100^pc_search_result_base5&utm_term=tomcat%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B&spm=1018.2226.3001.4187)
   - 启动/关闭
   - 配置（环境配置）
 
@@ -252,7 +271,7 @@
 
 ### 4.1使用普通的创建方式
 
-![image-20221007135054516](webTomcatServlet.assets/image-20221007135054516.png)
+<img src="webTomcatServlet.assets/image-20221007135054516.png" alt="image-20221007135054516" style="zoom: 67%;" />
 
 - 使用普通的这种方式，项目结构是不完整的，需要补齐项目缺失的目录结构
 
@@ -262,37 +281,39 @@
 
 - 得到的web 项目结构
 
-  <img src="webTomcatServlet.assets/image-20221007140253755.png" alt="image-20221007140253755" style="zoom:50%;" />
+  <img src="webTomcatServlet.assets/image-20221007140253755.png" alt="image-20221007140253755" style="zoom: 67%;" />
+  
+- Web项目结构更改
+
+  ![image-20241011220341798](./assets/image-20241011220341798.png)
 
 ### 4.2使用 maven 的骨架创建项目
 
-- 创建模块
-
-  <img src="webTomcatServlet.assets/image-20221007140436174.png" alt="image-20221007140436174" style="zoom:50%;" />
-
-
-
 - 选择 maven 的骨架
 
-  <img src="webTomcatServlet.assets/image-20221007140532200.png" alt="image-20221007140532200" style="zoom:50%;" />
+  <img src="./assets/image-20241011214909321.png" alt="image-20241011214909321"  />
 
   
 
-  <img src="webTomcatServlet.assets/image-20221007140729731.png" alt="image-20221007140729731" style="zoom:50%;" />
+  <img src="./assets/image-20241011215015059.png" alt="image-20241011215015059"  />
 
-- 修改maven 配置
+- 修改maven 配置（新版idea不需要）
 
   <img src="webTomcatServlet.assets/image-20221007140840914.png" alt="image-20221007140840914" style="zoom: 33%;" />
 
-- 缺失了 java 源代码目录和 resources 目录
+- 缺失了 java 源代码目录和 resources 目录（新版idea只缺少java原代码目录）
 
-  ![image-20221007141023378](webTomcatServlet.assets/image-20221007141023378.png)
+  ![image-20241011215334420](./assets/image-20241011215334420.png)
 
 ## 5.把 java 项目部署到 tomcat
 
 - 将 java 代码打成一个 war 包
 
   ![image-20221007143935004](webTomcatServlet.assets/image-20221007143935004.png)
+
+- 使用Maven的打包
+
+  ![image-20241011223734632](./assets/image-20241011223734632.png)
 
 - 将 war 包丢进tomcat webapps 下面
 
