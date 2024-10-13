@@ -213,7 +213,7 @@ public class ShareResource {
 
    
 
-5. Lock 和 Condition 接口：
+5. **Lock 和 Condition 接口：**
 
    - wait 和 notify 只能被同步监听锁对象调用，否则报错，但是Lock 机制根本没有同步锁，也没有获取释放锁的逻辑。
    - 使用Condition 接口对象的 await singnal signalAll 方法取代 Object 类中的 wait notify notifyAll 方法
