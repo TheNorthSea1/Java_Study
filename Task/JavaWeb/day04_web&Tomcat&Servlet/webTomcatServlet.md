@@ -457,6 +457,14 @@ http://localhost:8080/myServlet
       - 封装了响应数据
       - 响应值从这里面传
 
+> 1. **浏览器发送请求**：用户在浏览器中输入URL，浏览器根据URL建立与Web服务器（如Tomcat）的连接，并发送HTTP请求。
+> 2. **服务器解析请求**：Web服务器接收到请求后，解析请求数据，并根据请求的URL路径找到对应的Servlet。
+> 3. **实例化Servlet对象**：如果Servlet尚未被实例化，Web服务器会创建Servlet实例，并调用其`init()`方法进行初始化。
+> 4. **调用service方法**：Web服务器调用Servlet的`service()`方法来处理请求。`service()`方法根据请求的类型（如GET、POST等）调用相应的`doGet()`、`doPost()`等方法。
+> 5. **处理请求并生成响应**：在`doGet()`、`doPost()`等方法中，程序员编写业务逻辑来处理请求，生成响应内容，并将其写入`HttpServletResponse`对象中。
+> 6. **发送响应**：Web服务器将`HttpServletResponse`对象中的响应内容发送回浏览器。
+> 7. **浏览器显示响应**：浏览器接收到响应后，解析并显示响应内容。
+
 - 额外面试拓展
   - Servlet 是谁创建的对象
     - tomcat 服务器

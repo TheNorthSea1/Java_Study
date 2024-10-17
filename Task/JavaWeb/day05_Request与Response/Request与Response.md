@@ -463,6 +463,6 @@ public class RespServlet extends HttpServlet {
 
   ![image-20221009194042921](Request与Response.assets/image-20221009194042921.png)
 
-  - **漏到 mysql 驱动包**（倒错位置）
+  - **漏到 mysql 驱动包**（导错位置）
   - **jdbc 工具类出现问题**
   - **SQL 出现错误**

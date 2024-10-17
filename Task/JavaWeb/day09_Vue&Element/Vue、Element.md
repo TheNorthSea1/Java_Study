@@ -2,11 +2,11 @@
 
 ## 1.Vue 概述
 
-- Vue 学习中文文档 https://vuejs.bootcss.com/guide/
+- Vue 学习中文文档 https://cn.vuejs.org/
 
 - Vue (读音 /vjuː/，类似于 **view**) 是一套用于构建用户界面的**渐进式框架**
 
-  ![image-20221014110053829](Vue、Element.assets/image-20221014110053829.png)
+  <img src="Vue、Element.assets/image-20221014110053829.png" alt="image-20221014110053829" style="zoom:150%;" />
 
 - vue 是使用数据的双向绑定
 
@@ -16,57 +16,62 @@
 
 - 引入 vue.js 文件
 
-  ```html
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-  ```
+  > vue2  https://cdn.jsdelivr.net/npm/vue/dist/vue.js
+  >
+  > vue3 https://unpkg.com/vue@3/dist/vue.global.js
 
-- 先写一个视图
+  > Tips:
+  > 如果你没有使用任何构建工具，而是从 CDN 或其他源来加载 Vue，请确保在部署时使用的是生产环境版本（以 .prod.js 结尾的构建文件）。生产环境版本会被最小化，并移除了所有仅用于开发环境的代码分支。
+  >
+  > vue3 https://unpkg.com/vue@3/dist/vue.global.prod.js 
 
-  ```html
-  <div id="app">
-          {{message}}
-  </div>
-  ```
-
-- 写js 实现数据绑定
-
-  ```java
-  var app = new Vue({
-    el: '#app',
-    data: {
-      message: 'Hello Vue!'
-    }
-  })
-  ```
-
-- 完整的代码
-
-  ```html
+- ```html
   <!DOCTYPE html>
-  <html lang="en">
+  <html lang="cn">
   <head>
       <meta charset="UTF-8">
-      <title>Title</title>
-      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+      <title>test</title>
+      <!-- 在线引入vue3 -->
+      <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
+      <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   </head>
   <body>
+      <!-- id 绑定应用范围 -->
       <div id="app">
-          {{message}}
+          {{test}} <button @click="fun_test">increment</button>
       </div>
-  
-      <script>
-          var app = new Vue({
-              el: '#app',
-              data: {
-                  message: 'Hello Vue 11111!'
-              }
-          })
-      </script>
   </body>
+  <script>
+      //使用 vue3 的基本格式
+      const {createApp , ref } = Vue
+      const app =  createApp({
+          // 逻辑代码全部写在setup里面
+          // 因为没有语法糖，无论是定义的"变量"或者"函数"都必须！
+          // 把名称再多写一次！放在在最后return里面
+          setup(){
+              //测试变量
+              const test = ref(0)
+              //测试函数
+              const fun_test = () => {
+                  test.value++;
+              }
+              //h5页面必须把名称return，vite中不需要（重要区别）
+              return {
+                  test,
+                  fun_test
+              }
+          }
+      })
+      //应用vue（就是挂载在上面ID绑定的元素上）
+      app.mount("#app")
+  </script>
   </html>
   ```
 
-  
+- ### `ref()`
+
+  > - 模板中使用 ref 时，我们**不**需要附加 `.value`  (在模板中使用时，ref 会自动解包)
+  > - 在js中使用ref时，需要附加 `.value`
 
 ## 3.Vue 实例
 
@@ -98,7 +103,7 @@
 
 - 生命周期图示
 
-  <img src="Vue、Element.assets/image-20221014112516826.png" alt="image-20221014112516826" style="zoom: 50%;" />
+  <img src="Vue、Element.assets/lifecycle.png" alt="image-20221014112516826"  />
 
   
 
@@ -247,93 +252,7 @@
 
 ## 5.案例操作
 
-### 5.1前期准备工作
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</head>
-<body>
-<div id="app">
-    <table border="1" cellspacing="0" width="100%">
-        <tr>
-            <th>序号</th>
-            <th>商品名称</th>
-            <th>价格</th>
-            <th>备注</th>
-            <th>操作</th>
-        </tr>
-    </table>
-</div>
-<script>
-    var app = new Vue({
-        el: '#app',
-        data: {
-            products:[]
-        },
-        mounted(){
-
-        }
-    })
-</script>
-</body>
-</html>
-```
-
-### 5.2建立基本的表单
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</head>
-<body>
-<div id="app">
-    <a href="#">新增</a>
-    <table border="1" cellspacing="0" width="100%">
-        <tr>
-            <th>序号</th>
-            <th>商品名称</th>
-            <th>价格</th>
-            <th>备注</th>
-            <th>操作</th>
-        </tr>
-        <tr v-for="(product,i) in products" align="center">
-            <td>{{i+1}}</td>
-            <td>{{product.name}}</td>
-            <td>{{product.price}}</td>
-            <td>{{product.remark}}</td>
-            <td><a href="#">修改</a><a href="#">删除</a></td>
-        </tr>
-    </table>
-</div>
-<script>
-    var app = new Vue({
-        el: '#app',
-        data: {
-            products:[
-                {id:1,name:'电脑',price:'5000',remark:'笔记本电脑'},
-                {id:2,name:'平板',price:'3000',remark:'华为平板'},
-                {id:3,name:'手机',price:'1000',remark:'小米手机'}
-            ]
-        },
-        mounted(){
-
-        }
-    })
-</script>
-</body>
-</html>
-```
-
-### 5.3列表展示查询操作
+### 5.1列表展示查询操作
 
 - 先验证后端响应数据的正确性
 
@@ -379,239 +298,95 @@
       </table>
   </div>
   <script>
-      var app = new Vue({
-          el: '#app',
-          data: {
-              products:[]
-              // products:[
-              //     {id:1,name:'电脑',price:'5000',remark:'笔记本电脑'},
-              //     {id:2,name:'平板',price:'3000',remark:'华为平板'},
-              //     {id:3,name:'手机',price:'1000',remark:'小米手机'}
-              // ]
-          },
-          mounted(){
-              var var_this = this;
-              axios.get('/product')
-                  .then(function (response) {
-                      var_this.products = response.data;
-                      console.log(var_this.products);
-                  })
+     <script>
+      //使用 vue3 的基本格式
+      const { createApp, ref, onMounted } = Vue
+      const app = createApp({
+          setup() {
+              let products = ref([]);
+              
+  
+              onMounted(() => {
+                  axios.get('/product')
+                      .then( response => {
+                          products.value = response.data;
+                          console.log(products.value);
+                      })
+              })
+  
+              
+              return {
+                  products,
+              }
           }
       })
+      app.mount("#app")
+  </script>
   </script>
   </body>
   </html>
   ```
-
   
+  > 1. **将 `products` 初始化为一个空数组**：因为您期望 `products` 是一个数组，以便能够使用 `v-for` 指令来迭代它。
+  > 2. **使用正确的响应式变量更新方法**：在 `axios` 的回调中，您应该直接更新 `products.value`，因为 `ref` 返回的是一个对象，其 `.value` 属性存储了实际的响应式数据。
+  > 3. **使用箭头函数保持 `this` 的上下文**：虽然在 `setup` 中不需要 `this`，但在处理异步数据时使用`箭头函数`可以保持回调函数中 `this` 的预期行为
 
 ### 5.4添加商品
-
-- 前端页面
-
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <title>Title</title>
-      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  </head>
-  <body>
-  <div id="app">
-      <a href="add.html">新增</a>
-      <table border="1" cellspacing="0" width="100%">
-          <tr>
-              <th>序号</th>
-              <th>商品名称</th>
-              <th>价格</th>
-              <th>备注</th>
-              <th>操作</th>
-          </tr>
-          <tr v-for="(product,i) in products" align="center">
-              <td>{{i+1}}</td>
-              <td>{{product.name}}</td>
-              <td>{{product.price}}</td>
-              <td>{{product.remark}}</td>
-              <td><a href="#">修改</a><a href="#">删除</a></td>
-          </tr>
-      </table>
-  </div>
-  <script>
-      var app = new Vue({
-          el: '#app',
-          data: {
-              products:[]
-              // products:[
-              //     {id:1,name:'电脑',price:'5000',remark:'笔记本电脑'},
-              //     {id:2,name:'平板',price:'3000',remark:'华为平板'},
-              //     {id:3,name:'手机',price:'1000',remark:'小米手机'}
-              // ]
-          },
-          mounted(){
-              var var_this = this;
-              axios.get('/product')
-                  .then(function (response) {
-                      var_this.products = response.data;
-                      console.log(var_this.products);
-                  })
-          }
-      })
-  </script>
-  </body>
-  </html>
-  ```
 
 - 后端代码
 
   ```java
   @Override
       protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-          List<Product> list = ProductDao.list;
+          List<Product> list = new ArrayList<>();
+          list.add(new Product("电脑",1000,"Laptop"));
+          list.add(new Product("phone",130,"smart_phone"));
           //接收前端传参数据
-          BufferedReader reader = req.getReader();
-          String s = reader.readLine();
-          Product product = JSON.parseObject(s, Product.class);
-          list.add(product);
+          Object json = JSON.toJSON(list);
+          resp.setContentType("text/json;charset=utf-8");
   
-          //响应数据回去
-          resp.getWriter().write("yes");
+          resp.getWriter().write(json.toString());
       }
   ```
 
-### 5.5删除商品
 
-- 前端代码
 
-  ```java
-  <!DOCTYPE html>
-  <html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
-  <head>
-      <meta charset="UTF-8">
-      <title>Title</title>
-      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  </head>
-  <body>
-  <div id="app">
-      <a href="add.html">新增</a>
-      <table border="1" cellspacing="0" width="100%">
-          <tr>
-              <th>序号</th>
-              <th>商品名称</th>
-              <th>价格</th>
-              <th>备注</th>
-              <th>操作</th>
-          </tr>
-          <tr v-for="(product,i) in products" align="center">
-              <td>{{i+1}}</td>
-              <td>{{product.name}}</td>
-              <td>{{product.price}}</td>
-              <td>{{product.remark}}</td>
-              <td><a href="#">修改</a><input type="button" id="but" v-on:click="del(product.id)" value="删除"></td>
-          </tr>
-      </table>
-  </div>
-  <script>
-      var app = new Vue({
-          el: '#app',
-          data: {
-              products:[]
-              // products:[
-              //     {id:1,name:'电脑',price:'5000',remark:'笔记本电脑'},
-              //     {id:2,name:'平板',price:'3000',remark:'华为平板'},
-              //     {id:3,name:'手机',price:'1000',remark:'小米手机'}
-              // ]
-          },
-          mounted(){
-              var var_this = this;
-              axios.get('/product')
-                  .then(function (response) {
-                      var_this.products = response.data;
-                      console.log(var_this.products);
-                  })
-          },
-          methods:{
-              del(obj){
-                  console.log(obj)
-  
-                  axios({
-                      method: 'delete',
-                      url: '/product?id='+obj,
-                  }).then(function (resp) {
-                      if(resp.data == "yes"){
-                          //跳转到列表页面
-                          location.href="http://localhost:8088/vue/product/product.html"
-                      }
-                  })
-              }
-          }
-      })
-  </script>
-  </body>
-  </html>
-  ```
-
-- 后端代码
-
-  ```java
-  @Override
-      protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-          String s = req.getParameter("id");
-          Long id = Long.valueOf(s);
-          Iterator<Product> iterator = ProductDao.list.iterator();
-          while (iterator.hasNext() && iterator.next().getId() == id){
-              iterator.remove();
-          }
-          resp.getWriter().write("yes");
-      }
-  ```
-
-  
-
-# 二、Element
+# 二、Element-plus
 
 ## 1.Element 概述
 
-- 中文学习地址 https://element.eleme.cn/#/zh-CN/component/installation
+- 中文学习地址 https://element-plus.org/zh-CN/component/layout.html
 
 - 饿了么公司前端开发出来的一套组件库，是基于 Vue
 - 提供了丰富的组件库，方便程序员迭代开发
 
-## 2.快速入门
+## 2.快速入门(准备工作)
 
-- 引入 js 和 css 文件
+- 利用vue脚手架创建项目，并使用element-plus 和 icon
 
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <title>Title</title>
-  <!--    引入js 和 css-->
-      <script src="/js/vue.js"></script>
-      <script src="/element-ui/lib/index.js"></script>
-      <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
-  </head>
-  <body>
+  ![image-20241016105644506](./assets/image-20241016105644506.png)
+
+  > 在main.js文件里添加
+
+  ```js
+  import { createApp } from 'vue'
+  import App from './App.vue'
   
-  </body>
-  </html>
+  import ElementPlus from 'element-plus' // 引入模块
+  import 'element-plus/dist/index.css' // 引入css
+  
+  import * as ElementPlusIconsVue from '@element-plus/icons-vue' // 引入icon库
+  
+  const app = createApp(App);
+  
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {  //进行全局注册。
+      app.component(key, component)
+  }
+  
+  app.use(ElementPlus).mount('#app')
   ```
 
-- 创建 vue 对象
-
-  ```html
-   <div id="app">
-          
-      </div>
-      <script>
-          new Vue({
-              el:'#app'
-          })
-      </script>
-  ```
+  
 
 ## 3.组件
 

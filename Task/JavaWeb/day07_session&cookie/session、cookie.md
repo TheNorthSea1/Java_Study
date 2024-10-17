@@ -180,7 +180,7 @@
   >
   > 1. **服务器创建Cookie**：当用户访问网站时，服务器会根据用户信息和请求创建一个或多个Cookie，并通过HTTP响应头中的Set-Cookie字段发送给浏览器。
   > 2. **浏览器接收并存储Cookie**：浏览器接收到Set-Cookie响应头后，会自动将Cookie内容保存在本地。存储位置通常与浏览器和操作系统相关，如Windows系统中可能存储在C:\Users\用户名\AppData\Roaming\Microsoft\Windows\Cookies\等目录下。
-  > 3. **浏览器携带Cookie发起请求**：当用户再次访问同一网站时，浏
+  > 3. **浏览器携带Cookie发起请求**：当用户再次访问同一网站时，浏览器会自动从本地存储中读取相关的Cookie，并将其放在HTTP请求头中的Cookie字段内发送给服务器。
 
 ## 4.Cookie 使用
 

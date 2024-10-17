@@ -12,7 +12,7 @@
 
 - RedHat(红帽)
 
-- **CentOS**
+- **CentOS**  
 
 - Debain[蝶变]
 
@@ -90,7 +90,7 @@
 
   - 寻找下载源
 
-    <img src="linux 安装与使用.assets/image-20221016135706366.png" alt="image-20221016135706366" style="zoom: 25%;" />
+    <img src="linux 安装与使用.assets/image-20221016135706366.png" alt="image-20221016135706366" style="zoom: 80%;" />
 
   - 常用下载仓库地址
 
@@ -175,35 +175,35 @@
 
 - 修改日期
 
-<img src="linux 安装与使用.assets/image-20221016142413654.png" alt="image-20221016142413654" style="zoom:50%;" />
+<img src="linux 安装与使用.assets/image-20221016142413654.png" alt="image-20221016142413654" style="zoom: 67%;" />
 
 
 
-<img src="linux 安装与使用.assets/image-20221016142508319.png" alt="image-20221016142508319" style="zoom:50%;" />
+<img src="linux 安装与使用.assets/image-20221016142508319.png" alt="image-20221016142508319" style="zoom: 67%;" />
 
 - 验证安装源
 
-  <img src="linux 安装与使用.assets/image-20221016142607067.png" alt="image-20221016142607067" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016142607067.png" alt="image-20221016142607067" style="zoom: 67%;" />
 
-  <img src="linux 安装与使用.assets/image-20221016142653595.png" alt="image-20221016142653595" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016142653595.png" alt="image-20221016142653595" style="zoom: 67%;" />
 
 - 安装位置
 
-  <img src="linux 安装与使用.assets/image-20221016142808014.png" alt="image-20221016142808014" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016142808014.png" alt="image-20221016142808014" style="zoom: 67%;" />
 
-  <img src="linux 安装与使用.assets/image-20221016142924471.png" alt="image-20221016142924471" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016142924471.png" alt="image-20221016142924471" style="zoom: 67%;" />
 
-  <img src="linux 安装与使用.assets/image-20221016143100530.png" alt="image-20221016143100530" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016143100530.png" alt="image-20221016143100530" style="zoom: 67%;" />
 
 
 
 - 设置密码 123456
 
-  <img src="linux 安装与使用.assets/image-20221016143139865.png" alt="image-20221016143139865" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016143139865.png" alt="image-20221016143139865" style="zoom: 67%;" />
 
 - 重启
 
-  <img src="linux 安装与使用.assets/image-20221016143358114.png" alt="image-20221016143358114" style="zoom:50%;" />
+  <img src="linux 安装与使用.assets/image-20221016143358114.png" alt="image-20221016143358114" style="zoom: 67%;" />
 
 
 

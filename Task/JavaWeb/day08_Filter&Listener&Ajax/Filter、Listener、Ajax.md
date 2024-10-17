@@ -73,7 +73,15 @@
 
   ![image-20221012134535349](Filter、Listener、Ajax.assets/image-20221012134535349.png)
 
-  - 放行后访问资源访问完成还是会回到 filter
+  > - **初始化**：在Web容器启动时，会加载并初始化Filter。Filter通过实现`javax.servlet.Filter`接口的`init(FilterConfig filterConfig)`方法进行初始化，可以读取配置参数并进行必要的准备工作。
+  >
+  > - **请求预处理**：当客户端发送请求到服务器时，容器会检查是否有与请求URL匹配的Filter。如果匹配成功，Filter会拦截请求，并通过`doFilter(ServletRequest request, ServletResponse response, FilterChain chain)`方法进行预处理，如验证权限、记录日志等。然后，Filter通过调用`chain.doFilter(request, response)`将请求传递给下一个Filter或目标Servlet。
+  > - **Servlet处理**：请求到达目标Servlet后，Servlet会执行相应的业务逻辑并生成响应。
+  > - **响应后处理**：响应生成后，会沿着Filter链反向传递回客户端。每个Filter都有机会对响应进行后处理，如修改响应头、添加内容等。这同样通过`doFilter`方法实现，但此时处理的是响应对象。
+  > - **销毁**：在Web容器关闭时，会调用Filter的`destroy()`方法进行清理操作，如关闭资源连接等。
+  >
+
+  - filterChain.doFilter(req,resp);    放行后访问资源访问完成还是会回到 filter
 
     ```java
     A filter is an object that performs filtering tasks on either the request to a resource (a servlet or static content), or on the response from a resource, or both.
@@ -109,7 +117,7 @@
     </body>
     ```
 
-    
+    ![image-20241015164755513](./assets/image-20241015164755513.png)
 
 ## 4.Filter 拦截路径配置
 
@@ -179,7 +187,7 @@
   ![image-20221012144428236](Filter、Listener、Ajax.assets/image-20221012144428236.png)
 
   - **先进后出的一个原则**
-  - **注意：具体的拦截的优先级是大于模糊的优先级的**
+  - **注意：具体的拦截的优先级是  <u>大于</u> 模糊的优先级的**
 
 - 做登录拦截
 
@@ -287,9 +295,9 @@
 
 - Ajax:可以发送异步请求，AJAX = *A*synchronous *J*avaScript *A*nd *X*ML.
 
-  <img src="Filter、Listener、Ajax.assets/image-20221012153352443.png" alt="image-20221012153352443" style="zoom: 33%;" />
+  <img src="Filter、Listener、Ajax.assets/image-20221012153352443.png" alt="image-20221012153352443" style="zoom: 80%;" />
 
-  <img src="Filter、Listener、Ajax.assets/image-20221012153523058.png" alt="image-20221012153523058" style="zoom:33%;" />
+  <img src="Filter、Listener、Ajax.assets/image-20221012153523058.png" alt="image-20221012153523058" style="zoom: 67%;" />
 
 - 作用
 
@@ -298,7 +306,7 @@
 
 - 应用
 
-  <img src="Filter、Listener、Ajax.assets/image-20221012153758681.png" alt="image-20221012153758681" style="zoom:25%;" />
+  <img src="Filter、Listener、Ajax.assets/image-20221012153758681.png" alt="image-20221012153758681" style="zoom: 67%;" />
 
   
 
@@ -308,9 +316,13 @@
 
 ![image-20221012154735643](Filter、Listener、Ajax.assets/image-20221012154735643.png)
 
+> 异步请求是指发送请求后，程序不会等待服务器响应，而是继续执行后续的代码。当服务器响应时，通过回调函数、事件或其他机制来处理响应
+
 
 
 ## 3.Ajax 使用
+
+- ![image-20241015174304817](./assets/image-20241015174304817.png)
 
 - 写一个 Servlet 服务，响应一串文字
 
@@ -360,16 +372,19 @@
 ## 4.axios
 
 - 概述Axios 是一个基于 *[promise](https://javascript.info/promise-basics)* 网络请求库，作用于[`node.js`](https://nodejs.org) 和浏览器中。 它是 *[isomorphic](https://www.lullabot.com/articles/what-is-an-isomorphic-application)* 的(即同一套代码可以运行在浏览器和node.js中)。在服务端它使用原生 node.js `http` 模块, 而在客户端 (浏览端) 则使用 XMLHttpRequests。
-- 官网地址 https://www.axios-http.cn/docs
+
+- 官网地址 https://www.axios-http.cn/
 
 - 使用
 
   - 引入js 文件
 
+    ```html
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    ```
 
   - 直接调用
-
+  
     ```java
     axios.get('/ajax')
             .then(function (response) {
@@ -388,7 +403,7 @@
     ![image-20221012163936801](Filter、Listener、Ajax.assets/image-20221012163936801.png)
 
   - 可以进入官网的 Axios api 查看具体使用细节
-
+  
     ```js
     axios({
       method: 'get',
