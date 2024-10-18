@@ -16,6 +16,8 @@
   man ls
   ```
 
+  > Note: When you enter man view，please press ‘q’ to quit the view
+  
   | 信息        | 作用         |
   | ----------- | ------------ |
   | NAME        | 命令名称     |
@@ -73,6 +75,8 @@
   ls -i
   
   ls -ai 列出文件的所有信息
+  
+  ls -l
   ```
 
 - 列出当前路径下的所有目录或是文件
@@ -114,8 +118,10 @@
     cd /home
     ```
 
-  - ./ 代表当前目录
+  - ./ 代表当前目录  
 
+    > 作用：如果，你想查看当前目录的子目录。  cd ./xx  (也可以直接 cd  xx)
+  
     ```shell
     cd ./
     ```
@@ -123,7 +129,7 @@
     ![image-20221017104703214](Linux 实操指令.assets/image-20221017104703214.png)
 
   - ../ 代表上一层目录
-
+  
     ```shell
     cd ../
     ```
@@ -131,7 +137,7 @@
     ![image-20221017104750442](Linux 实操指令.assets/image-20221017104750442.png)
 
   - cd ~ 切换到系统根目录
-
+  
   - 可以用 tab 键来补全
 
 ### 4.mkdir 创建目录
@@ -188,7 +194,7 @@
   ```shell
   cp [选项] source dest //source 源文件 dest 目标文件
   
-  cp -r source dest
+  cp -r source dest  // -r 递归的去复制整个文件
   ```
 
 - 拷贝 a.txt 文件到 zs 目录下
@@ -200,6 +206,9 @@
   ![image-20221017114124219](Linux 实操指令.assets/image-20221017114124219.png)
 
 - 覆盖不提示 \cp
+
+  ![image-20241018130223278](./assets/image-20241018130223278.png)
+
 
 ### 8.rm 删除目录、文件
 
@@ -236,7 +245,7 @@
   mv a.txt test.txt
   ```
 
-- **移动语法**
+- **移动语法** （文件夹）
 
   ```shell
   mv /temp/movefile /targetFolder 
@@ -403,7 +412,7 @@
   tail -n 5 文件（功能描述：查看文件尾5行内容，5可以是任意行数）
   ```
 
-- 常用 -f 追加新内容，监听文件的内容变化
+- `常用 -f 追加新内容，监听文件的内容变化`
 
   <img src="Linux 实操指令.assets/image-20221017140241278.png" alt="image-20221017140241278" style="zoom:50%;" />
 
@@ -423,7 +432,7 @@
 
   ![image-20221017140652495](Linux 实操指令.assets/image-20221017140652495.png)
 
-- 当前的年月日
+- 当前的年月日（双引号可以不加）
 
   - date +"%Y"（功能描述：显示当前年份）
 
@@ -432,10 +441,12 @@
   - date +"%d"（功能描述：显示当前是哪一天）
 
     ```shell
-    date +"%Y"
-    date +"%m"
-    date +"%d"
+    date +%Y
+    date +%m
+    date +%d
     ```
+    
+    > Note: 此处的 ‘+’ 也要输入进去。
 
 ### 3.cal 查看日历
 
@@ -451,7 +462,7 @@
 
 ### 1.find 查找文件或者目录
 
-- 概述：find指令将从指定目录向下递归地遍历其各个子目录，将满足条件的文件或者目录显示在终端
+- 概述：find指令将从**指定目录**向下递归地遍历其各个子目录，将满足条件的文件或者目录显示在终端
 
 - 语法
 
@@ -541,7 +552,7 @@
 
 ### 2.zip 与 unzip
 
-- **先安装 yum install zip yum install unzip**
+- **先安装 yum install zip           /                     yum install unzip**
 
 - 语法
 
@@ -557,7 +568,7 @@
 
     ![image-20221017151600786](Linux 实操指令.assets/image-20221017151600786.png)
 
-  - 压缩指定目录 -r
+  - 压缩指定目录 -r  (也可不加，但最好加上用于区分)
 
 - 注意：
 

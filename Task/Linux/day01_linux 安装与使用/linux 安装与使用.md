@@ -419,7 +419,8 @@ Linux系统是一个多用户多任务的操作系统，任何一个要使用系
 - 删除wr 用户
 
   ```shell
-  userdel wr
+  userdel wr       // Only delete the content
+  userdel -r wr   // The command will delete the content and its directory.
   ```
 
 ### 1.4查询用户
@@ -450,13 +451,13 @@ Linux系统是一个多用户多任务的操作系统，任何一个要使用系
   su zs
   ```
 
-- **注意：高权限的用户切换到低权限的用户不需要输入密码，但是，低权限用户切换到高权限用户就需要输入密码**
+- > Note: A high permission user does not need to enter a password to switch to a low permission user, but a low permission user will need to enter a password to switch to a high permission user
 
-## 2.Linux 组管理
-
-### 2.1概述
+### 2.1Overview
 
 Linux的组类似于**角色**，系统可以对有共性的多个用户进行统一的管理。每一个用户都至少属于一个组，创建用户时如果不指定组，会默认**创建一个跟用户名相同的组**，并且把新创建的用户分配到组中，root用户默认属于root组。
+
+Linux groups are similar to  roles , and the system can centrally manage multiple users with common features. Each user belongs to at least one group. If you do not specify a group when creating a user, a group with the same name as the user is created by default, and the newly created user is assigned to the group.
 
 ### 2.2添加组
 
@@ -549,21 +550,29 @@ Linux的组类似于**角色**，系统可以对有共性的多个用户进行�
 
 
 
-- 命名行模式下
-  - 查找某一个单词 **/查找的单词** 
+- 命名行模式下 
+  - 查找某一个单词 **/查找的单词**   :/ [words]
     - n 是下一个 
     - 大 N是上一个
+    
   - 设置行号 set nu
+  
+    ![image-20241017230719815](./assets/image-20241017230719815.png)
+  
   - 取消行号 set nonu
+  
   - q 是退出文档
+  
   - 保存文档 wq
+  
   - ! 表示强制执行
+  
 - 一般模式下
   - 拷贝当前行yy  数字yy 拷贝当前光标往下的第几行
   - 粘贴下一行 p
   - u 是撤销
   - 删除当前行 dd
-  - 跳转到文档最末行 G
+  - 跳转到文档最末行 G  ( shift + g)
   - 最首行 gg
   - 光标移动到具体行数 （行数）shift + g
   - 插入
