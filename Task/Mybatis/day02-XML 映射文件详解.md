@@ -35,7 +35,7 @@
   | 属性            | 使用目的                | 描述                                                         |
   | --------------- | ----------------------- | ------------------------------------------------------------ |
   | `id`            | 和Mapper 接口方法名关联 | 在命名空间中唯一的标识符，可以被用来引用这条语句。           |
-  | `parameterType` |                         | 将会传入这条语句的参数的类全限定名或别名。这个属性是可选的，因为                MyBatis 可以通过类型处理器（TypeHandler）推断出具体传入语句的参数，默认值为未设置（unset）。 |
+  | `parameterType` |                         | 将会传入这条语句的参数的类全限定名或别名。这个属性是可选的，因为 MyBatis 可以通过类型处理器（TypeHandler）推断出具体传入语句的参数，默认值为未设置（unset）。 |
   | parameterMap    |                         | 用于引用外部 parameterMap 的属性，目前已被废弃。请使用行内参数映射和 parameterType 属性。 |
   | `resultType`    | 返回结果集              | 期望从这条语句中返回结果的类全限定名或别名。注意，如果返回的是集合，那应该设置为集合包含的类型，而不是集合本身的类型。resultType 和 resultMap 之间只能同时使用一个。 |
   | `resultMap`     | 返回结果集              | 对外部 resultMap 的命名引用。结果映射是 MyBatis 最强大的特性，如果你对其理解透彻，许多复杂的映射问题都能迎刃而解。resultType 和 resultMap 之间只能同时使用一个。 |
@@ -73,11 +73,11 @@
   | `parameterMap`     | 用于引用外部 parameterMap 的属性，目前已被废弃。请使用行内参数映射和 parameterType 属性。 |                        |
   | `flushCache`       | 将其设置为 true 后，只要语句被调用，都会导致本地缓存和二级缓存被清空，默认值：（对 insert、update 和 delete 语句）true。 | 默认使用刷新缓存       |
   | `timeout`          | 这个设置是在抛出异常之前，驱动程序等待数据库返回请求结果的秒数。默认值为未设置（unset）（依赖数据库驱动）。 |                        |
-  | `statementType     | 可选 STATEMENT，PREPARED 或 CALLABLE。这会让 MyBatis 分别使用                Statement，PreparedStatement 或 CallableStatement，默认值：PREPARED。 |                        |
-  | `useGeneratedKeys` | （仅适用于 insert 和 update）这会令 MyBatis 使用 JDBC 的                getGeneratedKeys 方法来取出由数据库内部生成的主键（比如：像 MySQL 和 SQL Server 这样的关系型数据库管理系统的自动递增字段），默认值：false。 | 获取数据库生成的主键id |
+  | `statementType`    | 可选 STATEMENT，PREPARED 或 CALLABLE。这会让 MyBatis 分别使用 Statement，PreparedStatement 或 CallableStatement，默认值：PREPARED。 |                        |
+  | `useGeneratedKeys` | （仅适用于 insert 和 update）这会令 MyBatis 使用 JDBC 的 getGeneratedKeys 方法来取出由数据库内部生成的主键（比如：像 MySQL 和 SQL Server 这样的关系型数据库管理系统的自动递增字段），默认值：false。 | 获取数据库生成的主键id |
   | `keyProperty`      | （仅适用于 insert 和 update）指定能够唯一识别对象的属性，MyBatis 会使用                getGeneratedKeys 的返回值或 insert 语句的 selectKey 子元素设置它的值，默认值：未设置（`unset`）。如果生成列不止一个，可以用逗号分隔多个属性名称。 | keyProperty="id"       |
   | `keyColumn`        | （仅适用于 insert 和 update）设置生成键值在表中的列名，在某些数据库（像 PostgreSQL）中，当主键列不是表中的第一列的时候，是必须设置的。如果生成列不止一个，可以用逗号分隔多个属性名称。 |                        |
-  | `databaseId`       | 如果配置了数据库厂商标识（databaseIdProvider），MyBatis 会加载所有不带                databaseId 或匹配当前 databaseId 的语句；如果带和不带的语句都有，则不带的会被忽略。 |                        |
+  | `databaseId`       | 如果配置了数据库厂商标识（databaseIdProvider），MyBatis 会加载所有不带 databaseId 或匹配当前 databaseId 的语句；如果带和不带的语句都有，则不带的会被忽略。 |                        |
 
 - 常用案例
 
@@ -93,9 +93,9 @@
 
     | 属性            | 描述                                                         |      |
     | --------------- | ------------------------------------------------------------ | ---- |
-    | `keyProperty    | `selectKey` 语句结果应该被设置到的目标属性。如果生成列不止一个，可以用逗号分隔多个属性名称。 |      |
+    | `keyProperty` | selectKey语句结果应该被设置到的目标属性。如果生成列不止一个，可以用逗号分隔多个属性名称。 ||
     | `keyColumn`     | 返回结果集中生成列属性的列名。如果生成列不止一个，可以用逗号分隔多个属性名称。 |      |
-    | `resultType     | 结果的类型。通常 MyBatis 可以推断出来，但是为了更加准确，写上也不会有什么问题。MyBatis 允许将任何简单类型用作主键的类型，包括字符串。如果生成列不止一个，则可以使用包含期望属性的 Object 或 Map。 |      |
+    | `resultType`    | 结果的类型。通常 MyBatis 可以推断出来，但是为了更加准确，写上也不会有什么问题。MyBatis 允许将任何简单类型用作主键的类型，包括字符串。如果生成列不止一个，则可以使用包含期望属性的 Object 或 Map。 |      |
     | `order`         | 可以设置为 `BEFORE` 或 `AFTER`。如果设置为  `BEFORE`，那么它首先会生成主键，设置 `keyProperty` 再执行插入语句。如果设置为AFTER`，那么先执行插入语句，然后是 `selectKey` 中的语句 - 这和 Oracle数据库的行为相似，在插入语句内部可能有嵌入索引调用。 |      |
     | `statementType` | 和前面一样，MyBatis 支持 `STATEMENT`，`PREPARED` 和 `CALLABLE` 类型的映射语句，分别代表 `Statement`, `PreparedStatement` 和 `CallableStatement` 类型。 |      |
 
@@ -151,13 +151,15 @@
 
 - 特点
 
-  - 安全
+  - 安全(防止SQL注入)
   - 迅速
   - 首选做法
 
 ## 2.${参数名称}
 
 -  `${参数名称}` 会被直接替换，而 `#{value}` 会使用 `?` 预处理
+
+-  作用: 当 SQL 语句中的元数据（如`表名`或`列名`）是动态生成的时候，字符串替换将会非常有用
 
 - 实操
 
@@ -173,8 +175,6 @@
   Employee selectSql(@Param("tableName") String tableName,@Param("id") Long id);
   ```
 
-  
-
   ![image-20221022114348653](picture/image-20221022114348653.png)
 
 - 特点
@@ -188,7 +188,7 @@
 
 # 六、结果映射
 
-## 1.ResultType 映射
+## 1.ResultType 映射	
 
 - 使用 resultType
 
@@ -203,11 +203,12 @@
     ```
 
     ```java
+    @MapKey("id")
     Map selectUsers(Long id);
     ```
-
+  
   - 查询具体单个对象
-
+  
     ```xml
     <select id="selectEmpById" resultType="cn.sycoder.domain.Employee">
         select
@@ -220,15 +221,13 @@
         id,name,age,address,emp_detail
     </sql>
     ```
-
+  
     ```java
     Employee selectEmpById(Long id);
     ```
-
-    
-
+  
   - 查询集合对象
-
+  
     ```xml
     <select id="selectEmp" resultType="cn.sycoder.domain.Employee">
         select
@@ -237,36 +236,40 @@
         where id = #{id}
     </select>
     ```
-
+  
     ```java
     List<Employee> selectEmp(Long id);
     ```
-
+  
   - 查询单个值
-
+  
     ```xml
     <select id="selectCount" resultType="java.lang.Integer">
         select count(*) from employee
     </select>
     ```
-
+  
     ```java
     Integer selectCount();
     ```
 
-## 2.ResultMap 映射
+## 2.ResultMap 映射（⭐️）
 
 ### 2.1使用ResultType 问题
 
-- 单独使用ResultType 会出现如下问题
-
-  ![image-20221022134014555](picture/image-20221022134014555.png)
-
-  ### 
+- > 单独使用ResultType 会出现如下问题
+  >
+  > mapUnderscoreToCamelCase  未开启
+  >
+  > ```xml
+  > <setting name="mapUnderscoreToCamelCase" value="false"/>
+  > ```
+  >
+  > ![image-20221022134014555](picture/image-20221022134014555.png)
 
 ### 2.2ResultMap
 
-- 应用场景：实体类属性和数据库列名不匹配的时候（比如，数据库采用经典命名法，java 使用驼峰命名法的时候）
+- **应用场景**：实体类属性和数据库列名不匹配的时候（比如，数据库采用经典命名法，java 使用驼峰命名法（CamelCase）的时候）
 
   ```xml
   <resultMap id="basicMap" type="cn.sycoder.domain.Employee">
@@ -306,7 +309,7 @@
 
   | 属性       | 描述                                                         |      |
   | ---------- | ------------------------------------------------------------ | ---- |
-  | `property` | 映射到列结果的字段或属性。如果 JavaBean 有这个名字的属性（property），会先使用该属性。否则 MyBatis 将会寻找给定名称的字段（field）。无论是哪一种情形，你都可以使用常见的点式分隔形式进行复杂属性导航。 比如，你可以这样映射一些简单的东西：“username”，或者映射到一些复杂的东西上：“address.street.number”。         stu.name |      |
+  | `property` | 映射到列结果的字段或属性。如果 JavaBean 有这个名字的属性（property），会先使用该属性。否则 MyBatis 将会寻找给定名称的字段（field）。无论是哪一种情形，你都可以使用常见的点式分隔形式进行复杂属性导航。 比如，你可以这样映射一些简单的东西：“username”，或者映射到一些复杂的东西（某个类中的字段）上：“address.street.number”。         stu.name |      |
   | `column`   | 数据库中的列名，或者是列的别名。一般情况下，这和传递给               `resultSet.getString(columnName)` 方法的参数一样。 |      |
   | `javaType` | 一个 Java 类的全限定名，或一个类型别名（关于内置的类型别名，可以参考上面的表格）。                如果你映射到一个 JavaBean，MyBatis 通常可以推断类型。然而，如果你映射到的是                HashMap，那么你应该明确地指定 javaType 来保证行为与期望的相一致。 |      |
 

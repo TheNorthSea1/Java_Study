@@ -55,7 +55,7 @@
   pwd
   ```
 
-- 查看当前工作目录
+- 查看当前工作目录（Print Working Directory）
 
   ```shell
   pwd

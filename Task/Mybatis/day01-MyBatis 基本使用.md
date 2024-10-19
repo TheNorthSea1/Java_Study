@@ -1,7 +1,9 @@
 # 一、简介
 
 - 本次课程跟着MyBatis 中文文档学习
-- 中文学习地址 https://mybatis.org/mybatis-3/zh_CN/configuration.html
+  - 学习地址（Chinese）https://mybatis.org/mybatis-3/zh_CN/configuration.html
+  - 学习地址（English）https://mybatis.org/mybatis-3/index.html
+
 
 ## 1.什么是 MyBatis
 
@@ -9,9 +11,7 @@
 
 - 源码地址：
 
-  ```java
   https://github.com/mybatis/mybatis-3
-  ```
 
 - 如果需要看源码，下载
 
@@ -82,7 +82,7 @@
 - 简单使用 MyBatis 核心配置
   - **核心配置概述**：XML 配置文件中包含了对 MyBatis 系统的核心设置，包括获取数据库连接实例的数据源（DataSource）以及决定事务作用域和控制方式的事务管理器（TransactionManager）
 
-- 核心配置 mybatis-config.xml
+- 核心配置 mybatis-config.xml  (放在resourse包下)
 
   ```xml
   <?xml version="1.0" encoding="UTF-8" ?>
@@ -122,7 +122,7 @@
           "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="cn.sycoder.mapper.EmployeeMapper">
       <select id="selectEmployee" resultType="cn.sycoder.domain.Employee">
-          select * from Blog where id = #{id}
+          select * from employee where id = #{id}
       </select>
   </mapper>
   ```
@@ -143,6 +143,17 @@
 - 项目结构
 
   ![image-20221021152656061](picture/image-20221021152656061.png)
+
+## 4.1 MybatisX Plugin
+
+> **MybatisX plugin Features:**
+>
+> - mapper and xml can jump back and forth
+> - mybatis.xml,mapper.xml prompt
+> - mapper and xml support auto prompt like jpa (reference MybatisCodeHelperPro)
+> - integrate mybatis generator Gui (copy from free mybatis plugin)
+
+![image-20241019112521049](./assets/image-20241019112521049.png)
 
 ## 5.准备数据库
 
@@ -178,6 +189,12 @@
 
 - SqlSession：提供了执行 SQL 的所有方法
 
+  > openSession() 方法可以接收一个布尔参数，用于指定是否自动提交事务。
+  >
+  > - `openSession(true)`：表示自动提交事务。每次执行 SQL 命令后，事务都会自动提交。
+  > - `openSession(false)`：表示手动提交事务。需要在执行完所有 SQL 命令后，显式调用 `commit()` 方法来提交事务，或者在出错时调用 `rollback()` 方法来回滚事务。
+  > - 如果不传递参数，则默认行为取决于 MyBatis 配置文件中的设置。
+  
   ```java
   try (SqlSession session = sqlSessionFactory.openSession()) {
       EmployeeMapper mapper = session.getMapper(EmployeeMapper.class);
@@ -186,7 +203,7 @@
   }
   ```
 
-
+​	
 
 ## 8.流程分析
 
@@ -253,6 +270,8 @@
 
 - 启用默认值之后可以采用如下的方式配置
 
+  > When the varible of  'driver' isn't be assigned value, the varibale will be valued by the default.
+  
   ```xml
   <dataSource type="POOLED">
       <property name="driver" value="${driver:com.mysql.cj.jdbc.Driver}"/>     
@@ -265,7 +284,7 @@
 
 ## 3.设置（settings）
 
-- **作用**：改变 MyBatis 的运行时行为
+- **作用**： MyBatis 中极为重要的调整设置，它们会改变 MyBatis 的运行时行为。
 
 - 常用设置
 
@@ -273,7 +292,7 @@
   | :----------------------- | ------------------------------------------------------------ | ------------- | ------ |
   | cacheEnabled             | 全局性地开启或关闭所有映射器配置文件中已配置的任何缓存。     | true \| false | true   |
   | lazyLoadingEnabled       | 延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。特定关联关系中可通过设置 `fetchType`属性来覆盖该项的开关状态。 | true \| false | false  |
-  | mapUnderscoreToCamelCase | 是否开启驼峰命名自动映射，即从经典数据库列名                A_COLUMN 映射到经典 Java 属性名 aColumn。 | true \| false | False  |
+  | mapUnderscoreToCamelCase | 是否开启驼峰命名自动映射，即从经典数据库列名 A_COLUMN 映射到经典 Java 属性名 aColumn。 | true \| false | False  |
 
 - 配置xml代码
 
@@ -330,12 +349,24 @@
 ## 5.环境配置（environments）
 
 - **作用**：可以获取多数据源，可以选用适合要求的数据源。开发、测试和生产环境需要有不同的配置；或者想在具有相同 Schema          的多个生产数据库中使用相同的 SQL 映射
+
 - **注意**：**尽管可以配置多个环境，但每个 SqlSessionFactory 实例只能选择一种环境**
+
+- **每个数据库对应一个 SqlSessionFactory 实例**
 
 - 代码
 
+  > Note:
+  >
+  > - 默认使用的环境 ID（比如：default="development"）。
+  > - 每个 environment 元素定义的环境 ID（比如：id="development"）。
+  > - 事务管理器的配置（比如：type="JDBC"）。
+  > - 数据源的配置（比如：type="POOLED"）。
+  > - 默认环境和环境 ID 顾名思义。 环境可以随意命名，但务必保证默认的环境 ID 要匹配其中一个环境 ID。
+  
   ```xml
-   <environments default="test">
+  <!--     default 设置默认使用的环境       -->
+  <environments default="test">
   <!--        开发环境-->
           <environment id="development">
               <transactionManager type="JDBC"/>
@@ -395,7 +426,7 @@
 
   - **POOLED**：使用数据库连接池，就是把建立的连接缓存起来，下次使用直接拿，不需要新建
 
-    - ```
+    - ```xml
       poolMaximumActiveConnections-在任意时间可存在的活动（正在使用）连接数量，默认值：10 
       poolMaximumIdleConnections – 任意时间可能存在的空闲连接数。
       ```
@@ -424,7 +455,7 @@
     </mappers>
     ```
 
-  - 将包内的映射器接口全部注册为映射器
+  - 将包内的映射器接口全部注册为映射器 (常用)
 
     - **注意，使用这种必须保证 mapper.xml 和 mapper 文件在同一包下**
 
@@ -433,6 +464,8 @@
       <package name="cn.sycoder.mapper"/>
     </mappers>
     ```
+    
+    ![image-20241019172231425](./assets/image-20241019172231425.png)
 
 # 四、日志
 
@@ -446,7 +479,7 @@
   - ​          Log4j （3.5.9 起废弃）        
   - ​          JDK logging        
 
-  <img src="picture/image-20221021190759815.png" alt="image-20221021190759815" style="zoom:33%;" />
+  <img src="picture/image-20221021190759815.png" alt="image-20221021190759815" style="zoom: 50%;" />
 
   
 
@@ -479,7 +512,7 @@
   ```properties
   log4j.rootLogger=ERROR, stdout
   
-  log4j.logger.cn.sycoder.mapper.EmployeeMapper=TRACE
+  log4j.logger.cn.sycoder.mapper.EmployeeMapper=TRACE // 可选参数：ERROR  WARN INFO  DEBUG
   
   log4j.appender.stdout=org.apache.log4j.ConsoleAppender
   log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
@@ -499,7 +532,7 @@
 
 - 注意：忘记配置 setting 也能够自动装载，具体请看源码
 
-- **ERROR  WARN   INFO  DEBUG**
+- ![image-20241019173945968](./assets/image-20241019173945968.png)
 
 # 五、使用MyBatis增删改查
 
