@@ -32,7 +32,7 @@
 static {
     //加载配置文件资源
     Properties properties = new Properties();
-    InputStream in = 	 Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties");
+    InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties");
     try {
         properties.load(in);
     } catch (IOException e) {

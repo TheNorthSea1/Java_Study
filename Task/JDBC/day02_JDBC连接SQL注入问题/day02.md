@@ -168,7 +168,7 @@ connection.commit();
 2. 代码实现
 
    ```java
-    String url = "jdbc:mysql://localhost:3306/jdbc";
+   		String url = "jdbc:mysql://localhost:3306/jdbc";
            Properties properties = new Properties();
            properties.setProperty("user","root");
            properties.setProperty("password","123456");
