@@ -126,8 +126,10 @@
 
 - 使用了 where 标签之后，解决了这些问题
 
-  ![image-20221023120439644](picture/image-20221023120439644.png)
+  > *where* 元素只会在子元素返回任何内容的情况下才插入 “WHERE” 子句。而且，若子句的开头为 “AND” 或 “OR”，*where* 元素也会将它们去除。
 
+  ![image-20221023120439644](picture/image-20221023120439644.png)
+  
   
 
 ### 4.3set
@@ -250,7 +252,7 @@
           <bind name="ret" value="'%' + name + '%'"/>
           select * from student
           where name like #{ret}
-      </select>
+  </select>
   ```
 
   ![image-20221023134649500](picture/image-20221023134649500.png)
@@ -302,9 +304,30 @@
 
 - 最终会将xml 配置文件，或者 properties 配置转换成一个 Configuration ,最后一个 build 方法接受一个 Configuration 实例。Configuration 类包含了对一个 SqlSessionFactory 实例你可能关心的所有内容。
 
-- Configuration 类信息
+- #### Configuration 类信息
 
   ![image-20221023141736373](picture/image-20221023141736373.png)
+
+  > 你之前学习过的所有配置开关都存在于 Configuration 类，只不过它们是以 Java API 形式暴露的。以下是一个简单的示例，演示如何手动配置 Configuration 实例，然后将它传递给 build() 方法来创建 SqlSessionFactory。
+  >
+  > ```java
+  > DataSource dataSource = BaseDataTest.createBlogDataSource();
+  > TransactionFactory transactionFactory = new JdbcTransactionFactory();
+  > 
+  > Environment environment = new Environment("development", transactionFactory, dataSource);
+  > 
+  > Configuration configuration = new Configuration(environment);
+  > configuration.setLazyLoadingEnabled(true);
+  > configuration.setEnhancementEnabled(true);
+  > configuration.getTypeAliasRegistry().registerAlias(Blog.class);
+  > configuration.getTypeAliasRegistry().registerAlias(Post.class);
+  > configuration.getTypeAliasRegistry().registerAlias(Author.class);
+  > configuration.addMapper(BoundBlogMapper.class);
+  > configuration.addMapper(BoundAuthorMapper.class);
+  > 
+  > SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+  > SqlSessionFactory factory = builder.build(configuration);
+  > ```
 
 - 提供了六个方法创建 SqlSession 的实例
 
@@ -355,7 +378,13 @@
 
     ![image-20221023143206145](picture/image-20221023143206145.png)
 
-    
+    > ##### 立即批量更新方法
+    >
+    > 当你将 `ExecutorType` 设置为 `ExecutorType.BATCH` 时，可以使用这个方法清除（执行）缓存在 JDBC 驱动类中的批量更新语句。
+    >
+    > ```java
+    > List<BatchResult> flushStatements()
+    > ```
 
 ### 2.3SqlSession
 
@@ -371,12 +400,12 @@
   int delete(String statement, Object parameter)
   ```
 
-- RowBounds
+- RowBounds 
 
   ```java
   int offset = 100;
   int limit = 25;
-  RowBounds rowBounds = new RowBounds(offset, limit);
+  RowBounds rowBounds = new RowBounds(offset, limit); // 第100页，限制25行
   ```
 
 - ##### 立即批量更新方法(如果不调用这个方法，批处理不执行，只是缓存而已)
@@ -442,7 +471,7 @@
 
 - ##### 映射器注解
 
-  ![image-20221023144916364](picture/image-20221023144916364.png)
+  <img src="picture/image-20221023144916364.png" alt="image-20221023144916364"  />
 
 - ##### 映射注解示例
 
@@ -472,6 +501,7 @@
 ## 1.概述
 
 - MyBatis 分页插件 PageHelper：是一款非常不错，并且企业用得很多的mybatis 分页插件
+- 地址： https://pagehelper.github.io/
 
 ## 2.如何使用
 
@@ -555,6 +585,10 @@
 
 - 执行查询
 
+  > 分页时，实际返回的结果list类型是Page<E>，如果想取出分页信息，需要强制转换为Page<E>
+  >
+  > 或者使用PageInfo类	
+
   ```java
   //②：开始执行结果，返回list
   List<Student> list = mapper.selectAll();
@@ -576,9 +610,11 @@
 
 # 四、实战SQL常用操作
 
-## 1.插入时获取主键
+## 1.插入时获取主键(⭐️)
 
 ### 1.1注解方式
+
+> `useGeneratedKeys`、`keyProperty` 和 `keyColumn` 这三个属性一起工作，使得 MyBatis 能够在插入操作后方便地返回数据库生成的主键值
 
 ![image-20221023154841040](picture/image-20221023154841040.png)
 
@@ -613,7 +649,7 @@
 
 ### 3.1批量插入
 
-- 开启sqlSession 批处理 ExecutorType.BATCH,但是记得刷新 statements session.flushStatements();
+- **开启sqlSession 批处理 ExecutorType.BATCH,但是记得刷新 statements session.flushStatements();**
 
   ```java
   try (SqlSession session = sqlSessionFactory.openSession(ExecutorType.BATCH,true)) {
@@ -629,7 +665,7 @@
           }
   ```
 
-- 使用 foreach
+- ##### **使用 foreach**
 
   ```xml
   <insert id="batchInsert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">

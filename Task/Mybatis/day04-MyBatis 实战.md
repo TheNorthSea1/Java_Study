@@ -29,6 +29,10 @@
 
 - 名称：generatorConfig.xml
 
+- 关于jdbcConnection属性配置（**对于XML配置我们可以查阅官方文档**）
+
+  ![image-20241021222549397](./assets/image-20241021222549397.png)
+
 ```xml
 <!DOCTYPE generatorConfiguration PUBLIC
         "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
@@ -223,7 +227,7 @@ create table product
 
   - 异步检测是否注册用户
   
-    ```html
+    ```js
     // 定义失去焦点事件发送异步请求去检验账户是否存在
         document.getElementById("account").onblur=function () {
             console.log(this.value);
@@ -432,17 +436,17 @@ create table product
 
 - 新增结束数据还在
 
-  ```html
+  ```js
   _this.insertForm = {
-                      name:'',
-                      price:'',
-                      remark:''
-                  }
+        name:'',
+        price:'',
+        remark:''
+   }
   ```
 
 - 页码显示不对
 
-  ```html
+  ```js
    handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.queryParam.pageSize = val;
