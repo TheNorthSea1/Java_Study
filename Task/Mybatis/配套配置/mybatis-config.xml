@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!--    引入properties 配置文件-->
+    <properties resource="db.properties">
+        <!-- ... -->
+        <property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/> <!-- 启用默认值特性 -->
+    </properties>
+    <settings>
+<!--        设置数据库经典命名下划线方式字段转换成驼峰方式-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+<!--        配置日志-->
+<!--        <setting name="logImpl" value="LOG4J"/>-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+    </settings>
+<!--    类别名配置-->
+<!--    配置插件-->
+    <plugins>
+        <!-- com.github.pagehelper为PageHelper类所在包名 -->
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!-- 使用下面的方式配置参数，后面会有所有的参数介绍 -->
+            <property name="param1" value="value1"/>
+        </plugin>
+    </plugins>
+<!--    default 设置模式使用的环境-->
+    <environments default="test">
+<!--        开发环境-->
+        <environment id="development">
+<!--            事务配置-->
+<!--            type 设置事务管理方式-->
+<!--            JDBC :JDBC 的提交和回滚功能，手动处理，所以需要手动处理或者获取 sqlSession 的时候设置 true-->
+<!--            MANAGED：让容器来管理事务的整个生命周期-->
+            <transactionManager type="JDBC"/>
+<!--            配置数据库连接要素-->
+<!--            数据源配置-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver:com.mysql.cj.jdbc.Driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+<!--        测试环境-->
+        <environment id="test">
+            <transactionManager type="JDBC"/>
+            <!--            配置数据库连接要素-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver:com.mysql.cj.jdbc.Driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+<!--    映射文件-->
+    <mappers>
+<!--        <mapper resource="cn/sycoder/mapper/EmployeeMapper.xml"/>-->
+<!--        <mapper class="cn.sycoder.mapper.EmployeeMapper"/>-->
+        <package name="cn.sycoder.mapper"/>
+    </mappers>
+</configuration>

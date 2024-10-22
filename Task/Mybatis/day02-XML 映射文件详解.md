@@ -658,7 +658,7 @@
   - ​            `PARTIAL` - 对除在内部定义了嵌套结果映射（也就是连接的属性）以外的属性进行映射          
   - ​            `FULL` - 自动映射所有属性。          
 
-# 八、缓存
+# 八、缓存（⭐️）
 
 ## 1.概述
 
@@ -678,23 +678,29 @@
 
 ## 3.二级缓存
 
-- 使用之前必须在mapper.xml 文件中添加 <cache/>
+- **二级缓存的配置**
 
-- 二级缓存：是 sqlSessionFactory 级别的，只要使用同一个 sqlSessionFactory 创建的 sqlSession 查询同一 sql 都可以使用缓存
+  - 要启用 Mybatis 的二级缓存，需要在 Mybatis 的全局配置文件中设置 `cacheEnabled` 参数为 True（尽管这个参数默认就是 True，但明确设置可以避免一些潜在的配置问题）。
 
-- 使用前注意：
+  - 还需要在对应的 Mapper XML 文件中添加 `<cache/>` 标签。这个标签可以配置一些缓存的属性，如驱逐策略（eviction）、刷新间隔（flushInterval）、缓存大小（size）和只读模式（readOnly）等。
 
-  - 先再 mapper.xml 中手动开启二级缓存
+  - 还需要对查询的数据所转换的实体类类型实现`序列化的接口`
 
-  ![image-20221022165743581](picture/image-20221022165743581.png)
+- 二级缓存：是 sqlSessionFactory 级别的，只要使用同一个 sqlSessionFactory 创建的 sqlSession 查询同一 sql 都可以使用缓存。
 
-  
+- 二级缓存是事务性的。这意味着，当 SqlSession 完成并提交时，或是完成并回滚,才会被写入，被其他 SqlSession 共享。
+
+- 演示
+
+  ![image-20241022172539018](./assets/image-20241022172539018.png)
+
+  ![image-20241022172634200](./assets/image-20241022172634200.png)
 
 - 失效情况
   - 必须给类实现序列化接口（其实原理就是把对象信息写进一个序列化文件中，通过对象流）
   - 两次查询之间添加了任何的增删改操作
-  -  insert、update 和 delete 语句会刷新缓存
-- 二级缓存清除策略
+  - insert、update 和 delete 语句会刷新缓存
+  - 二级缓存清除策略
   - `LRU` – （Least Recently Used）最近最少使用：移除最长时间不被使用的对象。(**默认使用方式**)   
   - `FIFO` – 先进先出：按对象进入缓存的顺序来移除它们。          
   - `SOFT` – 软引用：基于垃圾回收器状态和软引用规则移除对象。          

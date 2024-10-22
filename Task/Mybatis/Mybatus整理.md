@@ -58,7 +58,13 @@
 1. **MyBatis的一级、二级缓存是什么？**
 
    * **一级缓存**：基于PerpetualCache的HashMap本地缓存，其存储作用域为Session，当Session flush或close之后，该Session中的所有Cache就将清空，默认打开一级缓存。
-   * **二级缓存**：与一级缓存其机制相同，默认也是采用PerpetualCache，HashMap存储，不同在于其存储作用域为Mapper（Namespace），并且可自定义存储源，如Ehcache。默认不打开二级缓存，要开启二级缓存，使用二级缓存属性类需要实现Serializable序列化接口（可用来保存对象的状态），可在它的映射文件中配置。
+   * **二级缓存**：与一级缓存其机制相同，默认也是采用PerpetualCache，HashMap存储，不同在于其存储作用域为Mapper（Namespace），并且可自定义存储源，如Ehcache。默认不打开二级缓存。
+   * **二级缓存的配置**
+     - 要启用 Mybatis 的二级缓存，需要在 Mybatis 的全局配置文件中设置 `cacheEnabled` 参数为 True（尽管这个参数默认就是 True，但明确设置可以避免一些潜在的配置问题）。
+
+     - 还需要在对应的 Mapper XML 文件中添加 `<cache/>` 标签。这个标签可以配置一些缓存的属性，如驱逐策略（eviction）、刷新间隔（flushInterval）、缓存大小（size）和只读模式（readOnly）等。
+
+     - 还需要对查询的数据所转换的实体类类型实现`序列化的接口`
 
 2. **MyBatis是如何进行分页的？分页插件的原理是什么？**
 
