@@ -311,10 +311,11 @@ create table product
 
   ```java
   <dependency>
-              <groupId>com.alibaba</groupId>
-              <artifactId>fastjson</artifactId>
-              <version>1.2.79</version>
-          </dependency>
+       <groupId>com.alibaba.fastjson2</groupId>
+       <artifactId>fastjson2</artifactId>
+       <version>2.0.52</version>
+  </dependency>
+  
   ```
 
 - 通过序列化的方式输出
@@ -499,7 +500,7 @@ create table product
 - 备份 webapps  文件夹
 
   ```shell
-  mv webapps ./webapps_back
+  cp webapps ./webapps_back
   ```
 
 - 新建webapps 目录
@@ -523,9 +524,25 @@ create table product
 - 查看日志
 
   ```shell
-  tail -n 500 -f logs/catalina.out
+  tail -n 500 -f logs/catalina.out 
   ```
 
 ## 5.linux mysql 新建 mybatis 库
 
 - 新建数据表 user 和 product
+
+## 6将war包命名为ROOT的情况
+
+- 如果希望Tomcat在启动时默认打开某个web应用，可以将该应用的war包命名为ROOT.war。这是因为在Tomcat的默认配置中，会寻找webapps目录下的ROOT应用作为根应用。具体做法如下：
+
+  1. 将webapps目录下原有的ROOT文件夹（如果有的话）删除。
+
+  1. 将要部署的war包复制到webapps目录下，并重命名为ROOT.war。
+
+  1. 重新启动Tomcat服务器。
+
+完成以上步骤后，Tomcat会将ROOT.war解压并部署为根应用，此时只需通过URL“http://localhost:8080/”即可访问该应用，而无需在URL中包含项目名称。
+
+### 不将war包命名为ROOT的情况
+
+如果不希望将某个web应用部署为根应用，或者希望保留Tomcat的默认ROOT应用，那么可以将war包保留其原始名称（例如myapp.war）。在这种情况下，Tomcat会将该war包解压并部署为一个具有特定上下文路径（也称为项目名称）的应用。要访问该应用，需要在URL中包含其上下文路径，例如“http://localhost:8080/myapp/”。
