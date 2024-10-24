@@ -1,4 +1,5 @@
 - 文档下载地址：https://docs.spring.io/spring-framework/docs/
+- 官方文档地址 https://spring.io/
 
 # 一、Spring 简介
 
@@ -37,7 +38,7 @@
 
 - Spring 系统架构图
 
-  <img src="picture/image-20221026160641634.png" alt="image-20221026160641634" style="zoom:50%;" />
+  <img src="picture/image-20221026160641634.png" alt="image-20221026160641634" style="zoom: 67%;" />
 
   
 
@@ -49,7 +50,7 @@
   - **Data Access/Integration**：数据层
     - Data Access：数据访问的
     - Data Integration：数据集成
-    - Transactios：支持事务操作，通过 AOP 来实现，释放我们的双手
+    - Transactions：支持事务操作，通过 AOP 来实现，释放我们的双手
   - **Web**：WEB 层，SpringMVC 框架的
     - Servlet
     - Web
@@ -148,7 +149,7 @@
 
 ## 4.容器创建
 
-### 1.ClassPathXmlApplicationContext
+### 1.ClassPathXmlApplicationContext(常用)
 
 ```java
 ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
@@ -328,7 +329,12 @@ final Student bean = context.getBean(Student.class);
                   if(id.equals(bean.attributeValue("id"))){
                       final String aClass = bean.attributeValue("class");
                       final Class<?> clz = Class.forName(aClass);
-                      return clz.newInstance();
+                      
+                      Constructor<?> declaredConstructor = clz.getDeclaredConstructor();
+                      declaredConstructor.setAccessible(true);
+                      return declaredConstructor.newInstance();
+                      
+                      // return clz.newInstance();
                   }
               }
           } catch (Exception e) {
@@ -338,7 +344,7 @@ final Student bean = context.getBean(Student.class);
       }
   }
   ```
-
+  
   
 
 ## 7.bean 实例化
@@ -395,6 +401,7 @@ final Student bean = context.getBean(Student.class);
   public class ClientServer {
       //创建自身对象并且私有化
       private static ClientServer clientServer = new ClientServer();
+      // 使得不可以通过new来实例化对象
       private ClientServer() {}
       public static ClientServer createInstance(){
           return clientServer;
@@ -435,25 +442,43 @@ final Student bean = context.getBean(Student.class);
 - 创建实例工厂类
 
   ```java
-  public class ClientServiceFactory {
-      private static ClientService instance = new ClientService();
-      private ClientServiceFactory(){}
-      public ClientService getInstance(){
-          return instance;
+  public class DefaultServiceLocator {
+      private static ClientService clientService = new ClientServiceImpl();
+      private static AccountService accountService = new AccountServiceImpl();
+      private DefaultServiceLocator() {}
+      public ClientService createClientServiceInstance() {
+          return clientService;
+      }
+      public AccountService createAccountServiceInstance() {
+          return accountService;
       }
   }
   
-  public class ClientService {
+  class ClientService{
+      
+  }
+  
+  class AccountService{
+      
   }
   ```
 
 - 配置 bean
 
   ```xml
-  <!--    配置工厂-->
-      <bean id="clientFactory" class="cn.sycoder.domian.ClientServiceFactory"></bean>
-  <!--    配置 clientService-->
-      <bean id="clientService" factory-bean="clientFactory" factory-method="getInstance"></bean>
+  <bean id="serviceLocator" class="examples.DefaultServiceLocator">
+   <!-- inject any dependencies required by this locator bean -->
+  </bean>
+  
+  <bean id="clientService"
+   class="cn.sycoder.domian.ClientService"
+   factory-bean="serviceLocator"
+   factory-method="createClientServiceInstance"/>
+  
+  <bean id="accountService"
+   class="cn.sycoder.domian.AccountService"
+   factory-bean="serviceLocator"
+   factory-method="createAccountServiceInstance"/>
   ```
 
 - 获取bean
@@ -482,7 +507,7 @@ final Student bean = context.getBean(Student.class);
   }
   ```
 
-- 创建员工 factory 类实现 FactoryBean
+- 创建员工 factory 类实现 FactoryBean接口
 
   ```java
   public class EmployeeFactory implements FactoryBean<Employee> {
@@ -494,7 +519,7 @@ final Student bean = context.getBean(Student.class);
       public Class<?> getObjectType() {
           return Employee.class;
       }
-  
+  	// 设置是否是单例设计模式
       public boolean isSingleton() {
           return false;
       }
@@ -520,8 +545,10 @@ final Student bean = context.getBean(Student.class);
 
 - 实现方法说明
 
-  - isSingleton:如果是 true 返回单例的对象
+  - **isSingleton:如果是 true 返回单例的对象**
 
+    > 默认是true。
+  
     ```java
     public boolean isSingleton() {
             return true;
@@ -529,14 +556,14 @@ final Student bean = context.getBean(Student.class);
     ```
 
   - getObject:进行对象创建的
-
+  
     ```java
     public Employee getObject() throws Exception {
         System.out.println("获取 emp 对象");
         return new Employee();
     }
     ```
-
+  
     
 
 # 三、DI
@@ -652,7 +679,7 @@ public class Student {
 
 - 配置 service 构造器
 
-  ```xml
+  ```java
   public class StudentServiceImpl implements IStudentService {
   
       private StudentMapper mapper;

@@ -531,6 +531,37 @@ create table product
 
 - 新建数据表 user 和 product
 
+  ```sql
+  create table mybatis.user
+  (
+      id       bigint auto_increment
+          primary key,
+      name     varchar(64)  null,
+      account  varchar(64)  null,
+      password varchar(128) null,
+      constraint user_account_uindex
+          unique (account)
+  );
+  
+  create table mybatis.product
+  (
+      id          bigint auto_increment
+          primary key,
+      name        varchar(64)  null,
+      price       double       null,
+      remark      varchar(128) null,
+      create_time datetime     null,
+      create_id   bigint       null,
+      update_time datetime     null,
+      update_id   bigint       null
+  );
+  
+  ```
+
+  
+
+  
+
 ## 6将war包命名为ROOT的情况
 
 - 如果希望Tomcat在启动时默认打开某个web应用，可以将该应用的war包命名为ROOT.war。这是因为在Tomcat的默认配置中，会寻找webapps目录下的ROOT应用作为根应用。具体做法如下：
@@ -546,3 +577,11 @@ create table product
 ### 不将war包命名为ROOT的情况
 
 如果不希望将某个web应用部署为根应用，或者希望保留Tomcat的默认ROOT应用，那么可以将war包保留其原始名称（例如myapp.war）。在这种情况下，Tomcat会将该war包解压并部署为一个具有特定上下文路径（也称为项目名称）的应用。要访问该应用，需要在URL中包含其上下文路径，例如“http://localhost:8080/myapp/”。
+
+> Note:
+>
+>    对于将war设置为什么名字，取决于你的deployment。
+>
+> For instance: We should modify the name of war directory to the ROOT.war.
+>
+> ​	<img src="./assets/image-20241024093125079.png" alt="image-20241024093125079" style="zoom: 80%;" />
