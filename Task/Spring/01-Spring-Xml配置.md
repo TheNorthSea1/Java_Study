@@ -588,14 +588,18 @@ final Student bean = context.getBean(Student.class);
 
 ## 3.构造器依赖注入
 
-### 1.创建学生类
+### 3.0 项目结构
+
+![image-20241025130241760](./assets/image-20241025130241760.png)
+
+### 3.1.创建学生类
 
 ```java
 public class Student {
 }
 ```
 
-### 2.创建Mapper 接口以及实现类
+### 3.2.创建Mapper 接口以及实现类
 
 - 创建 Mapper 接口
 
@@ -607,7 +611,7 @@ public class Student {
   }
   ```
 
-- 创建 Mapper 实现类
+- 创建 Mapper 实现类（底层都是将接口实现）
 
   ```java
   public class StudentMapperImpl implements StudentMapper{
@@ -630,7 +634,7 @@ public class Student {
 
   
 
-### 3.创建 service 接口以及实现类
+### 3.3.创建 service 接口以及实现类
 
 - 创建 service 接口
 
@@ -667,7 +671,7 @@ public class Student {
 
   
 
-### 4.如果没有使用DI注入直接调用
+### 3.4.如果没有使用DI注入直接调用
 
 - 会产生如下问题
 
@@ -675,7 +679,7 @@ public class Student {
 
 
 
-### 5.配置构造器注入属性
+### 3.5.配置构造器注入属性
 
 - 配置 service 构造器
 
@@ -721,7 +725,7 @@ public class Student {
 
     
 
-### 6.构造器配置多个引用类型参数
+### 3.6.构造器配置多个引用类型参数
 
 - service
 
@@ -788,7 +792,15 @@ public class Student {
 
   
 
-### 7.构造器配置多个基本数据类型参数
+### 3.7.构造器配置多个基本数据类型参数
+
+| Attribute | Locate  the constructor argument                           |
+| --------- | ---------------------------------------------------------- |
+| name      | 根据参数的名称                                             |
+| type      | 根据参数类型（如果，存在相同类型的参数，会出现映射不准确） |
+| index     | 根据位置确定（从0开始）                                    |
+
+
 
 - service
 
@@ -843,8 +855,12 @@ public class Student {
   </beans>
   ```
 
-- 这种方式会存在参数覆盖的问题，解决方式，删除 type 添加 index 属性
+- 这种方式会存在参数覆盖的问题，解决方式，删除 type 添加 **index** 属性
 
+  > Use the index attribute to specify explicitly the index of constructor arguments. 
+  >
+  >  Note：that the index is 0 based.
+  
   ```xml
   <?xml version="1.0" encoding="UTF-8"?>
   <beans xmlns="http://www.springframework.org/schema/beans"
@@ -865,27 +881,49 @@ public class Student {
       <bean id="userMapper" class="cn.sycoder.di.mapper.UserMapperImpl"></bean>
   </beans>
   ```
-
+  
   
 
 ## 4.setter依赖注入
 
-- 使用 set 方法实现属性的注入
+- 原理：
+
+  - **Spring框架通过底层调用对象属性对应的setter方法，完成成员变量的赋值**。
+
+  - 这种方式的优势在于实现了代码与配置文件的解耦合，属性的值都写在XML配置文件里面，后续如果需要修改属性的值，可以直接修改XML文件中的内容，而无需改动代码层面。
+
+- 步骤:
+
+  - **提供setter和getter方法**：在需要注入属性的Java类中，为需要注入的属性提供对应的setter和getter方法。
+
+    > Note: set 方法严格采用驼峰的命名方式
+    >
+    > ```java
+    > private String name;
+    > public void setName(String name) {
+    >     this.name = name;
+    > }
+    > ```
+
+    
+
+  - **配置Spring的配置文件**：在Spring的配置文件（如applicationContext.xml）中，通过`<bean>`标签定义Bean，并通过`<property>`标签指定需要注入的属性及其值。`<property>`标签的`name`属性应与Java类中的属性名一致，`value`属性则指定了要注入的值。
+
 - 使用 property 属性
-  - name:属性名称
-  - value:直接给值
-  - ref:其它bean的引用
+  - `name`: 应与Java类中的属性名一致
+  - `value`:指定了要注入的值给值
+  - `ref`: 允许将一个Spring容器中已经创建的Bean引用到当前正在配置的Bean的属性中。通过这种方式，可以在不同的Bean之间建立依赖关系，实现依赖注入（Dependency Injection）。
 
 
 
-### 1.创建员工类
+### 4.1.创建员工类
 
 ```java
 public class Employee {
 }
 ```
 
-### 2.创建 mapper 接口以及实现类
+### 4.2.创建 mapper 接口以及实现类
 
 - mapper 接口
 
@@ -906,7 +944,7 @@ public class Employee {
   }
   ```
 
-### 3.创建 servie 接口以及实现类
+### 4.3.创建 servie 接口以及实现类
 
 - 创建 service 接口
 
@@ -929,7 +967,7 @@ public class Employee {
   }
   ```
 
-### 4.配置 setter 注入
+### 4.4.配置 setter 注入
 
 - 配置bean
 
@@ -995,15 +1033,10 @@ public class Employee {
 
   
 
-- setter 注入过程分析
-
-  ![image-20221027134811805](picture/image-20221027134811805.png)
-
   
 
-  
 
-### 5.配置多个 setter 方法注入多个属性
+### 4.5.配置多个 setter 方法注入多个属性
 
 - 给service 添加新的属性以及新的setter方法
 
@@ -1077,7 +1110,7 @@ public class Employee {
       }
   ```
 
-### 6.使用 setter 注入简单类型
+### 4.6.使用 setter 注入简单类型
 
 - 修改 service 类，提供两个属性 int age = 18,String name = "sy"
 
@@ -1138,16 +1171,22 @@ public class Employee {
   </beans>
   ```
 
-- 可能出现的问题
+- 可能出现的问题 (value 数据类型 和 setter方法对应参数类型不匹配)
 
   ![image-20221027140105809](picture/image-20221027140105809.png)
 
-### 7.setter 注入总结
+### 4.7.setter 注入总结
 
 - 对于引用数据类型来说使用
-  - **<property name="" ref=""></property>**
+  
+  - ```xml
+    <property name="" ref=""></property>
+    ```
+  
 - 对于简单数据类型
-  - **<property name="" value=""></property>**
+  - ```xml
+    <property name="" value=""></property>
+    ```
 
 ## 5.集合注入
 
@@ -1166,6 +1205,7 @@ public class CollectionsDemo {
     private Set<String> set;
     private Properties properties;
     private int[] arr;
+    
 
     public void print(){
         System.out.println("list:"+list);
@@ -1241,6 +1281,12 @@ public class CollectionsDemo {
                 <value>2</value>
             </array>
         </property>
+        
+        // 如果想配置null，就用这种方法。
+        <property name="email">
+           <null/>
+        </property>
+        
     </bean>
 </beans>
 ```
@@ -1259,7 +1305,7 @@ public class CollectionsDemo {
 
 ### 2.分类
 
-- 不启用自动装配
+- no 不启用自动装配
 - byName 通过名称
 - byType 通过类型
 - constructor 通过构造器
@@ -1292,7 +1338,7 @@ public class CollectionsDemo {
   }
   ```
 
-- 配置 bean 并且通过 bype 自动装配
+- 配置 bean 并且通过 byType 自动装配
 
   ```xml
   <?xml version="1.0" encoding="UTF-8"?>
@@ -1345,14 +1391,33 @@ public class CollectionsDemo {
 
 ## 7.bean scopes
 
+- 定义了Bean在Spring容器中的生命周期和可见性。它决定了Spring容器创建Bean实例的数量以及这些实例的持久性。Bean作用域帮助开发者控制Bean的创建和销毁时机，以及它们在不同上下文中的可用性。
+
 - 常见的作用域
 
-  | 作用域    | 说明   |
-  | --------- | ------ |
-  | singleton | 单例的 |
-  | prototype | 多例   |
-  | request   | 请求   |
-  | session   | 会话   |
+  - **Singleton**（单例）
+    - 在Spring容器中，单例作用域的Bean只创建一个实例。
+    - 无论容器被请求多少次，都会返回同一个Bean实例。
+    - 单例作用域适用于无状态的服务类，因为无状态意味着它们不依赖于任何特定的会话或请求数据。
+
+  - **Prototype**（原型）
+    - 每次请求原型作用域的Bean时，都会创建一个新的Bean实例。
+    - 这意味着每次从容器中获取原型Bean时，都会得到一个新的对象实例。
+    - 原型作用域适用于有状态的Bean，因为每次都需要一个新的实例来保持独立性。
+  - **Request**（请求）
+    - 请求作用域的Bean在HTTP请求的生命周期内存在。
+    - 每个HTTP请求都会创建一个新的Bean实例，并且该实例仅在当前请求中可见。
+    - 请求结束时，Bean实例会被销毁。
+    - 请求作用域通常用于Web应用程序中与请求相关的数据或处理。
+  - **Session**（会话）
+    - 会话作用域的Bean在HTTP会话的生命周期内存在。
+    - 对于同一个用户会话，Spring容器会创建一个Bean实例并将其存储在会话中。
+    - 会话结束时，Bean实例会被销毁。
+    - 会话作用域通常用于存储用户会话特定的数据或行为。
+  - **Application/GlobalSession**（应用/全局会话）
+    - 应用作用域的Bean在ServletContext的生命周期内存在，对于整个Web应用程序都是可见的。
+    - 全局会话作用域类似于会话作用域，但它在基于portlet的Web应用程序中用于跨多个portlet会话。
+    - 这些作用域通常用于存储应用程序级别的数据或配置
 
 - 单例 singleton
 
@@ -1365,10 +1430,12 @@ public class CollectionsDemo {
   
 
 - 注意：容器模式就是以单例的方式创建对象的，如果需要修改成非单例，使用 scope 属性修改即可
-- 以后开发中适合将那些bean对象交给 spring 管理
+
+  - 以后开发中适合将哪些bean对象交给 spring 管理
   - 持久层 mapper
   - 业务层 service
   - 控制层 controller
+
 - 单例bean会出现线程安全吗
   - 判断bean 对象是否存储数据，如果用来存储数据了，会导致线程安全问题
   - 使用局部变量做存储，方法调用结束就销毁了，所以不存在线程安全问题
@@ -1433,19 +1500,27 @@ public class CollectionsDemo {
 
 ### 3.BeanPostProcessor
 
+- BeanPostProcessor是Spring框架中一个非常重要的接口，它允许开发者在Spring容器实例化、配置Bean之后，在初始化Bean的前后插入自定义的处理逻辑。
+
+- BeanPostProcessor接口定义了两个方法：
+  1. `postProcessBeforeInitialization(Object bean, String beanName)`：在Bean初始化之**前**调用，允许开发者对Bean进行自定义处理，如检查Bean的属性、修改Bean的配置等。处理完成后，需要将Bean作为返回值返回，以便Spring继续后续的初始化流程。
+  2. `postProcessAfterInitialization(Object bean, String beanName)`：在Bean初始化之**后**调用，允许开发者对已经初始化的Bean进行进一步的处理，如添加代理对象、进行AOP增强等。同样，处理完成后也需要将Bean作为返回值返回。
+
 - 自定义自己 bean 处理器
 
   ```java
   public class MyBeanPostProcessor  implements BeanPostProcessor{
+      
+      //bean 前置处理器
       public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-          //bean 前置处理器
+    
           System.out.println("bean 的前置处理器");
           return bean;
       }
-  
+      
+       //bean 后置处理器
       public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
           System.out.println("bean 的后置处理器");
-          //bean 后置处理器
           return bean;
       }
   }
@@ -1517,32 +1592,39 @@ public class CollectionsDemo {
 
 ### 2.使用占位符获取连接数据
 
-- 简历 db.properties 配置文件
+- 建立 db.properties 配置文件
 
   ```properties
   username=root
   password=123456
   driverClassName=com.mysql.cj.jdbc.Driver
   url=jdbc:mysql://localhost:3306/mybatis
-  
   ```
 
-- 配置引用db.properties
+- 换成占位符
 
   ```xml
-   <bean id="dataSource1" class="com.alibaba.druid.pool.DruidDataSource">
+  <bean id="dataSource1" class="com.alibaba.druid.pool.DruidDataSource">
           <property name="username" value="${username}"></property>
           <property name="password" value="${password}"></property>
           <property name="driverClassName" value="${driverClassName}"></property>
           <property name="url" value="${url}"></property>
       </bean>
+  ```
+
+- 配置引用db.properties
+
+  方法一：
+
+  ```xml
+  
   <!--    获取db.properties 配置文件-->
       <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
           <property name="location" value="db.properties"></property>
       </bean>
   ```
 
-- 引入 db.properties 缩写
+  方法二:(更加简洁)（推荐）
 
   ```xml
   <context:property-placeholder location="db.properties"/>
@@ -1554,24 +1636,21 @@ public class CollectionsDemo {
 
 - 解决方式
 
-  - 给配置文件加上前缀变量
+  - 方法一： 给配置文件加上前缀变量，同时对应xml文件里的占位符里的内容也要换成jdbc.xxx。
 
     ```properties
     jdbc.username=root
     jdbc.password=123456
     jdbc.driverClassName=com.mysql.cj.jdbc.Driver
     jdbc.url=jdbc:mysql://localhost:3306/mybatis
-    username=123
     ```
-
     
-
   - 添加属性
-
+  
     ```xml
     <context:property-placeholder system-properties-mode="NEVER" location="db.properties"/>
     ```
-
+  
 - 加载多个配置文件可以用 * 代替
 
   ```xml
@@ -1608,7 +1687,7 @@ public class CollectionsDemo {
     </bean>
 ```
 
-- lazy-init:如果开启懒加载，默认是调用时才创建bean
+- lazy-init:如果开启懒加载，默认是调用时才创建bean (默认是false)
 - init-method:初始化方法
 - destroy-method:销毁方法
 - scope:作用域，单例，原型
