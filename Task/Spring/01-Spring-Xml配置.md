@@ -214,7 +214,7 @@ final Student bean = context.getBean(Student.class);
 
   ![image-20221026184148621](picture/image-20221026184148621.png)
 
-## 6.设计模式
+## 6.设计模式(⭐️)
 
 ### 1.单例模式
 
@@ -291,7 +291,7 @@ final Student bean = context.getBean(Student.class);
   }
   ```
 
-### 3.通过反射获取 xml 配置创建对象
+### 3.通过反射获取 xml 配置创建对象（⭐️）
 
 - 导依赖
 
@@ -1299,6 +1299,10 @@ public class CollectionsDemo {
 
 ## 6.自动装配
 
+> Note:
+>
+> 使用自动装配，依旧要加入setter方法。
+
 ### 1.概述
 
 - 概述：IOC容器根据bean所依赖的属性，自动查找并进行自动装配。
@@ -1307,8 +1311,14 @@ public class CollectionsDemo {
 
 - no 不启用自动装配
 - byName 通过名称
+  - 按照属性名称进行注入。Spring容器会查找与属性名称相同的Bean对象，并将其注入到对应的属性中。如果找不到对应的Bean对象，则不会进行注入。这种方式要求属性名称和Bean对象的名称（id）必须一致。
+
 - byType 通过类型
+  - 按照属性类型进行注入。Spring容器会查找与属性类型相同的Bean对象，并将其注入到对应的属性中。如果找到多个符合条件的Bean对象，Spring会抛出异常。这种方式要求属性类型和Bean对象的类型必须匹配。
+
 - constructor 通过构造器
+  - 按照构造方法进行注入。Spring容器会查找与构造方法参数类型相同的Bean对象，并通过构造方法将其注入到Bean中。这种方式要求构造方法的参数类型和Bean对象的类型必须匹配，并且构造方法必须是无参构造方法之外的唯一构造方法（或者是在多个构造方法中通过@Autowired注解指定的一个）。	
+
 
 
 

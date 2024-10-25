@@ -98,10 +98,22 @@
 
 - 配置 xml 包扫描路径
 
+  > `<context:component-scan>`:主要作用是自动检测并注册 Bean，以及激活属性注入注解。
+  >
+  > 1. 扫描指定包及其子包
+  >    - `<context:component-scan>` 元素会扫描指定的包（通过 `base-package` 属性指定）及其所有的子包。
+  >    - 在扫描过程中，它会查找能够自动注册为 Spring Bean 的类。
+  > 2. 查找标注了特定注解的类
+  >    - 默认情况下，`<context:component-scan>` 会查找使用构造型（stereotype）注解所标注的类，如 `@Component`、`@Service`、`@Controller` 和 `@Repository`。
+  >    - 这些注解分别用于标注组件、服务、控制器和数据仓库层的类。
+  > 3. 注册 Bean
+  >    - 对于找到的每个符合条件的类，`<context:component-scan>` 会将其注册为一个 Spring Bean。
+  >    - 这意味着不需要在 XML 配置文件中显式地使用 `<bean>` 元素来定义这些 Bean。
+  
   ```xml
   <context:component-scan base-package="cn.sycoder.xmlAnnotationBean.mapper"/>
   ```
-
+  
   ```xml
   <?xml version="1.0" encoding="UTF-8"?>
   <beans xmlns="http://www.springframework.org/schema/beans"
@@ -133,8 +145,6 @@
 
   
 
-
-
 ### 1.4Component详解
 
 - 默认不传参，bean 的名称是首字母小写其余不变
@@ -148,9 +158,10 @@
 
   ```java
   @Component("u") 参数就是你bean的名称
+  @Component(value = "u")
   ```
 
-- 使用位置：具体类的上方，不要使用到接口上
+- **使用位置：具体类的上方，不要使用到接口上**
 
 - 作用：将bean 交给spring管理
 
