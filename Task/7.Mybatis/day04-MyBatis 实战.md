@@ -585,3 +585,73 @@ create table product
 > For instance: We should modify the name of war directory to the ROOT.war.
 >
 > ​	<img src="./assets/image-20241024093125079.png" alt="image-20241024093125079" style="zoom: 80%;" />
+
+# 四、加入Druid连接池
+
+## **1.导入Maven依赖**
+
+```java
+ <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>1.2.22</version>
+    </dependency>
+```
+
+## **2.构建Druid连接池**
+
+创建一个自定义的`DruidDataSourceFactory`类，继承自MyBatis的`UnpooledDataSourceFactory`，并重写`getDataSource()`方法以初始化Druid数据源.
+
+```java
+public class DruidDataSourceFactory extends PooledDataSourceFactory {
+
+    @Override
+    public DataSource getDataSource() {
+        try {
+            ((DruidDataSource) this.dataSource).init();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return this.dataSource;
+    }
+    public DruidDataSourceFactory() {
+        this.dataSource = new DruidDataSource();
+    }
+}
+```
+
+## **3.配置MyBatis核心文件**
+
+在MyBatis的核心配置文件`mybatis-config.xml`中，配置数据源类型为自定义的`DruidDataSourceFactory`，并设置相关的数据库连接属性.
+
+```xml
+<configuration>  
+    <settings>  
+        <setting name="mapUnderscoreToCamelCase" value="true"/>  
+    </settings>  
+    <environments default="dev">  
+        <environment id="development">
+<!--            事务配置-->
+<!--            type 设置事务管理方式-->
+<!--            JDBC :JDBC 的提交和回滚功能，手动处理，所以需要手动处理或者获取 sqlSession 的时候设置 true-->
+<!--            MANAGED：让容器来管理事务的整个生命周期-->
+            <transactionManager type="JDBC"/>
+<!--            配置数据库连接要素-->
+<!--            数据源配置-->
+            <dataSource type="cn.bwhcoder.druid.DruidDataSourceFactory">
+                <property name="driverClassName" value="${driver:com.mysql.cj.jdbc.Driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+                <property name="initialSize" value="10"/>
+                <property name="maxActive" value="20"/>
+            </dataSource>
+        </environment> 
+    </environments>  
+    <mappers>  
+        <mapper resource="mappers/your_mapper.xml"/>  
+    </mappers>  
+</configuration>
+```
+

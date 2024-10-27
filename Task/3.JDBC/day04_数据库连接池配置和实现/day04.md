@@ -43,7 +43,7 @@
   Connection getConnection;
   ```
 
-- 注意：以后不需要用 DriverManager 对象去获取连接对象 Connection,通过 DataSource 获取。
+- **注意：以后不需要用 DriverManager 对象去获取连接对象 Connection,通过 DataSource 获取。**
 
 ### 2.常用的连接池
 

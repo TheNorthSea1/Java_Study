@@ -94,10 +94,22 @@
 ### 2.1概念
 
 - 连接点(JoinPoint)：对于需要增强的方法就是连接点
+
+  > *Join point*: a point during the execution of a program, such as the execution of a method or the handling of an exception. In Spring AOP, a join point *always* represents a method execution.
+
 - 切入点(Pointcut)：需要增强的方法是切入点，匹配连接点的式子
+
+  > a predicate that matches join points. Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name). The concept of join points as matched by pointcut expressions is central to AOP, and Spring uses the AspectJ pointcut expression language by default.
+
 - 通知(Advice)：存放需要增强功能的共性代码，就叫通知
+
+  > action taken by an aspect at a particular join point. Different types of advice include "around," "before" and "after" advice. (Advice types are discussed below.) Many AOP frameworks, including Spring, model an advice as an *interceptor*, maintaining a chain of interceptors *around* the join point.
+
 - 切面(Aspect)：通知是需要增强的功能存在多个，切入点是需要增强的方法也存在多个，需要去给切入点和通知做关联，知道哪个切入点对应哪个通知，这种描述关系就叫切面
-- 通知类：存放通知（方法）的类
+
+  > a modularization of a concern that cuts across multiple classes. Transaction management is a good example of a crosscutting concern in enterprise Java applications. In Spring AOP, aspects are implemented using regular classes (the schema-based approach) or regular classes annotated with the @Aspect annotation (the @AspectJ style).
+
+- 通知类：存放通知（方法）的类 
 
 ### 2.2图示
 
@@ -185,6 +197,10 @@
 
 - 代码
 
+  > Note:
+  >
+  > ​	@Pointcut("execution(void cn.sycoder.service.impl.StudentServiceImpl.save(..))")   `save(..)` 里面两个点不要忘记。
+  
   ```java
   @Component
   @Aspect
@@ -199,7 +215,7 @@
           System.out.println("关闭事务");
       }
       //定义切点
-      @Pointcut("execution(void cn.sycoder.service.impl.StudentServiceImpl.save(..))")
+      @Pointcut("execution(void cn.sycoder.service.impl.StudentServiceImpl.save(..))") 
       public void pc(){
       }
   }
@@ -290,6 +306,10 @@
 
 - 使用
 
+  > Note：
+  >
+  > execution 返回是 *
+  
   ```java
   @AfterReturning(returning = "obj",value = "execution(* cn.sycoder.service.impl.StudentServiceImpl.update(..))")
   public void afterReturning(JoinPoint joinPoint,Object obj){
@@ -326,7 +346,7 @@
 
 ### 5.5@Around
 
-- 环绕通知：可以使用 try 代码块把被代理的目标方法围绕住，就可以做自己想做的操作,可以在里面做任何的操作
+- 环绕通知：可以使用 try 代码块把被代理的目标方法围绕住，就可以做自己想做的操作,可以在里面做任何的操作（是前面所有通知的整合）
 
 - 说明
 
@@ -368,6 +388,10 @@
 
 - 概述：切入点表达式是用来寻找目标代理方法的
 
+  > Note:
+  >
+  > ​	切入点表达式中的类型名、方法名、参数类型等都需要使用全限定名（即包括包名的完整类名）
+
   ```java
   execution(public void cn.sycoder.service.impl.StudentServiceImpl.save(..))
   ```
@@ -385,7 +409,8 @@
   | 3    | *..      | 使用到包位置           | 任意包任意类                         |
   | 4    | *        | 使用到类               | 表示任意类                           |
   | 5    | *Service | 使用到类               | 表示寻找以Service 结尾的任意接口或类 |
-  | 6    | ..       | 使用到参数             | 表示任意参数                         |
+  | 6    | *add()   | 使用到方法             | 表示寻找add结尾的方法                |
+  | 7    | ..       | 使用到参数             | 表示任意参数                         |
 
   1. 案例:找到实现类中的任意save方法
 
@@ -425,14 +450,62 @@
 
 - 注意：如果你切的越模糊，那性能就会越低，所以实际开发中，建议把范围切小一点
 
-- 优先级
+- **优先级**
 
   - 如果想手动指定优先级关系，可以使用@Order(1)注解
+    
+    > `@Order`注解是Spring框架中的一个重要注解，它用于定义Spring IOC容器中Bean的执行顺序的优先级，而不是定义Bean的加载顺序。
+    >
+    > 1. **Bean的加载顺序与执行顺序**：
+    >
+    >    - Bean的加载顺序是指Spring容器在启动时加载Bean的顺序，这个顺序通常不受`@Order`注解或`Ordered`接口的影响。
+    >    - Bean的执行顺序是指Spring容器在调用Bean的方法时的顺序，这个顺序可以通过`@Order`注解或`Ordered`接口来指定。
+    >
+    > 2. **集合中的顺序**：
+    >
+    >    - 当将多个Bean注入到数组或列表中时，这些Bean将按照`@Order`注解指定的顺序进行排序。
+    >    - 但是，当将Bean注入到`Set`或`Map`集合中时，由于这些集合类型本身不保证元素的顺序，因此`@Order`注解将不起作用。
+    >
+    > 3. **与`Ordered`接口的关系**：
+    >
+    >    - `Ordered`接口也用于指定Bean的优先级，但它是一个接口，需要实现其`getOrder()`方法。
+    >    - `@Order`注解是`Ordered`接口的一个便捷实现方式，它允许通过简单的注解来指定优先级。
+    >
+    > 4. **默认值**：
+    >
+    >    - 如果不指定`@Order`注解的`value`属性，则默认值为一个较大的整数（如`Integer.MAX_VALUE`），表示Bean的优先级较低。
+    >
+    >    
+    >
+    >    ### 使用示例
+    >
+    >    ```java
+    >    @Service  
+    >    @Order(1)  
+    >    public class UserServiceImpl implements IUserService {  
+    >        @Override  
+    >        public void getUserInfo() {  
+    >            System.out.println("成功获取用户信息");  
+    >        }  
+    >    }  
+    >      
+    >    @Service  
+    >    @Order(2)  
+    >    public class CarServiceImpl implements ICarService {  
+    >        @Override  
+    >        public void getCarInfo() {  
+    >            System.out.println("成功获取车辆信息");  
+    >        }  
+    >    }
+    >    ```
+    >
+    >    在上述示例中，`UserServiceImpl`被标记为优先级1，而`CarServiceImpl`被标记为优先级2。因此，在Spring IOC容器中，`UserServiceImpl`的Bean将先于`CarServiceImpl`的Bean被执行。
+    
     - 提供的值越小，优先级越高
 
   ![image-20221104155839835](picture/image-20221104155839835.png)
 
-- 重用切入点表达式
+- 复用切入点表达式
 
   - 定义切点
 
@@ -448,7 +521,7 @@
     }
     ```
 
-  - 在其他切面类通知里面重用切点
+  - 在**其他切面类**通知里面重用切点
 
     ```java
     @Component
@@ -462,7 +535,7 @@
     }
     ```
 
-  - 切面内部自己重用
+  - 切面**内部**自己重用
 
     ```java
     @Component
@@ -628,7 +701,11 @@
          xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
       <bean id="service" class="cn.sycoder.service.impl.StudentServiceImpl"></bean>
       <bean id="xmlAspect" class="cn.sycoder.aspect.XmlAspect"></bean>
+          
+       <!--  XMl启用AOP -->
       <aop:aspectj-autoproxy/>
+          
+          
       <aop:config>
   <!--        配置切面类-->
           <aop:aspect ref="xmlAspect">
@@ -647,7 +724,7 @@
       </aop:config>
   </beans>
   ```
-
+  
   
 
 ## 4.总结
@@ -783,6 +860,20 @@
 
 - 创建配置类
 
+  > 1. **配置SqlSessionFactory**：
+  >
+  >    - 使用`SqlSessionFactoryBean`来创建`SqlSessionFactory`实例。
+  >    - `SqlSessionFactoryBean`需要指定数据源和MyBatis的配置文件（可选）。
+  >    - 如果不使用MyBatis的核心配置文件，可以通过`SqlSessionFactoryBean`的属性来配置MyBatis的相关设置。
+  >
+  > 2. **配置Mapper接口扫描**：
+  >
+  >    - 使用`MapperScannerConfigurer`或`@MapperScan`注解来自动扫描Mapper接口，并将其注册为Spring Bean。
+  >    - 这样就可以在业务层通过`@Autowired`注解注入Mapper接口，进行数据库操作。
+  >
+  >    `@MapperScan`使用示例
+  >    @MapperScan("com.example.mapper")  
+
   ```java
   public class MyBatisConfig {
   //    配置SqlSqlSessionFactoryBean
@@ -792,7 +883,7 @@
           bean.setDataSource(dataSource);//设置数据源
           return bean;
       }
-      
+  //  配置Mapper接口扫描    
       @Bean
       public MapperScannerConfigurer mapperScannerConfigurer(){
           MapperScannerConfigurer configurer = new MapperScannerConfigurer();
