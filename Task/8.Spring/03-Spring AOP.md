@@ -1608,6 +1608,3 @@
     
 
 - **注意：如果你还想通过 xml 配置 mybatis ，那么你还需要把 mybatis 配置文件搞一份过来，通过xml 配置好 mybatis 之后，然后再获取 sqlSessionFactory 去获取 mapper 文件**
-
-- 注意：spring 是面试重头戏，所以，你需要花时间认真巩固和复习，ioc 和 di 特别是对于常用注解，以及事务机制，aop 等都很爱问。
-- **spring mvc 再见，如果课程对你有帮助，期待你的支持【点赞、投币、关注、转发、评论】**
