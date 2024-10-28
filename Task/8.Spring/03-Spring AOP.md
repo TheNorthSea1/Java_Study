@@ -1063,7 +1063,7 @@
 - 提供 mapper.xml
 
   ```xml
-  </update>
+  <update>
       <update id="outAccount">
       update account
       set money = money-#{money,jdbcType=INTEGER}
@@ -1092,9 +1092,16 @@
 
 ## 3.基于注解的方式实现
 
+### 3.0 Summary
+
+> 1. **添加依赖**：确保你的项目中已经添加了 Spring 的相关依赖。如果你使用的是 Spring Boot，通常这些依赖已经包含在内。
+> 2. **创建配置类**：在一个配置类上使用 `@EnableTransactionManagement` 注解。
+> 3. **配置事务管理器**：通常情况下，Spring Boot 会自动配置一个 `PlatformTransactionManager` 实例。如果你需要自定义事务管理器，可以在配置类中进行配置。
+> 4. **使用 `@Transactional` 注解**：在需要事务管理的方法或类上使用 `@Transactional` 注解。
+
 ### 3.1@EnableTransactionManagement
 
-- @EnableTransactionManagement：用于开启事务支持的，直接添加到spring 配置类
+- @EnableTransactionManagement：是 Spring 框架提供的一个注解，用于启用基于注解的事务管理功能。当你在某个配置类上使用 `@EnableTransactionManagement` 注解时，Spring 会自动扫描并管理带有 `@Transactional` 注解的方法。
 
 - 说明
 
@@ -1129,9 +1136,9 @@
   | 作用 | 为当前的业务方法添加事务支持                         |
   |      |                                                      |
 
-- 修改业务层
+- 修改业务层（三种范围不同）
 
-  - 业务方法上添加
+  1. 业务方法上添加
 
     ```java
     @Transactional
@@ -1142,7 +1149,7 @@
     }
     ```
 
-  - 业务类上添加
+  2. 业务类上添加
 
     ```java
     @Service
@@ -1162,7 +1169,7 @@
     }
     ```
 
-  - 接口层添加
+  3. 接口层添加
 
     ```java
     @Transactional
@@ -1179,9 +1186,11 @@
 
   
 
-### 3.3配置事务管理
+### 3.3配置事务管理@PlatformTransactionManager
 
 - PlatformTransactionManager
+
+  > 在自己code演示中, 不@Bean PlatformTransactionManager ，idea没找到到实例。？？？
 
 - 代码
 
@@ -1298,7 +1307,7 @@
 
 ### 5.3rollbackFor&rollbackForClassName
 
-- 回滚概述：**回滚策略**，希望对于什么样的异常回顾
+- 回滚概述：**回滚策略**，希望对于什么样的异常回滚
 
 - **注意：并不是所有的异常 Spring 都会回滚，Spring 只对 Error 异常和 RuntimeException 异常回滚**
 
@@ -1379,16 +1388,16 @@
 
 ### 5.6propagation
 
-- 事务传播行为：事务协调员对事务管理员所携带的事务的处理态度
+- 事务传播行为：事务协调员对事务管理员所携带的事务的处理态度（事务传播行为决定了当一个事务方法被另一个事务方法调用时，事务应该如何处理）
 
 - 说明
 
   | 传播属性         | 说明                                                         |
   | ---------------- | ------------------------------------------------------------ |
-  | **REQUIRED**     | 外围方法会开启新事务，内部方法会加入到外部方法的事务中       |
-  | SUPPORTS         | 外围方法没有事务，则内部方法不执行事务                       |
+  | **REQUIRED**     | 如果当前没有事务，就新建一个事务；如果已经存在一个事务中，加入到这个事务中 |
+  | SUPPORTS         | 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式执行 |
   | MANDATORY        | 使用当前事务，如果当前没有事务就抛异常                       |
-  | **REQUIRES_NEW** | 新建事务，如果当前存在事务，把当前事务挂起                   |
+  | **REQUIRES_NEW** | 每次都新建一个事务，如果当前存在事务，就将当前事务挂起       |
   | NOT_SUPPORTED    | 不支持事务                                                   |
   | NEVER            | 不支持事务，如果存在事务还会抛异常                           |
   | NESTED           | 如果当前存在事务，则在嵌套事务内执行，如果不存在，执行REQUIRED类似操作 |
