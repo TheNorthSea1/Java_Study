@@ -130,7 +130,7 @@
 - MVC分别是什么
   - M：Model：模型层，指工程中的JavaBean，作用是处理数据
     - domain 对象，Student 对象
-    - 业务bean，Service,Mapper
+    - 业务bean：Service,Mapper
   - V：View：视图层，指工程中的html或jsp等页面，作用是与用户进行交互，展示数据
   - C：Controller：控制层，指工程中的servlet，作用是接收请求和响应浏览器
 
@@ -138,11 +138,61 @@
 
 ## 3.SpringMVC
 
-- 概述：SpringMVC是一种基于原生的 Servlet 实现MVC模型的轻量级Web框架，基于原生的Servlet，通过前端控制器DispatcherServlet，对请求和响应进行统一处理
+- 概述：SpringMVC 是 Spring 框架的一部分，它是一个基于 Java 的轻量级 Web 应用框架，主要用于简化 Web 开发。SpringMVC 遵循 MVC（Model-View-Controller）设计模式，帮助开发者构建清晰分离的组件化 Web 应用程序。
 - 特点：
   - Spring 系列产品，可以与Spring无缝衔接
   - 基于原生的Servlet,使用DispatcherServlet对Servlet进行封装，可以对请求或者响应做统一的处理
   - 组件非常丰富，以后想用什么组件，直接配置使用就可以
+
+### 1. 核心组件
+
+- **DispatcherServlet**：前端控制器，接收所有的HTTP请求，并将它们分派到不同的处理器。
+- **HandlerMapping**：映射处理器，负责为DispatcherServlet提供一个合适的处理器来处理请求。
+- **Controller**：控制器，处理具体的业务逻辑，返回ModelAndView对象给DispatcherServlet。
+- **ModelAndView**：包含视图信息和模型数据的对象。
+- **ViewResolver**：视图解析器，用于解析逻辑视图名称到实际的物理视图页面。
+
+### 2. 请求处理流程
+
+1. 用户发送请求至前端控制器DispatcherServlet。
+2. DispatcherServlet收到请求后，调用HandlerMapping进行处理。
+3. HandlerMapping找到指定的Controller（处理器），并将其返回给DispatcherServlet。
+4. DispatcherServlet调用Controller执行相应的业务方法。
+5. Controller处理完用户请求后，返回ModelAndView给DispatcherServlet。
+6. DispatcherServlet根据ModelAndView选择合适的ViewResolver进行视图解析。
+7. ViewResolver解析后返回具体View。
+8. DispatcherServlet把Model数据传给View结果，返回给客户端。
+
+### 3. 注解支持
+
+SpringMVC 提供了丰富的注解支持，简化了开发过程：
+
+- **@Controller**：标记在一个类上，表示这是一个控制器类。
+- **@RequestMapping**：可以放在类或方法上，用来映射HTTP请求。
+- **@RequestParam**：用于绑定web请求参数到控制器的方法参数上。
+- **@PathVariable**：用于接收URL中的动态值。
+- **@ModelAttribute**：用于将请求参数绑定到模型中。
+- **@ResponseBody**：指示方法返回的结果直接写入HTTP响应体。
+- **@RestController**：组合了@Controller和@ResponseBody两个注解的功能。
+
+### 4. 数据校验
+
+SpringMVC 支持使用JSR-303标准进行数据校验，例如使用`@Valid`注解配合`@NotNull`, `@Size`等校验注解对表单数据进行校验。
+
+### 5. 异常处理
+
+- **@ExceptionHandler**：用于处理异常，可以定义在全局异常处理器中。
+- **@ControllerAdvice**：可以用来定义全局的异常处理机制。
+
+### 6. 国际化支持
+
+SpringMVC 支持国际化，可以通过`LocaleResolver`获取用户的地区设置，并通过`MessageSource`获取相应的国际化资源文件。
+
+### 7. 文件上传下载
+
+SpringMVC 内置支持文件上传下载功能，通过`MultipartFile`接口可以方便地实现文件上传。
+
+以上就是SpringMVC的一些基础知识点，希望对你有所帮助！如果有更具体的问题或者需要深入了解某个方面，请随时提问。
 
 # 二、SpringMVC快速入门
 
@@ -188,6 +238,14 @@
 - 配置文件
 
   ```java
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:context="http://www.springframework.org/schema/context"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+  <!--    配置包扫描-->
+      <context:component-scan base-package="cn.sycoder.controller"/>
+  </beans>
   ```
 
 ### 1.3配置DispatcherServlet
@@ -237,7 +295,7 @@
 
   
 
-### 1.5配置视图解析器
+### 1.5配置视图解析器（ViewResolver）
 
 - 视图解析器
 
@@ -329,6 +387,7 @@
       @Override
       protected WebApplicationContext createServletApplicationContext() {
           //获取SpringMVC容器
+          //
           AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
           context.register(SpringMvcConfig.class);
           return context;
@@ -345,6 +404,68 @@
       }
   }
   ```
+  
+  > 下面是对 `ServletConfig` 类的详细解释：
+  >
+  > ### 类概述
+  >
+  > `ServletConfig` 继承自 `AbstractDispatcherServletInitializer`，这是一个Spring框架提供的抽象类，用于初始化Spring MVC的`DispatcherServlet`。通过继承这个类，我们可以自定义Spring MVC的初始化过程。
+  >
+  > ### 方法详解
+  >
+  > #### 1. `createServletApplicationContext()`
+  >
+  > ```java
+  > @Override
+  > protected WebApplicationContext createServletApplicationContext() {
+  >     // 获取SpringMVC容器
+  >     AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+  >     context.register(SpringMvcConfig.class);
+  >     return context;
+  > }
+  > ```
+  >
+  > - **作用**：创建并返回一个用于Spring MVC的`WebApplicationContext`。
+  > - **详细步骤**：
+  >   - 创建一个 `AnnotationConfigWebApplicationContext` 实例。这是一个基于注解的Web应用上下文，用于管理Spring MVC的Bean。
+  >   - 使用 `context.register(SpringMvcConfig.class)` 注册配置类 `SpringMvcConfig`。这个配置类通常包含Spring MVC的各种配置，如视图解析器、拦截器等。
+  >   - 返回创建好的 `WebApplicationContext`。
+  >
+  > #### 2. `getServletMappings()`
+  >
+  > ```java
+  > @Override
+  > protected String[] getServletMappings() {
+  >     return new String[]{"/"};
+  > }
+  > ```
+  >
+  > - **作用**：定义Spring MVC的`DispatcherServlet`应该映射到哪些URL路径。
+  > - **详细步骤**：
+  >   - 返回一个字符串数组 `new String[]{"/"}`，表示`DispatcherServlet`将处理所有以根路径（`/`）开头的请求。
+  >   - 这意味着所有的HTTP请求都会被`DispatcherServlet`捕获并分发到相应的控制器。
+  >
+  > #### 3. `createRootApplicationContext()`
+  >
+  > ```java
+  > @Override
+  > protected WebApplicationContext createRootApplicationContext() {
+  >     return null;
+  > }
+  > ```
+  >
+  > - **作用**：创建并返回一个根`WebApplicationContext`。
+  > - **详细步骤**：
+  >   - 返回 `null`，表示不创建根`WebApplicationContext`。
+  >   - 如果你需要一个根上下文来管理全局的Bean（例如数据库连接池、服务层Bean等），可以在这里创建并返回一个 `AnnotationConfigWebApplicationContext` 实例，并注册相应的配置类。
+  >
+  > ### 总结
+  >
+  > - **`createServletApplicationContext()`**：创建并配置Spring MVC的上下文，注册Spring MVC的配置类。
+  > - **`getServletMappings()`**：定义`DispatcherServlet`的URL映射，使其能够处理所有请求。
+  > - **`createRootApplicationContext()`**：可选地创建一个根上下文，用于管理全局的Bean。在这个例子中，没有创建根上下文。
+  >
+  > 通过这种方式，你可以完全控制Spring MVC的初始化过程，并确保所有必要的配置都被正确加载和应用。希望这些解释对你有所帮助！如果有更多问题，请随时提问。
 
 ### 2.4配置Controller
 
@@ -388,209 +509,458 @@
 
 - SpringMVC 接收到指定请求时，在映射关系中找到对应的控制方法
 
-| 名称 | @RequestMapping                                              |
-| ---- | ------------------------------------------------------------ |
-| 位置 | 类或接口、或者方法上                                         |
-| 作用 | 设置定义控制器方法的访问路径                                 |
-| 属性 | String[] value() 设置访问路径的，RequestMethod[] method() 指定访问方法 |
+`@RequestMapping` 是Spring MVC中一个非常重要的注解，用于映射Web请求到控制器方法。它可以帮助你定义哪些URL请求应该由特定的方法处理。`@RequestMapping` 可以放在类级别和方法级别，提供了丰富的配置选项。
 
+### 类级别的 `@RequestMapping`
 
+当 `@RequestMapping` 放在类级别时，它定义了该类中所有方法的公共请求路径前缀。
 
+#### 示例
 
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
 
-- 使用位置
+    @RequestMapping("/list")
+    public String listUsers() {
+        // 处理用户列表请求
+        return "userList";
+    }
 
+    @RequestMapping("/detail/{id}")
+    public String userDetails(@PathVariable("id") Long id) {
+        // 处理用户详情请求
+        return "userDetail";
+    }
+}
+```
+
+在这个例子中，`UserController` 类的所有方法都将以 `/user` 开头。因此：
+
+- `/user/list` 请求将被 `listUsers` 方法处理。
+- `/user/detail/{id}` 请求将被 `userDetails` 方法处理，其中 `{id}` 是一个路径变量。
+
+### 方法级别的 `@RequestMapping`
+
+当 `@RequestMapping` 放在方法级别时，它定义了该方法处理的具体请求路径。
+
+#### 示例
+
+```java
+@Controller
+public class HomeController {
+
+    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    public String home() {
+        // 处理主页请求
+        return "home";
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+        // 处理登录请求
+        return "loginResult";
+    }
+}
+```
+
+在这个例子中：
+
+- `/home` 请求将被 `home` 方法处理，且只接受GET请求。
+- `/login` 请求将被 `login` 方法处理，且只接受POST请求。
+
+### `@RequestMapping` 的属性
+
+`@RequestMapping` 注解提供了多个属性，用于更细粒度地控制请求映射：
+
+1. **value**：指定请求的URL路径。
+   ```java
+   @RequestMapping(value = "/home")
+   ```
+
+2. **method**：指定请求的方法类型（GET, POST, PUT, DELETE等）。
+   ```java
+   @RequestMapping(value = "/login", method = RequestMethod.POST)
+   ```
+
+3. **params**：指定请求参数的条件。
+   ```java
+   @RequestMapping(value = "/search", params = {"name=John", "age"})
+   ```
+
+4. **headers**：指定请求头的条件。
+   ```java
+   @RequestMapping(value = "/api/data", headers = "Content-Type=application/json")
+   ```
+
+5. **consumes**：指定请求的内容类型。
+   ```java
+   @RequestMapping(value = "/upload", consumes = "multipart/form-data")
+   ```
+
+6. **produces**：指定响应的内容类型。
+   ```java
+   @RequestMapping(value = "/data", produces = "application/json")
+   ```
+
+### 衍生注解
+
+Spring MVC还提供了一些衍生注解，这些注解是 `@RequestMapping` 的特化版本，用于更简洁地处理特定类型的请求：
+
+- **@GetMapping**：等同于 `@RequestMapping(method = RequestMethod.GET)`
   ```java
-  @Controller
-  @RequestMapping("/requestMappingController")
-  public class RequestMappingController {
-  
-      @RequestMapping(headers ={"header=123"} ,value = {"/test"})// /requestMapping/test
-      @ResponseBody
-      public String test(){
-          System.out.println("============");
-          return "OK";
-      }
+  @GetMapping("/home")
+  public String home() {
+      return "home";
   }
   ```
 
-- 指定请求类型
-
-  - 延伸注解
-    - @GetMapping 发起get 请求
-    - @PostMapping 发起Post 请求
-    - @PutMapping 发起 put 请求
-    - @DeleteMapping 发起 delete 请求
-
+- **@PostMapping**：等同于 `@RequestMapping(method = RequestMethod.POST)`
   ```java
-  @RequestMapping(value = "/test1",method = RequestMethod.POST)
-      @ResponseBody
-      public String test1(){
-          System.out.println("============");
-          return "OK";
-      }
-  ```
-
-- 指定请求头(可以做权限拦截)（了解一下就行）
-
-  ```java
-  @RequestMapping(headers ={"header=123"} ,value = {"/test"})// /requestMapping/test
-      @ResponseBody
-      public String test(){
-          System.out.println("============");
-          return "OK";
-      }
-  ```
-
-- 指定请求参数（没用）
-
-  ```java
-  @RequestMapping(params = {"username=123"},value = {"/test2"})// /requestMapping/test
-      @ResponseBody
-      public String test2(){
-          System.out.println("============");
-          return "OK";
-      }
-  ```
-
-  
-
-## 2.获取请求参数
-
-### 2.1一般获取参数方式
-
-- 获取方式
-
-  ```java
-  @Controller
-  @RequestMapping("/requestParams")
-  public class RequestParams {
-  
-      @RequestMapping("/test")
-      @ResponseBody
-      public String test(String username,String password){
-          System.out.println("username:"+username+",password:"+password);
-          return "ok";
-      }
+  @PostMapping("/login")
+  public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+      return "loginResult";
   }
   ```
 
-### 2.2参数名称不对应
-
-- @RequestParam
-
-  | 名称 | @RequestParam                                                |
-  | ---- | ------------------------------------------------------------ |
-  | 位置 | 控制器方法中的形参上                                         |
-  | 属性 | boolean required() 表示是否必填String value()，参数重命名名称 |
-  | 作用 | 绑定请求参数与处理器方法之间形参的关系                       |
-
-  
-
-- 出现问题，获取不到参数值
-
-  ![image-20221112142119257](picture/image-20221112142119257.png)
-
-- 解决方案
-
+- **@PutMapping**：等同于 `@RequestMapping(method = RequestMethod.PUT)`
   ```java
-  @Controller
-  @RequestMapping("/requestParams")
-  public class RequestParams {
-  
-      @RequestMapping("/test")
-      @ResponseBody
-      public String test(@RequestParam(value = "un",required = false) String username,
-                         @RequestParam(value = "password1",required = false) String password){
-          System.out.println("username:"+username+",password:"+password);
-          return "ok";
-      }
+  @PutMapping("/user/{id}")
+  public String updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+      return "userUpdated";
   }
   ```
 
-  
+- **@DeleteMapping**：等同于 `@RequestMapping(method = RequestMethod.DELETE)`
+  ```java
+  @DeleteMapping("/user/{id}")
+  public String deleteUser(@PathVariable("id") Long id) {
+      return "userDeleted";
+  }
+  ```
+
+- **@PatchMapping**：等同于 `@RequestMapping(method = RequestMethod.PATCH)`
+  ```java
+  @PatchMapping("/user/{id}")
+  public String patchUser(@PathVariable("id") Long id, @RequestBody User user) {
+      return "userPatched";
+  }
+  ```
+
+> ### 总结
+>
+> `@RequestMapping` 注解是Spring MVC中用于映射Web请求的核心注解。它提供了丰富的配置选项，可以灵活地控制请求的处理方式。通过结合类级别和方法级别的 `@RequestMapping`，以及其衍生注解，你可以构建出高效、清晰的Web应用程序。希望这些解释对你有所帮助！如果有更多问题，请随时提问。
+
+
+
+
+
+## 2.@RequestParam 
+
+`@RequestParam` 是Spring MVC中一个非常有用的注解，用于将请求参数绑定到控制器方法的参数上。它可以处理GET和POST请求中的查询参数或表单字段。下面是对 `@RequestParam` 注解的详细解释，包括其主要属性和使用示例。
+
+### 主要属性
+
+1. **value**：指定请求参数的名称。如果方法参数名与请求参数名相同，可以省略此属性。
+2. **required**：指定该参数是否必须存在，默认值为 `true`。如果设置为 `false`，则该参数可以不存在。
+3. **defaultValue**：指定该参数的默认值，如果请求中没有提供该参数，则使用默认值。
+
+### 示例
+
+#### 示例1：基本用法
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(@RequestParam("id") int userId) {
+        // 处理用户请求
+        System.out.println("User ID: " + userId);
+        return "user";
+    }
+}
+```
+
+在这个例子中，`@RequestParam("id")` 将请求中的 `id` 参数绑定到方法参数 `userId` 上。如果请求中没有提供 `id` 参数，将会抛出 `MissingServletRequestParameterException` 异常。
+
+#### 示例2：使用 `value` 属性
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(@RequestParam(value = "id") int userId) {
+        // 处理用户请求
+        System.out.println("User ID: " + userId);
+        return "user";
+    }
+}
+```
+
+在这个例子中，`value` 属性指定了请求参数的名称，与上面的例子效果相同。
+
+#### 示例3：使用 `required` 属性
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(@RequestParam(value = "id", required = false) Integer userId) {
+        if (userId != null) {
+            System.out.println("User ID: " + userId);
+        } else {
+            System.out.println("User ID is not provided");
+        }
+        return "user";
+    }
+}
+```
+
+在这个例子中，`required = false` 表示 `id` 参数是可选的。如果请求中没有提供 `id` 参数，`userId` 将为 `null`。
+
+#### 示例4：使用 `defaultValue` 属性
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(@RequestParam(value = "id", defaultValue = "1") int userId) {
+        // 处理用户请求
+        System.out.println("User ID: " + userId);
+        return "user";
+    }
+}
+```
+
+在这个例子中，`defaultValue = "1"` 表示如果请求中没有提供 `id` 参数，则使用默认值 `1`。
+
+### 处理多个参数
+
+你可以同时使用多个 `@RequestParam` 注解来处理多个请求参数。
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(
+            @RequestParam(value = "id", required = false) Integer userId,
+            @RequestParam(value = "name", defaultValue = "Guest") String userName) {
+        
+        if (userId != null) {
+            System.out.println("User ID: " + userId);
+        } else {
+            System.out.println("User ID is not provided");
+        }
+        
+        System.out.println("User Name: " + userName);
+        
+        return "user";
+    }
+}
+```
+
+在这个例子中，方法处理两个请求参数：`id` 和 `name`。`id` 是可选的，如果没有提供则为 `null`；`name` 如果没有提供则使用默认值 `Guest`。
+
+### 总结
+
+`@RequestParam` 注解是Spring MVC中用于将请求参数绑定到控制器方法参数上的重要工具。通过使用 `value`、`required` 和 `defaultValue` 属性，你可以灵活地处理各种请求参数的情况。
+
+
 
 ## 3.参数传递
 
-### 3.1对象参数传递
+在Spring MVC中，除了简单的请求参数传递外，还可以传递复杂的对象、数组和集合。下面分别介绍这些高级参数传递方式，并给出相应的示例。
 
-- 传递方式
+### 1. 对象参数传递
 
-  ```java
-  @RequestMapping("/user")
-      @ResponseBody
-      public String user(User user){
-          System.out.println("username:"+user.getAccount()+",password:"+user.getPassword());
-          return "ok";
-      }
-  ```
+#### 示例
 
-- 图示
+假设有一个 `User` 对象，包含 `id` 和 `name` 属性。
 
-  ![image-20221112142722349](picture/image-20221112142722349.png)
+```java
+public class User {
+    private int id;
+    private String name;
 
-  
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
 
-### 3.2复合型对象参数传递
+    public void setId(int id) {
+        this.id = id;
+    }
 
-- 如果出现对象嵌套，直接通过属性名称.传参即可
+    public String getName() {
+        return name;
+    }
 
-  ```java
-  public class User {
-      private String account;
-      private String password;
-  
-      private Address address;
-  }
-  ```
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
 
-- 图示
+在控制器中，可以直接将 `User` 对象作为方法参数：
 
-  ![image-20221112143111830](picture/image-20221112143111830.png)
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(User user) {
+        System.out.println("User ID: " + user.getId());
+        System.out.println("User Name: " + user.getName());
+        return "user";
+    }
+}
+```
+
+假设请求URL为 `/user?id=1&name=John`，Spring MVC会自动将请求参数绑定到 `User` 对象的属性上。
+
+### 2. 复合型对象参数传递
+
+#### 示例
+
+假设有一个 `Address` 对象，包含 `city` 和 `zipCode` 属性，并且 `User` 对象包含一个 `Address` 属性。
+
+```java
+public class Address {
+    private String city;
+    private String zipCode;
+
+    // Getters and Setters
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+}
+
+public class User {
+    private int id;
+    private String name;
+    private Address address;
+
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+}
+```
+
+在控制器中，可以直接将 `User` 对象作为方法参数：
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/user")
+    public String getUser(User user) {
+        System.out.println("User ID: " + user.getId());
+        System.out.println("User Name: " + user.getName());
+        System.out.println("City: " + user.getAddress().getCity());
+        System.out.println("Zip Code: " + user.getAddress().getZipCode());
+        return "user";
+    }
+}
+```
+
+假设请求URL为 `/user?id=1&name=John&address.city=NewYork&address.zipCode=10001`，Spring MVC会自动将请求参数绑定到 `User` 对象及其嵌套的 `Address` 对象的属性上。
+
+### 3. 数组参数传递
+
+#### 示例
+
+假设有一个方法需要接收一个整数数组。
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/users")
+    public String getUsers(@RequestParam("ids") int[] ids) {
+        for (int id : ids) {
+            System.out.println("User ID: " + id);
+        }
+        return "users";
+    }
+}
+```
+
+假设请求URL为 `/users?ids=1&ids=2&ids=3`，Spring MVC会将多个 `ids` 参数值绑定到数组 `ids` 上。
+
+### 4. 集合参数传递
+
+#### 示例
+
+假设有一个方法需要接收一个字符串列表。
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping("/users")
+    public String getUsers(@RequestParam("names") List<String> names) {
+        for (String name : names) {
+            System.out.println("User Name: " + name);
+        }
+        return "users";
+    }
+}
+```
+
+假设请求URL为 `/users?names=John&names=Alice&names=Bob`，Spring MVC会将多个 `names` 参数值绑定到列表 `names` 上。
+
+> ### 总结
+>
+> - **对象参数传递**：Spring MVC会自动将请求参数绑定到对象的属性上。
+> - **复合型对象参数传递**：可以嵌套对象，Spring MVC会递归地绑定请求参数。
+> - **数组参数传递**：使用 `@RequestParam` 注解将多个请求参数绑定到数组上。
+> - **集合参数传递**：使用 `@RequestParam` 注解将多个请求参数绑定到集合上。
+>
 
 
 
+## 4.JSON 参数传递(⭐️)
 
-
-### 3.3数组参数传递
-
-- 传数组
-
-  ```java
-  @RequestMapping("/array")
-      @ResponseBody
-      public String array(String[] cities){
-          System.out.println(Arrays.toString(cities));
-          return "ok";
-      }
-  ```
-
-- 传递参数
-
-  ![image-20221112143638621](picture/image-20221112143638621.png)
-
-  
-
-### 3.4集合参数传递
-
-- 传集合
-
-  ```java
-  @RequestMapping("/list")
-      @ResponseBody
-      public String list(@RequestParam List<String> cities){
-          System.out.println(cities);
-          return "ok";
-      }
-  ```
-
-- 传参图示
-
-  ![image-20221112143921887](picture/image-20221112143921887.png)
-
-
-
-## 4.JSON 参数传递
+- 在现代Web开发中，JSON（JavaScript Object Notation）是一种非常流行的格式，用于在客户端和服务器之间交换数据。Spring MVC提供了强大的支持，使得处理JSON参数变得非常简单。下面详细介绍如何在Spring MVC中处理JSON参数，并给出相应的示例。
 
 - springMVC 默认支持的json处理不是使用fastjson,而是使用 jackson 处理的
 
@@ -599,6 +969,11 @@
 - 依赖
 
   ```java
+  <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webmvc</artifactId>
+          <version>5.2.17.RELEASE</version>
+     </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
@@ -620,7 +995,7 @@
   }
   ```
 
-- @EnableWebMvc
+- @EnableWebMvc（⭐️）
 
   | 名称 | @EnableWebMvc                |
   | ---- | ---------------------------- |
@@ -635,83 +1010,239 @@
   | 作用 | 将请求中的请求体包含的数据传递给形参 |
   | 属性 | boolean required() 表示是否必填      |
 
-  
 
-### 4.2发送 json数据
+### 4.3处理简单的JSON对象
 
-- 传送 json 用户数据到后台
+假设你有一个 `User` 对象，包含 `id` 和 `name` 属性。
 
-  ```java
-  @Controller
-  @RequestMapping("/RequestBodyController")
-  public class RequestBodyController {
-  
-      @PostMapping("/user/save")
-      @ResponseBody
-      public String saveUser(@RequestBody User user){
-          System.out.println(user);
-          return "OK";
-      }
-  }
-  ```
+```java
+public class User {
+    private int id;
+    private String name;
 
-- 图示
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
 
-  ![image-20221112151437037](picture/image-20221112151437037.png)
+    public void setId(int id) {
+        this.id = id;
+    }
 
-- 如果 json 参数有嵌套也是老样子传参即可
+    public String getName() {
+        return name;
+    }
 
-  ```java
-  {  	"account": " 123", 	"password": "123456", 	"address": {  		"city": "杭州" 	} }
-  ```
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
 
-- 接收图示
+在控制器中，可以使用 `@RequestBody` 注解将请求体中的JSON数据绑定到 `User` 对象上。
 
-  ![image-20221112152127361](picture/image-20221112152127361.png)
+```java
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-### 4.3传 json 数组到后台
+@RestController
+public class UserController {
 
-- 传递json 数组
+    @PostMapping("/user")
+    public ResponseEntity<String> createUser(@RequestBody User user) {
+        System.out.println("User ID: " + user.getId());
+        System.out.println("User Name: " + user.getName());
+        return ResponseEntity.ok("User created successfully");
+    }
+}
+```
 
-  ```java
-  @PostMapping("/user/lists")
-  @ResponseBody
-  public String saveUser(@RequestBody List<String> lists){
-      System.out.println(lists);
-      return "OK";
-  }
-  ```
+假设客户端发送以下JSON请求：
 
-- 图示
+```json
+{
+    "id": 1,
+    "name": "John Doe"
+}
+```
 
-  ![image-20221112151823885](picture/image-20221112151823885.png)
+Spring MVC会自动将请求体中的JSON数据绑定到 `User` 对象上。
 
-  
+### 4.4 处理嵌套的JSON对象
 
-  
+假设你有一个 `User` 对象，包含一个嵌套的 `Address` 对象。
 
-### 4.4传递对象集合json 数据
+```java
+public class Address {
+    private String city;
+    private String zipCode;
 
-- 传递对象集合json数据
+    // Getters and Setters
+    public String getCity() {
+        return city;
+    }
 
-  ```java
-   @PostMapping("/user/lists/user")
-      @ResponseBody
-      public String listUser(@RequestBody List<User> lists){
-          System.out.println(lists);
-          return "OK";
-      }
-  ```
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-- 传递图示
+    public String getZipCode() {
+        return zipCode;
+    }
 
-  ![image-20221112152447956](picture/image-20221112152447956.png)
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+}
 
-- json 数据
+public class User {
+    private int id;
+    private String name;
+    private Address address;
 
-  ```java
-  [{"account":" 123","password":"123456","address":{"city":"杭州"}},{"account":" sy","password":"123456","address":{"city":"北京"}}]
-  ```
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+}
+```
+
+在控制器中，仍然使用 `@RequestBody` 注解将请求体中的JSON数据绑定到 `User` 对象上。
+
+```java
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserController {
+
+    @PostMapping("/user")
+    public ResponseEntity<String> createUser(@RequestBody User user) {
+        System.out.println("User ID: " + user.getId());
+        System.out.println("User Name: " + user.getName());
+        System.out.println("City: " + user.getAddress().getCity());
+        System.out.println("Zip Code: " + user.getAddress().getZipCode());
+        return ResponseEntity.ok("User created successfully");
+    }
+}
+```
+
+假设客户端发送以下JSON请求：
+
+```json
+{
+    "id": 1,
+    "name": "John Doe",
+    "address": {
+        "city": "New York",
+        "zipCode": "10001"
+    }
+}
+```
+
+Spring MVC会自动将请求体中的嵌套JSON数据绑定到 `User` 对象及其嵌套的 `Address` 对象上。
+
+### 4.5处理JSON数组
+
+假设你有一个 `User` 对象列表。
+
+```java
+public class User {
+    private int id;
+    private String name;
+
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+在控制器中，可以使用 `@RequestBody` 注解将请求体中的JSON数组绑定到 `List<User>` 上。
+
+```java
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+public class UserController {
+
+    @PostMapping("/users")
+    public ResponseEntity<String> createUsers(@RequestBody List<User> users) {
+        for (User user : users) {
+            System.out.println("User ID: " + user.getId());
+            System.out.println("User Name: " + user.getName());
+        }
+        return ResponseEntity.ok("Users created successfully");
+    }
+}
+```
+
+假设客户端发送以下JSON请求：
+
+```json
+[
+    {
+        "id": 1,
+        "name": "John Doe"
+    },
+    {
+        "id": 2,
+        "name": "Jane Smith"
+    }
+]
+```
+
+Spring MVC会自动将请求体中的JSON数组绑定到 `List<User>` 上。
+
+> ### 总结
+>
+> - **处理简单的JSON对象**：使用 `@RequestBody` 注解将请求体中的JSON数据绑定到Java对象上。
+> - **处理嵌套的JSON对象**：Spring MVC会递归地将嵌套的JSON数据绑定到嵌套的Java对象上。
+> - **处理JSON数组**：使用 `@RequestBody` 注解将请求体中的JSON数组绑定到Java集合上。
+>
+
+
 
 ## 5.@RequestParam 和 @RequestBody总结
 
@@ -728,60 +1259,7 @@
 
 ## 6.日期类型参数传递
 
-
-
-- 2022-11-12
-- 2022/11/12
-
-
-
-### 6.1常规格式
-
-- 控制器
-
-  ```java
-  @Controller
-  @RequestMapping("/date")
-  public class DateController {
-  
-      @RequestMapping("/test")
-      @ResponseBody
-      public String testDate(Date date){
-          System.out.println(date);
-          return "ok";
-      }
-  }
-  ```
-
-- 图示
-
-  ![image-20221112161519001](picture/image-20221112161519001.png)
-
-  
-
-### 6.2修改格式
-
-- 出现错误
-
-  ![image-20221112161702214](picture/image-20221112161702214.png)
-
-- 定制化格式操作
-
-  ```java
-  @Controller
-  @RequestMapping("/date")
-  public class DateController {
-  
-      @RequestMapping("/test")
-      @ResponseBody
-      public String testDate(@DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
-          System.out.println(date);
-          return "ok";
-      }
-  }
-  ```
-
-### 6.3@DateTimeFormat
+### 6.1@DateTimeFormat
 
 | 名称     | @DateTimeFormat                                            |
 | -------- | ---------------------------------------------------------- |
@@ -791,9 +1269,106 @@
 
 ![image-20221112162232238](picture/image-20221112162232238.png)
 
-### 6.4底层转换的原理
+#### 示例：基本日期类型参数传递
+
+假设你有一个控制器方法，需要接收一个日期参数。你可以使用 `@RequestParam` 注解，并指定日期格式。
+
+```java
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
+
+@RestController
+public class DateController {
+
+    @GetMapping("/date")
+    public String handleDate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        System.out.println("Date: " + date);
+        return "Date received: " + date;
+    }
+}
+```
+
+在这个例子中，`@DateTimeFormat(pattern = "yyyy-MM-dd")` 注解用于指定日期格式。假设请求URL为 `/date?date=2023-10-30`，Spring MVC会自动将请求参数 `date` 转换为 `Date` 对象。
+
+### 6.2底层转换的原理
 
 ![image-20221112162537891](picture/image-20221112162537891.png)
+
+### 6.3自定义转换器
+
+​	如果你需要处理更复杂的日期格式或自定义转换逻辑，可以使用自定义转换器。
+
+> **自定义转换器**：适用于更复杂的日期格式或自定义转换逻辑，可以通过实现 `Converter` 接口并注册到Spring中来实现。
+
+- #### 步骤1：创建自定义转换器
+
+  ```java
+  import org.springframework.core.convert.converter.Converter;
+  import java.text.ParseException;
+  import java.text.SimpleDateFormat;
+  import java.util.Date;
+  
+  public class CustomDateConverter implements Converter<String, Date> {
+  
+      private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  
+      @Override
+      public Date convert(String source) {
+          try {
+              return dateFormat.parse(source);
+          } catch (ParseException e) {
+              throw new IllegalArgumentException("Invalid date format. Expected format: yyyy-MM-dd");
+          }
+      }
+  }
+  ```
+
+- #### 步骤2：注册自定义转换器
+
+  在Spring配置类中注册自定义转换器。
+
+  ```java
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.format.FormatterRegistry;
+  import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+  
+  @Configuration
+  public class WebConfig implements WebMvcConfigurer {
+  
+      @Override
+      public void addFormatters(FormatterRegistry registry) {
+          registry.addConverter(new CustomDateConverter());
+      }
+  }
+  ```
+
+- #### 步骤3：使用自定义转换器
+
+  在控制器方法中，可以直接使用 `@RequestParam` 注解而无需额外的格式注解。
+
+  ```java
+  import org.springframework.web.bind.annotation.GetMapping;
+  import org.springframework.web.bind.annotation.RequestParam;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  import java.util.Date;
+  
+  @RestController
+  public class DateController {
+  
+      @GetMapping("/customDate")
+      public String handleCustomDate(@RequestParam("date") Date date) {
+          System.out.println("Date: " + date);
+          return "Date received: " + date;
+      }
+  }
+  ```
+
+  
 
 ## 7.路径中占位符
 
@@ -832,7 +1407,7 @@
 
 # 五、响应
 
-## 1.注解配置的另一种方式
+## 1.注解配置的另一种方式(官网的方式)
 
 - 配置
 
@@ -854,12 +1429,12 @@
       }
   }
   ```
-
-
-
-## 2.设置响应页面
-
-- 注解配置视图解析器
+  
+  > - **`getRootConfigClasses()`**：返回根上下文的配置类数组，这里为空数组，表示没有单独的根上下文配置类。
+  > - **`getServletConfigClasses()`**：返回Servlet上下文的配置类数组，这里指定了 `SpringMvcConfig` 类。
+  > - **`getServletMappings()`**：返回DispatcherServlet的映射路径，这里映射到所有以 `/` 开头的请求路径。
+  
+- 注解配置视图解析器（不要忘记）
 
   ```java
   @Configuration
@@ -877,6 +1452,8 @@
      }
   }
   ```
+
+## 2.设置响应页面
 
 - 配置视图解析器之后跳转
 
@@ -903,143 +1480,207 @@
 
   
 
-## 3.响应文本类型
+## 3.@ResponseBody
 
-- 如果没有使用 @ResponseBody 会出现如下问题
+`@ResponseBody` 是Spring MVC提供的一个注解，用于指示控制器方法的返回值应直接写入HTTP响应体中，而不是解析为视图。这个注解在处理RESTful API时非常有用，因为它允许你直接返回JSON、XML或其他格式的数据。下面详细介绍 `@ResponseBody` 注解的用法和示例。
 
-  ```java
-  @RequestMapping("/respbody")
-  //    @ResponseBody
-      public String respbody(){
-          return "ok";
-      }
-  ```
+### 1. 基本用法
 
-  
+#### 示例1：返回简单的字符串
 
-  ![image-20221113161901830](picture/image-20221113161901830.png)
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-- 响应文本类型使用 @ResponseBody
+@RestController
+public class SimpleController {
 
-  ```java
-  @RequestMapping("/respbody")
-      @ResponseBody
-      public String respbody(){
-          return "ok";
-      }
-  ```
+    @GetMapping("/hello")
+    @ResponseBody
+    public String hello() {
+        return "Hello, World!";
+    }
+}
+```
 
-## 4.响应JSON数据
+在这个例子中，`@ResponseBody` 注解告诉Spring MVC将方法的返回值 `"Hello, World!"` 直接写入HTTP响应体中。
 
-- 使用 @ResponseBody + @EnableWebMvc 才能返回 json
+#### 示例2：返回JSON对象
 
-- SpringMVC 配置类
+假设你有一个 `User` 对象，包含 `id` 和 `name` 属性。
 
-  ```java
-  @Configuration
-  @ComponentScan("cn.sycoder.controller")
-  @EnableWebMvc
-  public class SpringMvcConfig {
-  
-  
-     @Bean
-     public ViewResolver viewResolver(){
-         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-         resolver.setPrefix("/WEB-INF/pages/");
-         resolver.setSuffix(".jsp");
-         return resolver;
-     }
-  }
-  ```
+```java
+public class User {
+    private int id;
+    private String name;
 
-### 4.1响应单个json对象
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
 
-- 控制器方法使用 @ResponseBody 
+    public void setId(int id) {
+        this.id = id;
+    }
 
-  ```java
-  @RequestMapping("/userjson")
-      @ResponseBody
-      public User respUserJson(){
-          User user = new User();
-          user.setAddTime(new Date());
-          user.setName("sy");
-          user.setUsername("sy666");
-          user.setId(1L);
-          return user;
-      }
-  ```
+    public String getName() {
+        return name;
+    }
 
-  ![image-20221113162925050](picture/image-20221113162925050.png)
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
 
-  
+在控制器中，可以使用 `@ResponseBody` 注解将 `User` 对象转换为JSON格式并返回。
 
-  
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-### 4.2响应集合json对象
+@RestController
+public class UserController {
 
-- 控制器方法
+    @GetMapping("/user")
+    @ResponseBody
+    public User getUser() {
+        User user = new User();
+        user.setId(1);
+        user.setName("John Doe");
+        return user;
+    }
+}
+```
 
-  ```java
-  @RequestMapping("/listuserjson")
-      @ResponseBody
-      public List<User> respListUserJson(){
-          List<User> list = new ArrayList<>();
-          User user = new User();
-          user.setAddTime(new Date());
-          user.setName("sy");
-          user.setUsername("sy666");
-          user.setId(1L);
-          list.add(user);
-          User user1 = new User();
-          user1.setAddTime(new Date());
-          user1.setName("sy");
-          user1.setUsername("sy666");
-          user1.setId(1L);
-          list.add(user1);
-          return list;
-      }
-  ```
+在这个例子中，Spring MVC会自动将 `User` 对象转换为JSON格式，并将其写入HTTP响应体中。
 
-  ![image-20221113163217894](picture/image-20221113163217894.png)
+### 2. 结合 `@PostMapping` 和 `@PutMapping`
 
-### 4.3@RestController
+#### 示例3：处理POST请求并返回JSON
 
-- @RestController =  @Controller + @ResponseBody
+```java
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-- 应用
+@RestController
+public class UserController {
 
-  ```java
-  @RestController
-  public class MyRestController {
-  
-      @RequestMapping("/listuserjson")
-      public List<User> respListUserJson(){
-          List<User> list = new ArrayList<>();
-          User user = new User();
-          user.setAddTime(new Date());
-          user.setName("sy");
-          user.setUsername("sy666");
-          user.setId(1L);
-          list.add(user);
-          User user1 = new User();
-          user1.setAddTime(new Date());
-          user1.setName("sy");
-          user1.setUsername("sy666");
-          user1.setId(1L);
-          list.add(user1);
-          return list;
-      }
-  }
-  ```
+    @PostMapping("/user")
+    @ResponseBody
+    public User createUser(@RequestBody User user) {
+        // 处理用户创建逻辑
+        return user;
+    }
+}
+```
 
-  
+在这个例子中，`@RequestBody` 注解用于将请求体中的JSON数据绑定到 `User` 对象上，然后 `@ResponseBody` 注解将返回的 `User` 对象转换为JSON格式并写入HTTP响应体中。
 
-### 4.4@ResponseBody 总结
+### 3. 返回自定义对象
 
-| 名称 | @ResponseBody                                                |
-| ---- | ------------------------------------------------------------ |
-| 作用 | 设置控制器的返回值作为响应体，如果返回的是对象类型，会转换成 json 对象传输 |
-| 位置 | 可以使用到类上，或者控制器方法上                             |
+#### 示例4：返回包含多个属性的自定义对象
+
+假设你有一个 `ResponseMessage` 对象，用于封装响应消息和状态码。
+
+```java
+public class ResponseMessage {
+    private String message;
+    private int statusCode;
+
+    // Getters and Setters
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+}
+```
+
+在控制器中，可以使用 `@ResponseBody` 注解返回 `ResponseMessage` 对象。
+
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class MessageController {
+
+    @GetMapping("/message")
+    @ResponseBody
+    public ResponseMessage getMessage() {
+        ResponseMessage message = new ResponseMessage();
+        message.setMessage("Request processed successfully");
+        message.setStatusCode(200);
+        return message;
+    }
+}
+```
+
+在这个例子中，Spring MVC会自动将 `ResponseMessage` 对象转换为JSON格式，并将其写入HTTP响应体中。
+
+### 4. 返回集合
+
+#### 示例5：返回用户列表
+
+假设你有一个 `User` 列表。
+
+```java
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+
+@RestController
+public class UserController {
+
+    @GetMapping("/users")
+    @ResponseBody
+    public List<User> getUsers() {
+        User user1 = new User();
+        user1.setId(1);
+        user1.setName("John Doe");
+
+        User user2 = new User();
+        user2.setId(2);
+        user2.setName("Jane Smith");
+
+        return Arrays.asList(user1, user2);
+    }
+}
+```
+
+在这个例子中，Spring MVC会自动将 `List<User>` 转换为JSON数组，并将其写入HTTP响应体中。
+
+### 总结
+
+> - **`@ResponseBody` 注解**：用于指示控制器方法的返回值应直接写入HTTP响应体中，而不是解析为视图。
+> - **常见用法**：
+>   - 返回简单的字符串。
+>   - 返回JSON对象。
+>   - 处理POST请求并返回JSON。
+>   - 返回自定义对象。
+>   - 返回集合。
+>
+
+
 
 # 六、域对象共享
 
@@ -1075,7 +1716,7 @@
 
   
 
-## 2.ModelAndView
+## 2.ModelAndView（不常用）
 
 - 具体应用
 
@@ -1083,7 +1724,9 @@
   @RequestMapping("/modelAndView")
       public ModelAndView modelAndView(){
           ModelAndView view = new ModelAndView();
+          // 设置视图名称
           view.setViewName("ok");
+          // 添加模型数据
           view.addObject("ok","==============");
           return view;
       }
@@ -1139,9 +1782,7 @@
 
 ## 1.REST简介
 
-- REST概述：Representational State Transfer，表现层资源状态转移
-
-
+- RESTful（Representational State Transfer）是一种软件架构风格，用于设计网络应用程序，特别是Web服务。RESTful架构的核心思想是通过HTTP协议与服务器进行交互，利用HTTP方法（如GET、POST、PUT、DELETE等）对资源进行操作。
 
 ## 2.传统访问资源和 REST 对照
 
@@ -1239,7 +1880,7 @@
   }
   ```
 
-## 4.静态资源的处理
+## 4.静态资源的处理（⭐️）
 
 ### 4.1拷贝静态资源到项目webapp 下面
 

@@ -1021,6 +1021,20 @@
               <artifactId>lombok</artifactId>
               <version>1.18.22</version>
           </dependency>
+      
+      <!--        添加 spring 依赖-->
+          <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+              <version>5.2.17.RELEASE</version>
+          </dependency>
+  <!--        添加 junit 依赖-->
+          <dependency>
+              <groupId>junit</groupId>
+              <artifactId>junit</artifactId>
+              <version>4.12</version>
+  <!--            <scope>test</scope>-->
+          </dependency>
   ```
 
 ### 2.2建立 jdbc.propreties

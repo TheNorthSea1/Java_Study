@@ -497,6 +497,22 @@ final Student bean = context.getBean(Student.class);
 
 ### 4.FactoryBean
 
+> #### 定义
+>
+> `FactoryBean` 是一个特殊的 Bean，用于创建其他 Bean。它允许你在 Spring 容器中定义复杂的初始化逻辑，并返回一个具体的对象实例。`FactoryBean` 可以用来封装对象的创建过程，提供更多的灵活性。
+>
+> #### 主要职责
+>
+> - **对象创建**：负责创建和返回对象实例。
+> - **生命周期管理**：可以控制对象的初始化和销毁。
+> - **类型转换**：可以在创建对象时进行类型转换或包装。
+>
+> #### 接口方法
+>
+> - `Object getObject()`：返回由 `FactoryBean` 创建的对象实例。
+> - `Class<?> getObjectType()`：返回 `FactoryBean` 创建的对象的类型。
+> - `boolean isSingleton()`：指示 `FactoryBean` 创建的对象是否为单例。
+
 - 创建员工类
 
   ```java
@@ -1712,7 +1728,3 @@ public class CollectionsDemo {
 - 集合注入
 
 
-
-### 5.注意
-
-- 下去的时候，一定要去多练，把 bean 配置， di 注入，以及配置第三方bean 和引入配置文件全部掌握，都是重点

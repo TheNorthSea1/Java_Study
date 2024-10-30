@@ -1,3 +1,11 @@
+# **什么是 IoC（控制反转）？**
+
+- 控制反转是一种设计模式，用于减少代码之间的耦合。IoC 的核心思想是将对象的创建和管理交给框架，而不是由程序员直接管理。Spring 框架通过 IoC 容器管理 Bean 的生命周期和依赖关系。
+
+# **什么是 DI（依赖注入）？**
+
+- 依赖注入是 IoC 的一种实现方式，通过将依赖关系注入到对象中，而不是由对象自己创建依赖。Spring 框架支持三种依赖注入的方式：构造器注入、设值注入和接口注入。
+
 # Bean对象交给Spring管理
 
 它带来了许多好处，如依赖注入、生命周期管理、AOP（面向切面编程）支持等。以下是一些适合将Bean对象交给Spring管理的层面或场景：
@@ -90,3 +98,48 @@
 
 Spring中Bean的生命周期包括定义、实例化、属性赋值、初始化、使用和销毁等阶段。在这些阶段中，Spring容器会执行一系列操作来确保Bean的正确创建、配置和使用。同时，通过BeanPostProcessor接口和Aware接口等机制，开发者可以在Bean的生命周期中插入自定义的处理逻辑，以满足特定的业务需求。
 
+
+
+# **Spring 中的事务管理是如何工作的？**
+
+- Spring 的事务管理通过 `PlatformTransactionManager` 接口实现，提供了声明式事务管理和编程式事务管理。声明式事务管理通过 `@Transactional` 注解和 `@EnableTransactionManagement` 注解启用。编程式事务管理通过 `TransactionTemplate` 类实现
+
+# 各种通知
+
+![image-20241029195825505](./assets/image-20241029195825505.png)
+
+环绕通知---前置通知---目标方法---返回通知或异常通知---后置通知
+
+# Mybatis 整合Spring
+
+- 创建配置类
+
+  > 1. **配置SqlSessionFactory**：
+  >
+  >    - 使用`SqlSessionFactoryBean`来创建`SqlSessionFactory`实例。
+  >    - `SqlSessionFactoryBean`需要指定数据源和MyBatis的配置文件（可选）。
+  >    - 如果不使用MyBatis的核心配置文件，可以通过`SqlSessionFactoryBean`的属性来配置MyBatis的相关设置。
+  >
+  > 2. **配置Mapper接口扫描**：
+  >
+  >    - 使用`MapperScannerConfigurer`或`@MapperScan`注解来自动扫描Mapper接口，并将其注册为Spring Bean。
+  >    - 这样就可以在业务层通过`@Autowired`注解注入Mapper接口，进行数据库操作。
+  >
+  >    `@MapperScan`使用示例
+  >    @MapperScan("com.example.mapper")  
+
+# AOP
+
+- 连接点(JoinPoint)：对于需要增强的方法就是连接点
+
+  > *Join point*: a point during the execution of a program, such as the execution of a method or the handling of an exception. In Spring AOP, a join point *always* represents a method execution.
+
+- 切入点(Pointcut)：需要增强的方法是切入点，匹配连接点的式子。（定义了哪些连接点应给被通知所影响）
+
+  > a predicate that matches join points. Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name). The concept of join points as matched by pointcut expressions is central to AOP, and Spring uses the AspectJ pointcut expression language by default.
+
+- 通知(Advice)：存放需要增强功能的共性代码，就叫通知
+
+  > action taken by an aspect at a particular join point. Different types of advice include "around," "before" and "after" advice. (Advice types are discussed below.) Many AOP frameworks, including Spring, model an advice as an *interceptor*, maintaining a chain of interceptors *around* the join point.
+
+- 切面(Aspect)：通知是需要增强的功能存在多个，切入点是需要增强的方法也存在多个，需要去给切入点和通知做关联，知道哪个切入点对应哪个通知，这种描述关系就叫切面

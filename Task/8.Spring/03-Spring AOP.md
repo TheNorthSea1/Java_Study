@@ -97,7 +97,7 @@
 
   > *Join point*: a point during the execution of a program, such as the execution of a method or the handling of an exception. In Spring AOP, a join point *always* represents a method execution.
 
-- 切入点(Pointcut)：需要增强的方法是切入点，匹配连接点的式子
+- 切入点(Pointcut)：需要增强的方法是切入点，匹配连接点的式子。（定义了哪些连接点应给被通知所影响）
 
   > a predicate that matches join points. Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name). The concept of join points as matched by pointcut expressions is central to AOP, and Spring uses the AspectJ pointcut expression language by default.
 
@@ -1190,7 +1190,7 @@
 
 - PlatformTransactionManager
 
-  > 在自己code演示中, 不@Bean PlatformTransactionManager ，idea没找到到实例。？？？
+  > 在自己code演示中, 不@Bean PlatformTransactionManager ，idea没找到到实例。注意是在SpringBoot自动添加，而在Spring中需要自己设置一个Bean。
 
 - 代码
 
