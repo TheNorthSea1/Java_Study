@@ -136,7 +136,7 @@
 
 
 
-## 3.SpringMVC
+# SpringMVC（知识总览）
 
 - 概述：SpringMVC 是 Spring 框架的一部分，它是一个基于 Java 的轻量级 Web 应用框架，主要用于简化 Web 开发。SpringMVC 遵循 MVC（Model-View-Controller）设计模式，帮助开发者构建清晰分离的组件化 Web 应用程序。
 - 特点：
@@ -191,8 +191,6 @@ SpringMVC 支持国际化，可以通过`LocaleResolver`获取用户的地区设
 ### 7. 文件上传下载
 
 SpringMVC 内置支持文件上传下载功能，通过`MultipartFile`接口可以方便地实现文件上传。
-
-以上就是SpringMVC的一些基础知识点，希望对你有所帮助！如果有更具体的问题或者需要深入了解某个方面，请随时提问。
 
 # 二、SpringMVC快速入门
 
@@ -377,95 +375,118 @@ SpringMVC 内置支持文件上传下载功能，通过`MultipartFile`接口可�
   }
   ```
 
-### 2.3通过配置类替换web.xml
+### 2.3配置DispatcherServlet
 
-- 替换操作
+#### 方法一：Extend AbstractDispatcherServletInitializer
 
-  ```java
-  public class ServletConfig extends AbstractDispatcherServletInitializer {
-  
-      @Override
-      protected WebApplicationContext createServletApplicationContext() {
-          //获取SpringMVC容器
-          //
-          AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-          context.register(SpringMvcConfig.class);
-          return context;
-      }
-  
-      @Override
-      protected String[] getServletMappings() {
-          return new String[]{"/"};
-      }
-  
-      @Override
-      protected WebApplicationContext createRootApplicationContext() {
-          return null;
-      }
-  }
-  ```
-  
-  > 下面是对 `ServletConfig` 类的详细解释：
-  >
-  > ### 类概述
-  >
-  > `ServletConfig` 继承自 `AbstractDispatcherServletInitializer`，这是一个Spring框架提供的抽象类，用于初始化Spring MVC的`DispatcherServlet`。通过继承这个类，我们可以自定义Spring MVC的初始化过程。
-  >
-  > ### 方法详解
-  >
-  > #### 1. `createServletApplicationContext()`
-  >
-  > ```java
-  > @Override
-  > protected WebApplicationContext createServletApplicationContext() {
-  >     // 获取SpringMVC容器
-  >     AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-  >     context.register(SpringMvcConfig.class);
-  >     return context;
-  > }
-  > ```
-  >
-  > - **作用**：创建并返回一个用于Spring MVC的`WebApplicationContext`。
-  > - **详细步骤**：
-  >   - 创建一个 `AnnotationConfigWebApplicationContext` 实例。这是一个基于注解的Web应用上下文，用于管理Spring MVC的Bean。
-  >   - 使用 `context.register(SpringMvcConfig.class)` 注册配置类 `SpringMvcConfig`。这个配置类通常包含Spring MVC的各种配置，如视图解析器、拦截器等。
-  >   - 返回创建好的 `WebApplicationContext`。
-  >
-  > #### 2. `getServletMappings()`
-  >
-  > ```java
-  > @Override
-  > protected String[] getServletMappings() {
-  >     return new String[]{"/"};
-  > }
-  > ```
-  >
-  > - **作用**：定义Spring MVC的`DispatcherServlet`应该映射到哪些URL路径。
-  > - **详细步骤**：
-  >   - 返回一个字符串数组 `new String[]{"/"}`，表示`DispatcherServlet`将处理所有以根路径（`/`）开头的请求。
-  >   - 这意味着所有的HTTP请求都会被`DispatcherServlet`捕获并分发到相应的控制器。
-  >
-  > #### 3. `createRootApplicationContext()`
-  >
-  > ```java
-  > @Override
-  > protected WebApplicationContext createRootApplicationContext() {
-  >     return null;
-  > }
-  > ```
-  >
-  > - **作用**：创建并返回一个根`WebApplicationContext`。
-  > - **详细步骤**：
-  >   - 返回 `null`，表示不创建根`WebApplicationContext`。
-  >   - 如果你需要一个根上下文来管理全局的Bean（例如数据库连接池、服务层Bean等），可以在这里创建并返回一个 `AnnotationConfigWebApplicationContext` 实例，并注册相应的配置类。
-  >
-  > ### 总结
-  >
-  > - **`createServletApplicationContext()`**：创建并配置Spring MVC的上下文，注册Spring MVC的配置类。
-  > - **`getServletMappings()`**：定义`DispatcherServlet`的URL映射，使其能够处理所有请求。
-  > - **`createRootApplicationContext()`**：可选地创建一个根上下文，用于管理全局的Bean。在这个例子中，没有创建根上下文。
-  >
-  > 通过这种方式，你可以完全控制Spring MVC的初始化过程，并确保所有必要的配置都被正确加载和应用。希望这些解释对你有所帮助！如果有更多问题，请随时提问。
+```java
+public class ServletConfig extends AbstractDispatcherServletInitializer {
+
+    @Override
+    protected WebApplicationContext createServletApplicationContext() {
+        //获取SpringMVC容器
+        //
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(SpringMvcConfig.class);
+        return context;
+    }
+
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{"/"};
+    }
+
+    @Override
+    protected WebApplicationContext createRootApplicationContext() {
+        return null;
+    }
+}
+```
+
+> 下面是对 `ServletConfig` 类的详细解释：
+>
+> ### 类概述
+>
+> `ServletConfig` 继承自 `AbstractDispatcherServletInitializer`，这是一个Spring框架提供的抽象类，用于初始化Spring MVC的`DispatcherServlet`。通过继承这个类，我们可以自定义Spring MVC的初始化过程。
+>
+> ### 方法详解
+>
+> #### 1. `createServletApplicationContext()`
+>
+> ```java
+> @Override
+> protected WebApplicationContext createServletApplicationContext() {
+>     // 获取SpringMVC容器
+>     AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+>     context.register(SpringMvcConfig.class);
+>     return context;
+> }
+> ```
+>
+> - **作用**：创建并返回一个用于Spring MVC的`WebApplicationContext`。
+> - **详细步骤**：
+>   - 创建一个 `AnnotationConfigWebApplicationContext` 实例。这是一个基于注解的Web应用上下文，用于管理Spring MVC的Bean。
+>   - 使用 `context.register(SpringMvcConfig.class)` 注册配置类 `SpringMvcConfig`。这个配置类通常包含Spring MVC的各种配置，如视图解析器、拦截器等。
+>   - 返回创建好的 `WebApplicationContext`。
+>
+> #### 2. `getServletMappings()`
+>
+> ```java
+> @Override
+> protected String[] getServletMappings() {
+>     return new String[]{"/"};
+> }
+> ```
+>
+> - **作用**：定义Spring MVC的`DispatcherServlet`应该映射到哪些URL路径。
+> - **详细步骤**：
+>   - 返回一个字符串数组 `new String[]{"/"}`，表示`DispatcherServlet`将处理所有以根路径（`/`）开头的请求。
+>   - 这意味着所有的HTTP请求都会被`DispatcherServlet`捕获并分发到相应的控制器。
+>
+> #### 3. `createRootApplicationContext()`
+>
+> ```java
+> @Override
+> protected WebApplicationContext createRootApplicationContext() {
+>     return null;
+> }
+> ```
+>
+> - **作用**：创建并返回一个根`WebApplicationContext`。
+> - **详细步骤**：
+>   - 返回 `null`，表示不创建根`WebApplicationContext`。
+>   - 如果你需要一个根上下文来管理全局的Bean（例如数据库连接池、服务层Bean等），可以在这里创建并返回一个 `AnnotationConfigWebApplicationContext` 实例，并注册相应的配置类。
+>
+> ### 总结
+>
+> - **`createServletApplicationContext()`**：创建并配置Spring MVC的上下文，注册Spring MVC的配置类。
+> - **`getServletMappings()`**：定义`DispatcherServlet`的URL映射，使其能够处理所有请求。
+> - **`createRootApplicationContext()`**：可选地创建一个根上下文，用于管理全局的Bean。在这个例子中，没有创建根上下文。
+>
+> 通过这种方式，你可以完全控制Spring MVC的初始化过程，并确保所有必要的配置都被正确加载和应用。希望这些解释对你有所帮助！如果有更多问题，请随时提问。
+
+#### 方法二： Extend AbstractAnnotationConfigDispatcherServletInitializer (推荐)
+
+```java
+public class ServletConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[0];
+    }
+
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class[]{SpringMvcConfig.class};
+    }
+
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{"/"};
+    }
+}
+```
+
+
 
 ### 2.4配置Controller
 
@@ -1927,3 +1948,106 @@ public class UserController {
   ```
 
   
+
+### `WebMvcConfigurationSupport`类
+
+- `WebMvcConfigurationSupport` 是 Spring MVC 中的一个重要类，它提供了对 Spring MVC 配置的全面支持。当你需要对 Spring MVC 进行深度定制时，可以继承 `WebMvcConfigurationSupport` 类并重写其中的方法来实现特定的功能。下面是一些常见用途和方法介绍：
+
+  ### 主要用途
+
+  1. **自定义视图解析器**：可以创建自定义的视图解析器，如 Thymeleaf、FreeMarker 等。
+  2. **配置静态资源处理**：可以定义静态资源的位置和处理规则。
+  3. **配置拦截器**：可以注册全局的拦截器来处理请求前后的操作。
+  4. **配置消息转换器**：可以添加或修改消息转换器，用于处理请求和响应的数据格式。
+  5. **配置异常处理器**：可以自定义异常处理器来处理未捕获的异常。
+  6. **配置文件上传解析器**：可以配置文件上传解析器来支持文件上传功能。
+
+  ### 示例代码
+
+  下面是一个使用 `WebMvcConfigurationSupport` 的简单示例，展示了如何配置静态资源处理、添加拦截器和自定义视图解析器：
+
+  ```java
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+  import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+  import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+  import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+  import org.springframework.web.servlet.view.InternalResourceViewResolver;
+  
+  @Configuration
+  @EnableWebMvc // 注意：使用此注解会禁用Spring Boot的自动配置
+  public class WebConfig extends WebMvcConfigurationSupport {
+  
+      @Override
+      protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+          // 添加静态资源处理规则
+          registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+      }
+  
+      @Override
+      protected void addInterceptors(InterceptorRegistry registry) {
+          // 注册拦截器
+          registry.addInterceptor(new MyInterceptor()).addPathPatterns("/**");
+      }
+  
+      @Bean
+      public InternalResourceViewResolver viewResolver() {
+          // 自定义视图解析器
+          InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+          resolver.setPrefix("/WEB-INF/views/");
+          resolver.setSuffix(".jsp");
+          return resolver;
+      }
+  
+      @Override
+      public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+          // 添加自定义的消息转换器
+          converters.add(new MyCustomMessageConverter());
+      }
+  }
+  ```
+
+  ### 关键方法说明
+
+  - **`addResourceHandlers`**：用于添加静态资源处理器，定义哪些URL路径对应哪些文件夹。
+  - **`addInterceptors`**：用于添加拦截器，可以注册多个拦截器，并指定它们作用的路径。
+  - **`viewResolver`**：用于配置视图解析器，决定如何解析视图名称。
+  - **`configureMessageConverters`**：用于配置消息转换器，处理请求和响应的数据格式转换。
+  - **`configureDefaultServletHandling`**：用于配置默认Servlet的处理方式。
+
+  ### 注意事项
+
+  1. **`@EnableWebMvc` 注解**：使用 `@EnableWebMvc` 注解会禁用 Spring Boot 的自动配置，这意味着你需要手动配置许多默认情况下已经配置好的功能。因此，在使用 `@EnableWebMvc` 时要小心，确保所有必要的配置都已到位。
+  2. **兼容性**：在 Spring Boot 2.x 版本中，推荐使用 `WebMvcConfigurer` 接口而不是继承 `WebMvcConfigurationSupport` 类，除非你确实需要覆盖默认配置。
+
+
+###  `WebMvcConfigurer` 接口
+
+如果你只是想扩展默认配置而不是完全替换它，可以实现 `WebMvcConfigurer` 接口：
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MyInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+
+这种方式更加灵活，不会影响 Spring Boot 的自动配置。
+
+### 总结
+
+`WebMvcConfigurationSupport` 提供了强大的配置能力，适用于需要深度定制 Spring MVC 应用程序的场景。然而，对于大多数应用来说，实现 `WebMvcConfigurer` 接口已经足够，并且更加安全和灵活。

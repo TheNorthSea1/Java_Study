@@ -33,7 +33,7 @@
   }
   ```
 
-## 2.容器加载过程分析
+## 2.容器加载过程分析（⭐️）
 
 - tomcat 服务器启动的时候，加载ServletConfig类之后，做初始化web容器操作，相当于 web.xml
 
@@ -312,7 +312,7 @@
 
 - 目录如下
 
-  ![image-20221114145506041](picture/image-20221114145506041.png)
+  <img src="picture/image-20221114145506041.png" alt="image-20221114145506041" style="zoom:67%;" />
 
 ### 2.3创建SpringConfig
 
@@ -646,7 +646,7 @@
 
   ```java
   @Configuration
-  @ComponentScan(value = {"cn.sycoder.service","cn.sycoder.dao"})
+  @ComponentScan(value = {"cn.sycoder.service","z`Acn.sycoder.dao"})
   @EnableTransactionManagement
   @PropertySource("classpath:db.properties")
   @Import({DbConfig.class,MybatisConfig.class})
@@ -654,7 +654,16 @@
   }
   ```
 
-  
+  > ### 为什么需要 `classpath:` 前缀？
+  >
+  > 1. **类路径定位**：
+  >    - `classpath:` 前缀明确指定了属性文件位于类路径中。类路径通常包括项目的 `src/main/resources` 目录及其子目录。
+  >    - 这样做可以确保 Spring 容器能够在编译后的类路径中找到属性文件，而不仅仅是相对于当前工作目录的文件系统路径。
+  > 2. **避免路径歧义**：
+  >    - 如果不使用 `classpath:` 前缀，Spring 容器会尝试从当前工作目录或其他默认路径中加载文件，这可能会导致路径歧义或找不到文件的问题。
+  >    - 使用 `classpath:` 前缀可以避免这种歧义，确保文件路径是明确的。
+  > 3. **灵活性**：
+  >    - 使用 `classpath:` 前缀使得属性文件可以在不同的环境中灵活部署。例如，你可以将属性文件打包到 JAR 文件中，Spring 容器仍然能够正确地加载这些文件。
 
 ### 4.1添加item 数据
 
@@ -788,9 +797,11 @@
   }
   ```
 
-  
-
 - 出现静态资源被拦截问题
+
+  这里我把静态资源放在static文件下面
+
+  ![image-20241031182520926](./assets/image-20241031182520926.png)
 
   ```java
   @Configuration
@@ -798,14 +809,25 @@
   
       @Override
       protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-          registry.addResourceHandler("/pages/**").addResourceLocations("/pages/");
-          registry.addResourceHandler("/js/**").addResourceLocations("/js/");
-          registry.addResourceHandler("/css/**").addResourceLocations("/css/");
-          registry.addResourceHandler("/plugins/**").addResourceLocations("/plugins/");
+          registry.addResourceHandler("/pages/**").addResourceLocations("/static/pages/");
+          registry.addResourceHandler("/js/**").addResourceLocations("/static/js/");
+          registry.addResourceHandler("/css/**").addResourceLocations("/static/css/");
+          registry.addResourceHandler("/plugins/**").addResourceLocations("/static/plugins/");
   
       }
   }
   ```
+
+  > 1. **`addResourceHandler(String... patterns)`**：
+  >    - 参数 `patterns` 是一个字符串数组，表示客户端请求的 URL 路径模式。
+  >    - 例如，`"/css/**"` 表示所有以 `/css/` 开头的请求。
+  > 2. **`addResourceLocations(String... locations)`**：
+  >    - 参数 `locations` 是一个字符串数组，表示实际的资源文件夹路径。
+  >    - 例如，`"classpath:/static/css/"` 表示类路径下的 `static/css/` 文件夹。
+  >    - 支持的路径前缀有：
+  >      - `classpath:`：从类路径中加载资源。
+  >      - `file:`：从文件系统中加载资源。
+  >      - `http:` 或 `https:`：从远程 URL 加载资源。
 
 - 将 staticSupport 交给 SpringMvc 管理
 
@@ -822,7 +844,7 @@
 
 - 保存方法
 
-  ```html
+  ```js
   handleAdd () {
       console.log("========")
       axios.post("/item",this.formData).then((res)=>{
@@ -833,7 +855,7 @@
 
 - 列表查询
 
-  ```java
+  ```js
   getAll() {
       axios.get("/item",).then((res)=>{
           this.dataList = res.data;
@@ -843,7 +865,7 @@
 
 - 删除操作
 
-  ```java
+  ```js
   handleDelete(row) {
       axios.delete("/item/"+row.id).then((res)=>{
           //todo
@@ -853,9 +875,24 @@
 
 - 编辑操作
 
-  ```java
+  ```js
+  //弹出编辑窗口
+   handleUpdate(row) {
+     this.dialogFormVisible4Edit = true;
+      this.formData = row;
+        },
+  
+        //编辑物品
+   handleEdit() {
+   axios.put("/item",this.formData).then(
+     resp => {
+       this.getAll();
+       this.dialogFormVisible4Edit = false;
+     }
+     )
+  },
   ```
-
+  
   
 
 ## 2.全局统一结果集处理
@@ -1061,6 +1098,7 @@
           if (res.data.code == 20000) {
               //关闭新增弹框
               this.dialogFormVisible = false;
+              //使用Element UI的消息提示组件显示一个成功消息给用户。
               this.$message.success("添加物品成功")
           } else {
               this.$message.error("添加失败")
@@ -1163,7 +1201,7 @@
     public List<Item> listNull();
     ```
 
-## 3.全局统一异常处理
+## 3.全局统一异常处理(⭐️)
 
 ### 3.1目前存在问题
 
@@ -1208,7 +1246,15 @@
   }
   ```
 
-  
+- 交给SpringMVC管理
+
+  ```java
+  @Configuration
+  @ComponentScan(value = {"cn.bwhcoder.controller","cn.bwhcoder.config","cn.bwhcoder.exception"})
+  @EnableWebMvc
+  public class SpringMvcConfig {
+  }
+  ```
 
   
 
@@ -1330,7 +1376,7 @@
       //需要发送短信提醒运维人员
       @ExceptionHandler(SystemException.class)
       public ResultResp handlerSystemException(SystemException e){
-          //发送短信提醒业务人员的操作
+          //发送短信提醒业务人员的操作 
           //日志打印
           return new ResultResp(e.getCode(),null,e.getMessage());
       }
@@ -1347,6 +1393,17 @@
 - 控制层方法
 
   ```java
+  @Data
+  public class BusinessException extends RuntimeException{
+      private Integer code;
+      public BusinessException(Integer code ,String message){
+          super(message);
+          this.code = code;
+      }
+  }
+  ```
+  
+  ```java
    @GetMapping
   public ResultResp list(@RequestParam(required = false) String name) {
       if (name == null || name.equals(""))
@@ -1360,7 +1417,7 @@
       return ResultResp.success(ret == null ? Code.PAGE_FAIL : Code.PAGE_OK, ret);
   }
   ```
-
+  
   
 
 ## 4.拦截器
@@ -1410,7 +1467,7 @@
   }
   ```
 
-- 修改SpringMvc 配置
+- 注册拦截器，修改SpringMvc 配置
 
   ```java
   @Configuration
@@ -1451,68 +1508,251 @@
 
 ### 4.4拦截器参数讲解
 
-- HttpServletRequest request
-- HttpServletResponse response
-- Object handler 相当于是对访问接口的一种包装
+在 Spring MVC 中，`HandlerInterceptor` 接口的 `preHandle` 方法用于在控制器方法执行前进行预处理。这个方法接收三个参数：`HttpServletRequest`、`HttpServletResponse` 和 `Object handler`。
+
+#### 参数详解
+
+1. **`HttpServletRequest request`**
+   - **类型**：`javax.servlet.http.HttpServletRequest`
+   - **描述**：表示客户端发送的请求。通过这个对象，可以获取请求的各种信息，如请求头、请求参数、请求方法等。
+   - **常用方法**：
+     - `getMethod()`：获取请求方法（GET、POST 等）。
+     - `getRequestURI()`：获取请求的 URI。
+     - `getParameter(String name)`：获取请求参数的值。
+     - `getHeader(String name)`：获取请求头的值。
+     - `getSession(boolean create)`：获取或创建会话对象。
+
+2. **`HttpServletResponse response`**
+   - **类型**：`javax.servlet.http.HttpServletResponse`
+   - **描述**：表示服务器发送的响应。通过这个对象，可以设置响应的状态码、响应头、响应内容等。
+   - **常用方法**：
+     - `setStatus(int sc)`：设置响应状态码。
+     - `setHeader(String name, String value)`：设置响应头。
+     - `addHeader(String name, String value)`：添加响应头。
+     - `sendRedirect(String location)`：发送重定向响应。
+     - `getWriter()`：获取输出流，用于写入响应内容。
+
+3. **`Object handler`**
+   - **类型**：`java.lang.Object`
+   - **描述**：表示处理当前请求的控制器方法。这个对象可以是 `HandlerMethod` 类型，也可以是其他类型的处理器对象。
+   - **常用方法**：
+     - 如果 `handler` 是 `HandlerMethod` 类型，可以通过类型转换来访问更多详细信息：
+       ```java
+       if (handler instanceof HandlerMethod) {
+           HandlerMethod handlerMethod = (HandlerMethod) handler;
+           Method method = handlerMethod.getMethod(); // 获取控制器方法
+           Object controller = handlerMethod.getBean(); // 获取控制器实例
+           Class<?> controllerClass = handlerMethod.getBeanType(); // 获取控制器类
+       }
+       ```
+
+#### 示例代码
+
+下面是一个完整的 `preHandle` 方法示例，展示了如何使用这些参数：
+
+```java
+import org.springframework.web.servlet.HandlerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class MyInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 获取请求方法
+        String method = request.getMethod();
+        System.out.println("Request method: " + method);
+
+        // 获取请求 URI
+        String uri = request.getRequestURI();
+        System.out.println("Request URI: " + uri);
+
+        // 获取请求参数
+        String param = request.getParameter("param");
+        System.out.println("Request parameter 'param': " + param);
+
+        // 获取请求头
+        String header = request.getHeader("User-Agent");
+        System.out.println("Request header 'User-Agent': " + header);
+
+        // 设置响应头
+        response.setHeader("X-Custom-Header", "Value");
+
+        // 判断是否为特定控制器方法
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            Method methodObj = handlerMethod.getMethod();
+            System.out.println("Handling method: " + methodObj.getName());
+
+            Object controller = handlerMethod.getBean();
+            System.out.println("Controller instance: " + controller.getClass().getName());
+        }
+
+        // 返回 true 表示继续处理请求，false 表示中断请求处理
+        return true;
+    }
+}
+```
+
+#### 返回值
+
+- **返回值类型**：`boolean`
+- **描述**：
+  - 如果返回 `true`，表示请求将继续传递给下一个拦截器或控制器方法。
+  - 如果返回 `false`，表示中断请求处理，不再调用后续的拦截器和控制器方法。
+
+#### 总结
+
+通过 `preHandle` 方法，你可以在请求到达控制器方法之前进行各种预处理操作，如权限检查、日志记录、性能监控等。理解这些参数的用途和方法可以帮助你更好地利用拦截器来增强应用的功能和安全性。
 
 ### 4.5拦截器链
 
-- 新增拦截器
+在 Spring MVC 中，拦截器链（Interceptor Chain）是指多个拦截器按顺序依次执行的过程。通过配置多个拦截器，可以实现多阶段的请求处理，每个拦截器负责不同的任务，从而使得请求处理更加灵活和模块化。
 
-  ```java
-  @Component
-  public class AuthInterceptor implements HandlerInterceptor {
-      @Override
-      public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-          System.out.println("权限拦截的方法");
-          return true;
-      }
-  
-      @Override
-      public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-          System.out.println("权限拦截的postHandle方法");
-      }
-  
-      @Override
-      public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-          System.out.println("权限拦截的afterCompletion方法");
-      }
-  }
-  ```
+#### 拦截器链的工作原理
 
-  
+1. **请求到达**：客户端发送请求到服务器。
+2. **过滤器处理**：请求首先经过过滤器（如果配置了过滤器）。
+3. **Spring DispatcherServlet**：请求被传递到 Spring 的 `DispatcherServlet`。
+4. **拦截器链执行**：
+   - **preHandle 方法**：请求依次经过每个拦截器的 `preHandle` 方法。如果某个拦截器的 `preHandle` 方法返回 `false`，则请求处理终止，不再调用后续的拦截器和控制器方法。
+   - **控制器方法**：如果所有拦截器的 `preHandle` 方法都返回 `true`，请求将被传递给控制器方法进行处理。
+   - **postHandle 方法**：控制器方法执行完毕后，请求依次经过每个拦截器的 `postHandle` 方法。
+   - **视图渲染**：视图渲染完成后，请求依次经过每个拦截器的 `afterCompletion` 方法。
+5. **响应返回**：最终响应返回给客户端。
 
+#### 示例代码
 
+假设我们有三个拦截器：`LoggingInterceptor`、`AuthenticationInterceptor` 和 `PerformanceInterceptor`。
 
-- 添加到拦截器链中
+#### 1. 定义拦截器
 
-  ```java
-  @Configuration
-  @ComponentScan({"cn.sycoder.controller","cn.sycoder.interceptor"})
-  @EnableWebMvc
-  public class SpringMvcConfig implements WebMvcConfigurer {
-  
-      @Autowired
-      LoginInterceptor loginInterceptor;
-  
-      @Autowired
-      AuthInterceptor authInterceptor;
-  
-      @Override
-      public void addInterceptors(InterceptorRegistry registry) {
-          registry.addInterceptor(loginInterceptor).addPathPatterns("/item","/item/*");
-          registry.addInterceptor(authInterceptor).addPathPatterns("/item","/item/*");
-      }
-  }
-  ```
+```java
+import org.springframework.web.servlet.HandlerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-  
+public class LoggingInterceptor implements HandlerInterceptor {
 
-- 拦截器链注意点
-  - 拦截器有着先进后出的原则
-  - preHandle : 与配置顺序保持一致的执行顺序
-  - postHandle：与配置顺序相反，可能不运行
-  - afterCompletion：与配置顺序相反，可能不运行
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("LoggingInterceptor - preHandle");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("LoggingInterceptor - postHandle");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("LoggingInterceptor - afterCompletion");
+    }
+}
+
+public class AuthenticationInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("AuthenticationInterceptor - preHandle");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("AuthenticationInterceptor - postHandle");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("AuthenticationInterceptor - afterCompletion");
+    }
+}
+
+public class PerformanceInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("PerformanceInterceptor - preHandle");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("PerformanceInterceptor - postHandle");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("PerformanceInterceptor - afterCompletion");
+    }
+}
+```
+
+#### 2. 注册拦截器
+
+在 Spring 配置类中注册这些拦截器，并指定它们的执行顺序。
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private LoggingInterceptor loggingInterceptor;
+
+    @Autowired
+    private AuthenticationInterceptor authenticationInterceptor;
+
+    @Autowired
+    private PerformanceInterceptor performanceInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loggingInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(authenticationInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(performanceInterceptor).addPathPatterns("/**");
+    }
+}
+```
+
+#### 执行顺序
+
+假设请求路径为 `/example`，以下是拦截器链的执行顺序：
+
+1. **preHandle 方法**：
+   - `LoggingInterceptor.preHandle`
+   - `AuthenticationInterceptor.preHandle`
+   - `PerformanceInterceptor.preHandle`
+
+2. **控制器方法**：
+   - 控制器方法执行
+
+3. **postHandle 方法**：
+   - `PerformanceInterceptor.postHandle`
+   - `AuthenticationInterceptor.postHandle`
+   - `LoggingInterceptor.postHandle`
+
+4. **视图渲染**：
+   - 视图渲染完成
+
+5. **afterCompletion 方法**：
+   - `PerformanceInterceptor.afterCompletion`
+   - `AuthenticationInterceptor.afterCompletion`
+   - `LoggingInterceptor.afterCompletion`
+
+#### 注意事项
+
+- **顺序重要**：拦截器的执行顺序与其在 `addInterceptors` 方法中注册的顺序一致。先注册的拦截器会先执行其 `preHandle` 方法，后注册的拦截器会先执行其 `afterCompletion` 方法。
+- **返回值影响**：如果某个拦截器的 `preHandle` 方法返回 `false`，请求处理将立即终止，不会调用后续的拦截器和控制器方法。
+- **资源共享**：拦截器之间可以通过请求属性共享数据，例如在 `request.setAttribute` 方法中设置属性，然后在后续拦截器中通过 `request.getAttribute` 方法获取属性。
+
+通过合理配置和使用拦截器链，可以实现复杂且灵活的请求处理逻辑，提高应用的可维护性和扩展性。
 
 ### 4.6面试题拦截器与过滤器的区别
 
@@ -1523,7 +1763,27 @@
   - 拦截内容不同
     - Filter : 是对所有访问进行过滤
     - Interceptor：仅仅针对访问SpringMVC
-
+    
+  - ##### 使用场景
+    
+    过滤器（Filter）
+    
+    - 适用场景
+      - 字符编码转换
+      - 日志记录
+      - 认证和授权
+      - 请求和响应的修改
+      - 静态资源的访问控制
+    
+    拦截器（Interceptor）
+    
+    - 适用场景
+      - 日志记录
+      - 认证和授权
+      - 数据校验
+      - 性能监控
+      - 操作审计
+  
 - 访问流程
 
   ![image-20221117160848389](picture/image-20221117160848389.png)
@@ -1536,11 +1796,42 @@
 - **HandlerMapping**：处理器映射器，根据 url/method可以去找到具体的 Handler(Controller)
 - **Handler**:具体处理器（程序员，以后开发这一部分需要）
 - **HandlerAdapter**：处理器适配器，进行处理器方法的执行
+
+- **Controller**: 控制器，处理具体的业务逻辑
+
 - **ViewResolver**：处理视图相关的
 
 ## 2.处理流程图
 
 ![image-20221117165036933](picture/image-20221117165036933.png)
+
+### 详细执行流程
+
+1. **客户端请求**：
+   - 客户端（通常是浏览器）发送一个 HTTP 请求到服务器。
+2. **DispatcherServlet**：
+   - `DispatcherServlet` 是 Spring MVC 的前端控制器，负责接收所有的请求。
+   - 它是整个请求处理流程的入口点。
+3. **HandlerMapping**：
+   - `DispatcherServlet` 根据请求的 URL 查找合适的处理器（Handler），这个过程由 `HandlerMapping` 完成。
+   - `HandlerMapping` 返回一个处理器执行链（HandlerExecutionChain），其中包含处理器（Controller）和拦截器（Interceptor）。
+4. **HandlerAdapter**：
+   - `DispatcherServlet` 使用 `HandlerAdapter` 调用处理器（Controller）。
+   - `HandlerAdapter` 是一个适配器接口，用于调用不同类型处理器的方法。
+5. **Controller**：
+   - 控制器（Controller）处理请求，执行业务逻辑。
+   - 控制器返回一个 `ModelAndView` 对象，其中包含模型数据和视图名称。
+6. **Model and View**：
+   - `ModelAndView` 对象包含了模型数据（Model）和视图名称（View）。
+   - 模型数据用于传递给视图层，视图名称用于确定渲染哪个视图。
+7. **ViewResolver**：
+   - `DispatcherServlet` 使用 `ViewResolver` 解析视图名称，找到对应的视图对象。
+   - `ViewResolver` 将视图名称解析为实际的视图对象（如 JSP 页面）。
+8. **View**：
+   - 视图对象负责渲染视图，将模型数据填充到视图中。
+   - 渲染后的视图内容将作为 HTTP 响应返回给客户端。
+9. **响应客户端**：
+   - 最终，渲染后的视图内容通过 HTTP 响应返回给客户端
 
 ## 3.执行流程原理分析
 
@@ -1622,7 +1913,7 @@
                   try {
                       processedRequest = this.checkMultipart(request);
                       multipartRequestParsed = processedRequest != request;
-                      //获取处理器就是具体的需要执行的 Tontroller
+                      //获取处理器就是具体的需要执行的 Controller
                       mappedHandler = this.getHandler(processedRequest);
                       if (mappedHandler == null) {
                           this.noHandlerFound(processedRequest, response);
@@ -1701,7 +1992,7 @@
 
 - dbug 的图示
 
-  ![image-20221117170245433](picture/image-20221117170245433.png)
+  <img src="picture/image-20221117170245433.png" alt="image-20221117170245433" style="zoom: 67%;" />
 
   
 
