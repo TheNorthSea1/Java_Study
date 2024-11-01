@@ -803,6 +803,8 @@
 
   ![image-20241031182520926](./assets/image-20241031182520926.png)
 
+- **方法一**：
+
   ```java
   @Configuration
   public class StaticSupport extends WebMvcConfigurationSupport {
@@ -836,6 +838,25 @@
   @ComponentScan(value = {"cn.sycoder.controller","cn.sycoder.config"})
   @EnableWebMvc
   public class SpringMvcConfig {
+  }
+  ```
+
+- **方法二：**
+
+  **SpringMvcConfig实现WebMvcConfigurer**(`推荐`) 
+
+  ```java
+  @Configuration
+  @ComponentScan(value = {"cn.bwhcoder.controller"})
+  @EnableWebMvc
+  public class SpringMvcConfig implements WebMvcConfigurer {
+      @Override
+      public void addResourceHandlers(ResourceHandlerRegistry registry) {
+          registry.addResourceHandler("/pages/**").addResourceLocations("/static/pages/");
+          registry.addResourceHandler("/js/**").addResourceLocations("/static/js/");
+          registry.addResourceHandler("/css/**").addResourceLocations("/static/css/");
+          registry.addResourceHandler("/plugins/**").addResourceLocations("/static/plugins/");
+      }
   }
   ```
 
@@ -1031,42 +1052,40 @@
 
     
 
-    
-
   - update 方法
 
     ```java
-    @PutMapping
+  @PutMapping
     public ResultResp update(@RequestBody Item item){
         boolean ret = service.update(item);
         return new ResultResp(ret? Code.UPDATE_OK:Code.UPDATE_FAIL,ret);
     }
     ```
-
+  
     
 
   - delete 方法
 
     ```java
-    @DeleteMapping("/{id}")
+  @DeleteMapping("/{id}")
     public ResultResp delete(@PathVariable Long id){
         boolean ret = service.delete(id);
         return new ResultResp(ret? Code.DELETE_OK:Code.DELETE_FAIL,ret);
     }
     ```
-
+  
     
 
   - 单个结果集处理
 
     ```java
-    @GetMapping("/{id}")
+  @GetMapping("/{id}")
     public ResultResp getById(@PathVariable Long id){
         Item ret = service.getById(id);
         return ResultResp.success(ret==null?Code.GET_FAIL:Code.GET_OK,ret);
     }
     ```
-
+  
     
 
   - 集合结果集
@@ -1078,7 +1097,7 @@
         return ResultResp.success(ret==null?Code.PAGE_FAIL:Code.PAGE_OK,ret);
     }
     ```
-
+  
     
 
 - 最终实现截图
@@ -1993,7 +2012,3 @@ public class WebConfig implements WebMvcConfigurer {
 - dbug 的图示
 
   <img src="picture/image-20221117170245433.png" alt="image-20221117170245433" style="zoom: 67%;" />
-
-  
-
-- <font color="red">让我们在下一阶段、不见不散！</font>

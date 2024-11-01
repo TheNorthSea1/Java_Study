@@ -1947,9 +1947,11 @@ public class UserController {
   }
   ```
 
-  
+  > Note:
+  >
+  >  我们也可以通过直接实现WebMvcConfigurer 来进行相关的配置。
 
-### `WebMvcConfigurationSupport`类
+# `WebMvcConfigurationSupport`类
 
 - `WebMvcConfigurationSupport` 是 Spring MVC 中的一个重要类，它提供了对 Spring MVC 配置的全面支持。当你需要对 Spring MVC 进行深度定制时，可以继承 `WebMvcConfigurationSupport` 类并重写其中的方法来实现特定的功能。下面是一些常见用途和方法介绍：
 
@@ -2021,7 +2023,7 @@ public class UserController {
   2. **兼容性**：在 Spring Boot 2.x 版本中，推荐使用 `WebMvcConfigurer` 接口而不是继承 `WebMvcConfigurationSupport` 类，除非你确实需要覆盖默认配置。
 
 
-###  `WebMvcConfigurer` 接口
+#  `WebMvcConfigurer` 接口 （推荐）
 
 如果你只是想扩展默认配置而不是完全替换它，可以实现 `WebMvcConfigurer` 接口：
 
@@ -2051,3 +2053,136 @@ public class WebConfig implements WebMvcConfigurer {
 ### 总结
 
 `WebMvcConfigurationSupport` 提供了强大的配置能力，适用于需要深度定制 Spring MVC 应用程序的场景。然而，对于大多数应用来说，实现 `WebMvcConfigurer` 接口已经足够，并且更加安全和灵活。
+
+# 知识补充
+
+在 Spring MVC 中，继承和实现接口的行为确实有所不同，这主要与面向对象编程的基本概念有关。下面我们详细解释为什么继承会覆盖默认配置，而实现接口是扩展默认配置。
+
+### 继承与覆盖
+
+当一个类继承另一个类时，子类会继承父类的所有方法和属性。如果子类中定义了一个与父类同名的方法，那么子类中的方法会覆盖（override）父类中的方法。这种行为在 Spring MVC 中同样适用。
+
+#### 示例：继承覆盖默认配置
+
+假设有一个默认配置类 `DefaultConfig`，它提供了一些默认的配置方法：
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class DefaultConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 默认的拦截器配置
+        registry.addInterceptor(new DefaultInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+
+如果我们创建一个子类 `CustomConfig` 并继承 `DefaultConfig`，并在子类中重写 `addInterceptors` 方法：
+
+```java
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CustomConfig extends DefaultConfig {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 覆盖默认的拦截器配置
+        registry.addInterceptor(new CustomInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+
+在这个例子中，`CustomConfig` 类中的 `addInterceptors` 方法会完全覆盖 `DefaultConfig` 类中的 `addInterceptors` 方法。这意味着默认的拦截器配置将被新的拦截器配置取代。
+
+### 实现接口与扩展
+
+当一个类实现一个接口时，它必须实现接口中定义的所有方法。但是，实现接口并不会覆盖任何现有的方法，而是提供一个新的实现。这种方式通常用于扩展默认配置，而不是替换它。
+
+#### 示例：实现接口扩展默认配置
+
+假设有一个默认配置类 `DefaultConfig`，它实现了 `WebMvcConfigurer` 接口：
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class DefaultConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 默认的拦截器配置
+        registry.addInterceptor(new DefaultInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+
+如果我们创建一个新的配置类 `CustomConfig`，并实现 `WebMvcConfigurer` 接口：
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CustomConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 扩展默认的拦截器配置
+        registry.addInterceptor(new CustomInterceptor()).addPathPatterns("/custom/**");
+    }
+}
+```
+
+在这个例子中，`CustomConfig` 类实现了 `WebMvcConfigurer` 接口，并提供了自己的 `addInterceptors` 方法。由于 `DefaultConfig` 和 `CustomConfig` 都实现了 `WebMvcConfigurer` 接口，Spring 会合并这两个配置类中的方法。
+
+### 合并配置
+
+Spring 框架会自动合并多个实现了 `WebMvcConfigurer` 接口的配置类。这意味着你可以通过实现接口来扩展默认配置，而不会覆盖它们。
+
+#### 示例：合并配置
+
+假设我们有两个配置类，一个提供默认配置，另一个提供自定义配置：
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class DefaultConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 默认的拦截器配置
+        registry.addInterceptor(new DefaultInterceptor()).addPathPatterns("/**");
+    }
+}
+
+@Configuration
+public class CustomConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 扩展默认的拦截器配置
+        registry.addInterceptor(new CustomInterceptor()).addPathPatterns("/custom/**");
+    }
+}
+```
+
+在这种情况下，Spring 会合并这两个配置类中的 `addInterceptors` 方法，最终的拦截器配置将是：
+
+- `DefaultInterceptor` 应用于所有路径 `/**`
+- `CustomInterceptor` 应用于路径 `/custom/**`
+
+### 总结
+
+- **继承**：子类会覆盖父类中的同名方法，因此继承通常用于完全替换默认配置。
+- **实现接口**：实现接口不会覆盖现有的方法，而是提供新的实现，因此实现接口通常用于扩展默认配置。
+
+通过合理使用继承和实现接口，可以在 Spring MVC 中灵活地管理和扩展配置。
