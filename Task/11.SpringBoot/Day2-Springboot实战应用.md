@@ -30,7 +30,7 @@
   java -jar springboot-ssm-0.0.1-SNAPSHOT.jar --server.port=8081 --logging.level.org.springframework.web=debug
   ```
 
-## 2.属性加载优先级
+## 2.属性加载优先级(⭐️)
 
 - 文档地址
 
@@ -65,7 +65,7 @@
 
 - 了解内容
 
-  ```
+  ```java
   public static void main(String[] args) {
       args[0] = "--server.port=9999";
       SpringApplication.run(SpringbootSsmApplication.class, args);
@@ -84,7 +84,7 @@
   - 项目经理、技术经理使用
 - 程序包所在目录中配置文件
   - 运维人员、架构师使用
-- 程序包所在目录中config目录下配置文件
+- **程序包所在目录中config目录下配置文件**
   - 最高等级，技术总监
 - 应用场景
   - A 开发项目时候使用的是类路径下配置文件
@@ -182,7 +182,19 @@
   </dependency>
   ```
 
+- 在配置类中添加对应的数据
+
+  ```yaml
+  durid:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/springboot_ssm
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  ```
+
 - 配置三方bean
+
+  > 会自动给duridDataSource进行赋值
 
   ```java
   @Bean
@@ -260,7 +272,10 @@
   private DataSize datasize;
   ```
 
-## 8.检验
+## 8.检验@Validated&@Valid
+
+> - **`@Validated`**：用于方法级别的参数验证，允许你在方法参数上使用 JSR 303 注解。
+> - **`@Valid`**：用于字段级别的验证，可以用于方法参数、构造函数参数、字段等。
 
 - 导入依赖
 
@@ -271,13 +286,32 @@
   </dependency>
   ```
 
-- 检验配置如下
+- #### 示例
 
+  假设你有一个控制器方法，需要验证传入的 `User` 对象：
+  
   ```java
-  @Max(value = 9999,message = "无效的配置")
-  @Min(value = 80,message = "无效的配置")
-  private int port;
+  @RestController
+  @Validated
+  public class UserController {
+      @PostMapping("/users")
+      public String createUser(@Valid @RequestBody User user) {
+          // 处理用户创建逻辑
+          return "User created successfully";
+      }
+  }
+  
+  class User {
+      @NotEmpty(message = "Name cannot be empty")
+      private String name;
+  
+      @Size(min = 1, max = 10, message = "Age must be between 1 and 10")
+      private String age;
+  }
   ```
+  
+  
+  
 
 ## 9.数据类型转换
 
@@ -509,7 +543,7 @@
       include: devmysql,devredis
   ```
 
-- 这种切换还是存在问题，每次都得修改 include 中的value 值，所以，2.4版本之后新加了一个 group
+- 这种切换还是存在问题，每次都得修改 include 中的value 值，所以，S2.4版本之后新加了一个 group
 
   ```yaml
   spring:
@@ -594,7 +628,7 @@
 
   
 
-## 2.使用lombok简化日志操作
+## 2.使用lombok简化日志操作@Slf4j
 
 - 导入依赖
 
@@ -781,7 +815,7 @@
   
       @PostMapping
       public boolean save(@RequestBody Item item){
-          log.info("获取方法的入参为:{}",item);
+          log.info("获取方法的入参为:{}",item);  // 此处 {} 为占位符
          return mapper.insert(item);
       }
   
@@ -813,7 +847,7 @@
 
   
 
-## 2.Web环境模拟测试
+## 2.Web环境模拟测试（⭐️）
 
 ### 2.1目前存在的问题
 
@@ -844,7 +878,7 @@
 - 添加如下属性
 
   ```java
-  @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+  @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // 设置随机端口
   ```
 
   ![image-20221126120231001](picture/image-20221126120231001.png)
@@ -855,17 +889,22 @@
   @AutoConfigureMockMvc
   ```
 
+  > `@AutoConfigureMockMvc` 是 Spring Boot 提供的一个注解，用于自动配置 `MockMvc`，使得你可以在测试中方便地发送 HTTP 请求并验证响应。这个注解通常与 `@SpringBootTest` 一起使用。
+
 - 测试一个请求方法
 
   ```java
+  @Autowired 
+  MockMvc mvc
+  
   @Test
-      public void getById(@Autowired MockMvc mvc) throws Exception {
+  public void getById() throws Exception {
           //创建虚拟请求的
           MockHttpServletRequestBuilder builder =
                   MockMvcRequestBuilders.get("/item/29");
   
           mvc.perform(builder);
-      }
+  }
   ```
 
 ### 2.3预期结果比较
@@ -965,7 +1004,7 @@
 
 - 直接提供配置即可
 
-  ```java
+  ```yml
   testcase:
     item:
       name: ${random.int(5)}
@@ -1008,7 +1047,7 @@
 
 - 新建模块
 
-  ![image-20221126143543913](picture/image-20221126143543913.png)
+  <img src="picture/image-20221126143543913.png" alt="image-20221126143543913" style="zoom: 50%;" />
 
   
 
@@ -1026,7 +1065,7 @@
   spring:
     datasource:
       druid:
-        url: jdbc:mysql://localhost:3306/springboot_project
+        url: jdbc:mysql://localhost:3306/springboot_ssm
         username: root
         password: 123456
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -1043,7 +1082,7 @@
   spring:
     datasource:
       druid:
-        url: jdbc:mysql://localhost:3306/springboot_project
+        url: jdbc:mysql://localhost:3306/springboot_ssm
         username: root
         password: 123456
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -1168,6 +1207,50 @@ public interface ItemMapper {
 
   
 
+### @Builder的使用
+
+> 在 Spring Boot（以及更广泛的 Java 开发中），`@Builder` 是一个非常有用的注解，它来自 Lombok 库。Lombok 是一个 Java 库，它通过注解来简化 Java 代码，减少样板代码的编写。
+>
+> `@Builder` 注解的作用是为类生成一个构造器，这个构造器可以接受所有类字段作为参数，并且允许以链式调用的方式初始化对象。这种方式非常适合创建复杂对象，特别是当对象有多个可选属性时。
+
+#### 示例
+
+假设有一个简单的 `User` 类：
+
+```java
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class User {
+    private String name;
+    private int age;
+    private String email;
+}
+```
+
+使用了 `@Builder` 注解后，你可以这样创建 `User` 对象：
+
+```java
+User user = User.builder()
+                .name("张三")
+                .age(30)
+                .email("zhangsan@example.com")
+                .build();
+```
+
+#### 特性
+
+- **可选参数**：对于非必填字段，可以在调用 `.build()` 方法之前省略。
+- **链式调用**：通过点`.`操作符连续调用方法，使代码更加简洁流畅。
+- **默认值支持**：可以通过 `@Builder.Default` 注解给字段设置默认值。
+
+#### 注意事项
+
+- 使用 `@Builder` 可能会增加编译后的字节码大小，因为 Lombok 会在编译时生成大量的辅助方法。
+- 如果你的项目中启用了某些严格的静态分析工具，可能会对 Lombok 自动生成的方法提出警告或错误，这时可能需要调整工具配置或使用其他解决方案。
+
 ### 3.4controller
 
 - 统一结果处理
@@ -1252,6 +1335,16 @@ public interface ItemMapper {
   }
   ```
 
+  ```java
+  @Controller
+  public class IndexController {
+      @GetMapping("/index")
+      public String index() {
+          return "/pages/items.html";
+      }
+  }
+  ```
+  
   
 
 ## 4.上线部署
@@ -1283,7 +1376,7 @@ mvn package
 
 ### 4.3上传jar到服务器
 
-- rz 命令找到自己的jar ,上传到 /opt/springboot-project
+- rz -be命令找到自己的jar ,上传到 /opt/springboot-project
 
 ### 4.4创建数据库并且初始化表
 
@@ -1303,7 +1396,9 @@ mvn package
   java -jar springboot-project-0.0.1-SNAPSHOT.jar --spring.profiles.active=test --server.port=8080
   ```
 
-
+> ps -aux|grep SpringBoot2-01-1.0-SNAPSHOT.jar
+>
+> 如果，之前运行过，先杀之前开启的进程。
 
 ### 4.6linux启动方式
 
@@ -1315,9 +1410,12 @@ mvn package
   nohup java -jar springboot-project-0.0.1-SNAPSHOT.jar --spring.profiles.active=test --server.port=8080 &
   ```
 
-- nohup （no hang up）
+- **nohup** （no hang up）
 
   - 表示关闭终端的时候程序也能继续运行 & 来搭配
+  - `nohup` 是一个 Unix/Linux 命令，用于在后台运行命令，并使其不受终端挂断（如关闭终端窗口或 SSH 会话）的影响。这对于长时间运行的任务非常有用，因为它确保任务不会因为终端关闭而中断。
+
+- tail -n 500 -f nohup.out 跟踪日志
 
 - 自定义日志文件名称
 

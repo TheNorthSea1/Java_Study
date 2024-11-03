@@ -143,3 +143,297 @@ Spring中Bean的生命周期包括定义、实例化、属性赋值、初始化�
   > action taken by an aspect at a particular join point. Different types of advice include "around," "before" and "after" advice. (Advice types are discussed below.) Many AOP frameworks, including Spring, model an advice as an *interceptor*, maintaining a chain of interceptors *around* the join point.
 
 - 切面(Aspect)：通知是需要增强的功能存在多个，切入点是需要增强的方法也存在多个，需要去给切入点和通知做关联，知道哪个切入点对应哪个通知，这种描述关系就叫切面
+
+在 Spring 框架中，父子容器的概念是指一个容器可以作为另一个容器的父容器。这种关系使得子容器可以访问父容器中的 Bean，但父容器不能访问子容器中的 Bean。这种设计模式在一些复杂的场景中非常有用，比如模块化应用或多层次的应用架构。
+
+# 父子容器
+
+在 Spring 框架中，父子容器的概念是指一个容器可以作为另一个容器的父容器。这种关系使得子容器可以访问父容器中的 Bean，但父容器不能访问子容器中的 Bean。这种设计模式在一些复杂的场景中非常有用，比如模块化应用或多层次的应用架构。
+
+## 1. 编程方式创建父子容器
+
+以下是一个示例，展示了如何通过编程方式创建父子容器：
+
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+
+public class ParentChildContextExample {
+
+    public static void main(String[] args) {
+        // 创建父容器
+        ApplicationContext parentContext = new ClassPathXmlApplicationContext("parent-context.xml");
+
+        // 创建子容器，并将父容器传递给它
+        GenericApplicationContext childContext = new GenericApplicationContext();
+        childContext.setParent(parentContext);
+        childContext.load("child-context.xml");
+        childContext.refresh();
+
+        // 获取父容器中的 Bean
+        MyBean parentBean = parentContext.getBean("parentBean", MyBean.class);
+        System.out.println("Parent Bean: " + parentBean);
+
+        // 获取子容器中的 Bean
+        MyBean childBean = childContext.getBean("childBean", MyBean.class);
+        System.out.println("Child Bean: " + childBean);
+
+        // 关闭上下文
+        ((AbstractApplicationContext) parentContext).close();
+        ((AbstractApplicationContext) childContext).close();
+    }
+}
+```
+
+## 2. XML 配置创建父子容器
+
+你也可以通过 XML 配置文件来创建父子容器。假设你有两个配置文件 `parent-context.xml` 和 `child-context.xml`。
+
+**parent-context.xml:**
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="parentBean" class="com.example.MyBean">
+        <property name="name" value="Parent Bean"/>
+    </bean>
+</beans>
+```
+
+**child-context.xml:**
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="childBean" class="com.example.MyBean">
+        <property name="name" value="Child Bean"/>
+    </bean>
+</beans>
+```
+
+**Java 代码：**
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+
+public class ParentChildContextExample {
+
+    public static void main(String[] args) {
+        // 创建父容器
+        ApplicationContext parentContext = new ClassPathXmlApplicationContext("parent-context.xml");
+
+        // 创建子容器，并将父容器传递给它
+        GenericApplicationContext childContext = new GenericApplicationContext();
+        childContext.setParent(parentContext);
+        childContext.load("child-context.xml");
+        childContext.refresh();
+
+        // 获取父容器中的 Bean
+        MyBean parentBean = parentContext.getBean("parentBean", MyBean.class);
+        System.out.println("Parent Bean: " + parentBean);
+
+        // 获取子容器中的 Bean
+        MyBean childBean = childContext.getBean("childBean", MyBean.class);
+        System.out.println("Child Bean: " + childBean);
+
+        // 关闭上下文
+        ((ClassPathXmlApplicationContext) parentContext).close();
+        ((GenericApplicationContext) childContext).close();
+    }
+}
+```
+
+## 访问父容器中的 Bean
+
+在子容器中，你可以通过 `@Autowired` 注解或手动注入的方式来访问父容器中的 Bean。
+
+**MyBean.java:**
+```java
+package com.example;
+
+public class MyBean {
+    private String name;
+
+    // Getter and Setter
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "MyBean{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+}
+```
+
+**ChildBean.java:**
+```java
+package com.example;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ChildBean {
+
+    @Autowired
+    private MyBean parentBean;
+
+    @Override
+    public String toString() {
+        return "ChildBean{" +
+                "parentBean=" + parentBean +
+                '}';
+    }
+}
+```
+
+### 总结
+
+通过创建父子容器，你可以实现模块化和层次化的应用架构。子容器可以访问父容器中的 Bean，但父容器不能访问子容器中的 Bean。这种设计模式在大型项目中非常有用，可以帮助你更好地组织和管理 Bean。
+
+在 Spring 框架中，`BeanFactory` 和 `FactoryBean` 是两个重要的概念，它们在 Bean 的管理和创建过程中发挥着不同的作用。下面详细介绍这两个概念及其区别。
+
+# BeanFactory  & FactoryBean
+
+### BeanFactory 
+
+`BeanFactory` 是 Spring 框架中的核心接口之一，它负责管理 Bean 的生命周期和配置。`BeanFactory` 提供了一种高级形式的 IoC（控制反转），通过它可以管理和操作 Bean 的定义和依赖关系。
+
+#### 主要功能
+- **Bean 的创建和管理**：`BeanFactory` 负责创建和管理 Bean 的实例。
+- **依赖注入**：`BeanFactory` 可以自动注入 Bean 之间的依赖关系。
+- **生命周期管理**：`BeanFactory` 可以管理 Bean 的生命周期，包括初始化和销毁方法的调用。
+
+#### 示例
+```java
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.BeanFactory;
+
+public class BeanFactoryExample {
+    public static void main(String[] args) {
+        // 创建 BeanFactory
+        BeanFactory beanFactory = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        // 获取 Bean
+        MyBean myBean = (MyBean) beanFactory.getBean("myBean");
+
+        // 使用 Bean
+        myBean.doSomething();
+    }
+}
+```
+
+### FactoryBean
+
+`FactoryBean` 是一个特殊的接口，用于创建复杂的 Bean。它允许你在 Spring 容器中定义一个工厂方法，从而生成 Bean 实例。`FactoryBean` 可以用来封装复杂的初始化逻辑，使得 Bean 的创建过程更加灵活。
+
+#### 主要功能
+- **自定义 Bean 创建**：通过实现 `FactoryBean` 接口，可以自定义 Bean 的创建逻辑。
+- **返回不同类型**：`FactoryBean` 可以返回任何类型的对象，而不仅仅是实现 `FactoryBean` 接口的类的实例。
+- **生命周期管理**：`FactoryBean` 可以参与 Spring 容器的生命周期管理。
+
+#### 接口方法
+- `Object getObject()`：返回由 `FactoryBean` 创建的对象。
+- `Class<?> getObjectType()`：返回 `getObject()` 方法返回的对象类型。
+- `boolean isSingleton()`：指示 `FactoryBean` 创建的对象是否为单例。
+
+#### 示例
+假设我们有一个复杂的 Bean 需要初始化，可以使用 `FactoryBean` 来实现：
+
+**MyBean.java:**
+```java
+public class MyBean {
+    private String name;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void doSomething() {
+        System.out.println("Doing something with " + name);
+    }
+}
+```
+
+**MyBeanFactoryBean.java:**
+```java
+import org.springframework.beans.factory.FactoryBean;
+
+public class MyBeanFactoryBean implements FactoryBean<MyBean> {
+    private String name;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public MyBean getObject() throws Exception {
+        MyBean myBean = new MyBean();
+        myBean.setName(name);
+        return myBean;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return MyBean.class;
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
+}
+```
+
+**applicationContext.xml:**
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="myBeanFactoryBean" class="com.example.MyBeanFactoryBean">
+        <property name="name" value="Custom Name"/>
+    </bean>
+
+    <!-- 使用 FactoryBean 创建的 Bean -->
+    <bean id="myBean" factory-bean="myBeanFactoryBean" factory-method="getObject"/>
+</beans>
+```
+
+**Main Application:**
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class FactoryBeanExample {
+    public static void main(String[] args) {
+        // 创建 ApplicationContext
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        // 获取由 FactoryBean 创建的 Bean
+        MyBean myBean = (MyBean) context.getBean("myBean");
+
+        // 使用 Bean
+        myBean.doSomething();
+    }
+}
+```
+
+### 总结
+
+- **`BeanFactory`**：负责管理 Bean 的生命周期和依赖注入，是 Spring 框架的核心接口之一。
+- **`FactoryBean`**：用于创建复杂的 Bean，允许自定义 Bean 的创建逻辑，可以返回任何类型的对象。
+
+通过理解和使用这两个概念，你可以更好地管理和创建 Spring 容器中的 Bean，从而构建更加灵活和复杂的应用程序。

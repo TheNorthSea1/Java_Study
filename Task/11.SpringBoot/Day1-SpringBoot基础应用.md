@@ -49,7 +49,7 @@
 
 - 选一个 SpringWeb 依赖
 
-  ![image-20221122111521796](picture/image-20221122111521796.png)
+  <img src="picture/image-20221122111521796.png" alt="image-20221122111521796" style="zoom: 50%;" />
 
 ### 1.3生成文件包
 
@@ -69,11 +69,13 @@
 
 - 配置 maven 从阿里云下载依赖
 
+  <img src="./assets/image-20241101201021569.png" alt="image-20241101201021569" style="zoom:80%;" />
+
 - 第一次下载需要不少时间，创建好空项目的时候，就应该把maven 设置好
 
 - 得到如下代码
 
-  ![image-20221122115731107](picture/image-20221122115731107.png)
+  <img src="picture/image-20221122115731107.png" alt="image-20221122115731107" style="zoom:67%;" />
 
 ### 1.5新建Controller测试
 
@@ -143,7 +145,7 @@
 
 - 运行启动类 SecondSpringbootApplication
 
-  ![image-20221122123152630](picture/image-20221122123152630.png)
+  <img src="picture/image-20221122123152630.png" alt="image-20221122123152630" style="zoom:67%;" />
 
 - 测试
 
@@ -159,11 +161,11 @@
 
 - 新建模块
 
-  ![image-20221122121330948](picture/image-20221122121330948.png)
+  <img src="picture/image-20221122121330948.png" alt="image-20221122121330948" style="zoom:67%;" />
 
 - 添加基础信息
 
-  ![image-20221122130205810](picture/image-20221122130205810.png)
+  <img src="picture/image-20221122130205810.png" alt="image-20221122130205810" style="zoom:67%;" />
 
 
 
@@ -437,6 +439,8 @@
   - 问题：之前的操作导入依赖比较麻烦，比如我们要使用Spring-webmvc 一定会去使用Spring-web
   - 引入太繁琐不好管理
 - starter：springboot团队直接把这些固定搭配技术做成一个成品
+  - `Starter` 是一种特殊的依赖管理工具，它将一组相关的依赖项打包在一起，提供了一个简化的入口点。通过使用 `starter`，你可以快速地引入一组依赖项，并且这些依赖项会被自动配置好，以便立即使用。
+
 
 ### 2.1实际开发体验
 
@@ -562,7 +566,7 @@
 
 
 
-## 3.引导类
+## 3.引导类（也称为主应用类）
 
 ### 3.1传统spring配置
 
@@ -573,6 +577,12 @@
 
 
 ### 3.2引导类作用
+
+> 在 Spring Boot 应用程序中，引导类（也称为主应用类）是应用程序的入口点。这个类通常包含一个 `main` 方法，该方法负责启动 Spring Boot 应用程序。引导类通常使用 `@SpringBootApplication` 注解，该注解是一个组合注解，包含了以下几个注解：
+>
+> - `@SpringBootConfiguration`：表示这是一个配置类。
+> - `@EnableAutoConfiguration`：启用 Spring Boot 的自动配置机制。
+> - `@ComponentScan`：启用组件扫描，自动发现和注册带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 注解的类。
 
 - SpringBoot工程提供引导类用来**启动程序**
 
@@ -591,7 +601,30 @@
     }
     ```
 
-- 注意：引导类必须有一个注解@SpringBootApplication，否则启动不起来
+### 3.3 自定义配置
+
+​	虽然 `@SpringBootApplication` 注解已经包含了上述三个注解，但在某些情况下，你可能需要更细粒度的控制。你可以手动添加这些注
+
+```java
+package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan(basePackages = "com.example")
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+
+在这个例子中，我们手动添加了 `@Configuration`、`@EnableAutoConfiguration` 和 `@ComponentScan` 注解，并指定了扫描的基础包。
 
 ## 4.内嵌tomcat
 
@@ -686,7 +719,6 @@
     </dependencies>
   ```
 
-  
 
 ### 4.2Tomcat运行原理
 
@@ -708,8 +740,6 @@
     </exclusions>
   </dependency>
   ```
-
-  
 
 - 通过 starter引入 tomcat 服务器之后就可以直接创建tomcat对象了
 
@@ -749,12 +779,155 @@
       </dependencies>
   ```
 
-### 4.4总结
+# Tomcat(详细讲解)⭐️
 
-- tomcat 只是springboot中的一个依赖而已
-- 想要什么服务器，直接导入对应的starter包即可
+在 Spring Boot 中，内嵌的 Tomcat 服务器是一个非常重要的组件，它使得应用程序可以独立运行，而无需外部的 Servlet 容器。理解 Tomcat 在 Spring Boot 中的运行原理有助于更好地管理和优化应用程序。以下是对 Spring Boot 中 Tomcat 运行原理的详细解释：
 
+### 1. Spring Boot 启动流程
 
+当你运行一个 Spring Boot 应用程序时，Spring Boot 的启动流程大致如下：
+
+1. **加载引导类**：Spring Boot 应用程序从引导类（通常是带有 `@SpringBootApplication` 注解的类）开始。
+2. **初始化 `SpringApplication` 对象**：在引导类的 `main` 方法中，调用 `SpringApplication.run` 方法，创建一个 `SpringApplication` 对象。
+3. **加载配置**：`SpringApplication` 对象会加载应用的配置文件（如 `application.properties` 或 `application.yml`）。
+4. **创建 `ApplicationContext`**：根据配置文件和注解，创建一个 `ApplicationContext`。
+5. **初始化 Bean**：在 `ApplicationContext` 中初始化所有的 Bean。
+6. **启动嵌入式容器**：如果项目中包含 `spring-boot-starter-web` 依赖，Spring Boot 会自动配置并启动嵌入式 Tomcat 服务器。
+
+### 2. 内嵌 Tomcat 的启动过程
+
+在 Spring Boot 中，内嵌 Tomcat 的启动过程主要包括以下几个步骤：
+
+1. **创建 `TomcatServletWebServerFactory`**：
+   - Spring Boot 会创建一个 `TomcatServletWebServerFactory` 实例，这个工厂类负责创建和配置 Tomcat 服务器。
+   - 你可以通过配置文件或 Java 代码自定义 `TomcatServletWebServerFactory` 的行为。
+
+2. **配置 Tomcat 服务器**：
+   - `TomcatServletWebServerFactory` 会根据配置文件（如 `application.properties` 或 `application.yml`）中的属性配置 Tomcat 服务器。
+   - 你可以在配置文件中设置端口号、上下文路径、连接超时时间等属性。
+
+3. **创建 `Tomcat` 实例**：
+   - `TomcatServletWebServerFactory` 创建一个 `Tomcat` 实例，并设置相关配置。
+   - 创建 `Context` 对象，用于管理应用程序的 Servlet 容器上下文。
+
+4. **添加 Servlet 和 Filter**：
+   - `TomcatServletWebServerFactory` 将应用程序中的 Servlet 和 Filter 注册到 Tomcat 服务器中。
+   - 这些 Servlet 和 Filter 通常由 Spring Boot 的自动配置机制管理。
+
+5. **启动 Tomcat 服务器**：
+   - 调用 `Tomcat.start()` 方法启动 Tomcat 服务器。
+   - Tomcat 开始监听指定的端口，并处理客户端请求。
+
+### 3. 关键类和接口
+
+以下是一些关键的类和接口，它们在 Spring Boot 中管理内嵌 Tomcat 服务器的过程中起着重要作用：
+
+- **`SpringApplication`**：
+  - 负责启动 Spring Boot 应用程序。
+  - 通过调用 `run` 方法启动应用程序。
+
+- **`ServletWebServerApplicationContext`**：
+  - 扩展了 `ApplicationContext`，专门用于管理嵌入式 Servlet 容器。
+  - 在启动过程中创建并初始化嵌入式容器。
+
+- **`TomcatServletWebServerFactory`**：
+  - 负责创建和配置 Tomcat 服务器。
+  - 可以通过配置文件或 Java 代码进行自定义。
+
+- **`WebServer`**：
+  - 表示一个嵌入式 Servlet 容器。
+  - `TomcatServletWebServer` 是 `WebServer` 的具体实现，用于管理 Tomcat 服务器。
+
+- **`Connector`**：
+  - 表示一个网络连接器，用于处理客户端请求。
+  - 可以配置多个 `Connector`，例如 HTTP 和 HTTPS。
+
+- **`Context`**：
+  - 表示一个 Servlet 容器上下文，用于管理应用程序的 Servlet 和 Filter。
+  - 在 Tomcat 中，每个应用程序都有一个对应的 `Context`。
+
+### 4. 示例代码
+
+以下是一个简单的示例，展示了如何在 Spring Boot 中配置和启动内嵌的 Tomcat 服务器：
+
+#### 引导类
+
+```java
+package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+
+#### 配置文件 `application.properties`
+
+```properties
+# 设置服务器端口
+server.port=8080
+
+# 设置上下文路径
+server.servlet.context-path=/myapp
+
+# 设置连接超时时间
+server.tomcat.connection-timeout=20000
+
+# 设置最大线程数
+server.tomcat.max-threads=100
+
+# 设置最小空闲线程数
+server.tomcat.min-spare-threads=10
+
+# 设置最大连接数
+server.tomcat.max-connections=10000
+```
+
+#### 自定义配置类
+
+```java
+package com.example.demo.config;
+
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Http11NioProtocol;
+
+@Configuration
+public class TomcatConfig {
+
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
+        return factory -> {
+            factory.addConnectorCustomizers(connector -> {
+                connector.setPort(8080);
+                connector.setConnectionTimeout(20000);
+
+                Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
+                protocol.setMaxThreads(100);
+                protocol.setMinSpareThreads(10);
+            });
+
+            factory.addContextCustomizers(context -> {
+                context.setPath("/myapp");
+            });
+        };
+    }
+}
+```
+
+### 5. 总结
+
+内嵌的 Tomcat 服务器是 Spring Boot 应用程序的重要组成部分，它使得应用程序可以独立运行，而无需外部的 Servlet 容器。通过 `SpringApplication`、`TomcatServletWebServerFactory` 和其他相关类，Spring Boot 能够自动配置并启动 Tomcat 服务器。你可以通过配置文件或 Java 代码自定义 Tomcat 的各种属性，以满足不同的需求。
 
 # 四、配置文件
 
@@ -767,10 +940,8 @@
 
 - 常用配置信息官方文档地址
 
-  ```java
   https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties
-  ```
-
+  
 - 以后记不住什么配置的时候，就去官方找
 
 ### 2.1properties
@@ -781,9 +952,9 @@
 
 - 通过properties 修改端口信息
 
-  ![image-20221123104512001](picture/image-20221123104512001.png)
+  <img src="picture/image-20221123104512001.png" alt="image-20221123104512001" style="zoom: 50%;" />
 
-  ![image-20221123104440750](picture/image-20221123104440750.png)
+  <img src="picture/image-20221123104440750.png" alt="image-20221123104440750" style="zoom: 50%;" />
 
 - 修改后重启项目查看日志
 
@@ -791,36 +962,6 @@
 
 - 修改 banner 文件(直接新建一个 banner.txt 文件在idea resources下面即可)
 
-  ```java
-              _.._       ,------------------------.
-          ,'      `.    (        云哥带我们月薪上万！  )
-         /  __) __` \    `-,----------------------'
-        (  (`-`(-')  ) _.-'
-        /)  \  = /  (
-       /'    |--' .  \
-      (  ,---|  `-.)__`
-       )(  `-.,--'   _`-.
-      '/,'          (  Uu",
-       (。       ,    `/,-' )
-       `.__,  : `。'/  /`--'
-         |     `--'  |
-         `   `-._   /
-          \        (
-          /\ .      \.
-         / |` \     ,-\
-        /  \| .)   /   \
-       ( ,'|\    ,'     :
-       | \,`.`--"/      }
-       `,'    \  |,'    /
-      / "-._   `-/      |
-      "-.   "-.,'|     ;
-     /        _/["---'""]
-    :        /  |"-     '
-    '           |      /
-    |           `      |
-  ```
-
-  
 
 ### 2.2yaml 格式
 
@@ -882,32 +1023,121 @@
   private String name;
   ```
 
-- 读取配置全部数据:注意要导入spring包的类
+### 2.3`@ConfigurationProperties`
+
+#### 1. 基本概念
+
+`@ConfigurationProperties` 注解用于将配置文件中的属性绑定到一个 Java 对象上。这些属性可以来自 `application.properties` 或 `application.yml` 文件。Spring Boot 会自动将这些属性**映射**到相应的字段上。
+
+#### 2.示例
+
+#### 1.配置依赖
+
+```xml
+<!-- Maven -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+#### 2. 配置文件 `application.yml`
+
+```java
+server:
+  port: 8080
+  servlet:
+    context-path: /myapp
+
+app:
+  name: My Application
+  version: 1.0.0
+  settings:
+    timeout: 30000
+    max-threads: 100
+```
+
+#####   3. 配置类 AppProperties.java
+
+```java
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "app")
+@Data
+public class AppProperties {
+    private String name;
+    private String version;
+    private Settings settings;
+}
+```
+
+##### 4. 服务类 ConfigService.java
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ConfigService {			
+	@Autowired
+    private  AppProperties appProperties;
+
+    public String getAppName() {
+        return appProperties.getName();
+    }
+
+    public String getAppVersion() {
+        return appProperties.getVersion();
+    }
+
+    public int getAppTimeout() {
+        return appProperties.getSettings().getTimeout();
+    }
+
+    public int getAppMaxThreads() {
+        return appProperties.getSettings().getMaxThreads();
+    }
+}
+```
+
+### 2.4 `Environment` 接口
+
+`Environment` 接口用于获取应用程序的环境信息，包括系统属性、环境变量和配置文件中的属性。通过 `Environment` 接口，你可以在应用程序中动态地访问和使用这些配置信息。
+
+- 假设你有一个 `application.yml` 文件，内容如下：
 
   ```java
-  @Autowired
-  private Environment env;
+  server:
+    port: 8080
+    servlet:
+      context-path: /myapp
+  
+  app:
+    name: My Application
+    version: 1.0.0
   ```
 
-- 读取对象数据
+- 依赖注入，并获取
 
   ```java
-  @Component
-  @ConfigurationProperties(prefix = "sy")
-  @Data
-  public class User {
-      private String name;
-      private String password;
+  @Service
+  public class ConfigService {
+  
+      @Autowired
+      private Environment environment;
+      
+      public String getAppName() {
+          return environment.getProperty("app.name");
+      }
   }
   ```
 
-  - @ConfigurationProperties 注解必须指定读取数据的前缀
-
-### 2.3配置文件优先级
+### 2.5配置文件优先级
 
 - properties > yml > yaml
-
-
 
 ## 3.配置文件抽取公共配置
 
@@ -1124,7 +1354,7 @@
       @Test
       void contextLoads() {
           Item item = new Item();
-          item.setName("上云 javase 精讲");
+          item.setName("BWH javase 精讲");
           item.setRemark("课程免费，知识全面");
           mapper.insert(item);
   
@@ -1140,7 +1370,7 @@
 
 - 使用SpringBoot 整合真的太方便了
   - 需要添加 mybatis 的依赖也即mybatis-spring-boot-starter
-  - @Mapper 将Mapper 映射交给容器管理
+  - **@Mapper 将Mapper 映射交给容器管理**
   - 如果有下划线你觉得难受，添加 @Repository就可以解决（不解决也行）
 
 
@@ -1161,13 +1391,27 @@
 
 - 导入依赖
 
-  ```java
+  **SpringBoot2**
+  
+  ```xml
   <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>druid-spring-boot-starter</artifactId>
       <version>1.2.15</version>
   </dependency>
   ```
+  
+  **SpringBoot3**
+  
+  ```xml
+  <dependency>
+  	<groupId>com.alibaba</groupId>
+  	<artifactId>druid-spring-boot-3-starter</artifactId>
+      <version>1.2.20</version>
+  </dependency>
+  ```
+  
+  
 
 ### 2.3修改配置
 
@@ -1278,10 +1522,10 @@
 
   ```java
   <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <optional>true</optional>
-  </dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-devtools</artifactId>
+         <optional>true</optional>
+   </dependency>
   ```
 
 
@@ -1306,7 +1550,7 @@
 
 - 设置 complier
 
-  ![image-20221123163759225](picture/image-20221123163759225.png)
+  <img src="picture/image-20221123163759225.png" alt="image-20221123163759225" style="zoom:67%;" />
 
   
 
@@ -1403,3 +1647,47 @@
   - 包含原始工程的依赖jar
   - 读取MANIFEST.MF Main-Class 可以得到启动类
   - 运行JarLauncher 类执行
+
+![img](./assets/O1CN01khO8o01EAwXZnPWhX_!!6000000000312-2-tps-144-144.png)
+
+
+
+`JarLauncher` 是 Spring Boot 内部使用的一个类，用于启动打包成 JAR 文件的 Spring Boot 应用程序。当你运行一个 Spring Boot JAR 文件时，`JarLauncher` 会负责初始化和启动应用程序。
+
+### 什么是 JarLauncher？
+
+`JarLauncher` 是 `org.springframework.boot.loader.JarLauncher` 类的一个实例，它是 Spring Boot 的 `spring-boot-loader` 模块的一部分。这个模块提供了加载和启动嵌入式 JAR 文件所需的功能。
+
+### 工作原理
+
+当你使用 `java -jar your-app.jar` 命令启动一个 Spring Boot 应用程序时，以下是发生的过程：
+
+1. **启动 `JarLauncher`**：
+   - JVM 加载 `JarLauncher` 类。
+   - `JarLauncher` 类的 `main` 方法被调用。
+2. **初始化 ClassLoader**：
+   - `JarLauncher` 初始化一个自定义的 `ClassLoader`，用于加载 JAR 文件中的类和资源。
+3. **启动应用程序**：
+   - `JarLauncher` 调用 `SpringApplication.run` 方法，启动 Spring Boot 应用程序。
+   - `SpringApplication` 负责初始化 Spring 容器，加载配置文件，启动嵌入式服务器（如 Tomcat），并启动应用程序。
+
+### 示例
+
+假设你有一个简单的 Spring Boot 应用程序，打包成 `myapp.jar`。你可以使用以下命令启动它：
+
+sh浅色版本
+
+```
+java -jar myapp.jar
+```
+
+在这个过程中，`JarLauncher` 会执行以下步骤：
+
+1. **加载 `JarLauncher` 类**：
+   - JVM 加载 `org.springframework.boot.loader.JarLauncher` 类。
+2. **调用 `main` 方法**：
+   - `JarLauncher` 类的 `main` 方法被调用。
+3. **初始化 ClassLoader**：
+   - `JarLauncher` 初始化一个 `LaunchedURLClassLoader`，用于加载 JAR 文件中的类和资源。
+4. **启动应用程序**：
+   - `JarLauncher` 调用 `SpringApplication.run` 方法，启动 Spring Boot 应用程序。
