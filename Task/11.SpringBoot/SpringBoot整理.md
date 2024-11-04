@@ -17,7 +17,7 @@
    - `@EnableAutoConfiguration`：启用自动配置功能。
    - `@ComponentScan`：扫描指定包及其子包下的组件。
 
-# 自动配置
+自动配置
 
 4. **Spring Boot 的自动配置原理是什么？**
    - Spring Boot 通过 `@EnableAutoConfiguration` 注解启用自动配置功能。它会从类路径下的 `META-INF/spring.factories` 文件中读取 `EnableAutoConfiguration` 指定的值，并将这些值作为自动配置类导入到容器中。自动配置类会根据类路径上的 jar 包和类自动配置 Bean。
@@ -101,5 +101,3 @@
     - 使用 `@RestController` 注解标记控制器类。
     - 使用 `@RequestMapping`、`@GetMapping`、`@PostMapping` 等注解映射请求。
     - 返回 JSON 或 XML 格式的数据。
-
-通过准备这些问题，你可以更好地应对 Spring Boot 相关的面试，展示你对 Spring Boot 的深入理解和实际应用能力。

@@ -43,8 +43,6 @@
         logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
   ```
 
-
-
 ## 3.`@TableLogic`
 
 - 实体类字段上加上`@TableLogic`注解
@@ -109,8 +107,6 @@
 
 # 二、通用枚举
 
->
->
 >解决了繁琐的配置，让 mybatis 优雅的使用枚举属性！ 从 3.5.2 版本开始只需完成 `步骤1: 声明通用枚举属性` 即可使用
 
 ## 1.修改表结构
@@ -120,8 +116,6 @@
   ```java
   ALTER TABLE user ADD column `sex` int DEFAULT '1' COMMENT '1-男 0-女';
   ```
-
-
 
 ## 2.声明通用枚举属性
 
@@ -174,8 +168,6 @@
 
 ## 4.额外补充
 
->
->
 >如果是3.5.2版本之后的不需要配置了
 
 - 之前版本的按如下配置
@@ -206,7 +198,6 @@
   private final int code;
   ```
 
-  
 
 ## 5.测试
 
@@ -239,8 +230,6 @@
 
 # 三、自动填充功能
 
->
->
 >开发中，比如
 >
 >- 插入数据的时候需要插入创建时间
@@ -360,16 +349,13 @@
 
 - 数据库结果
 
-  ![image-20221203113830320](picture/image-20221203113830320.png)·
+  ![image-20221203113830320](picture/image-20221203113830320.png)
 
-  
 
 # 四、SQL注入器
 
 ## 1.SQL注入的原理分析
 
->
->
 >MyBatisPlus 是使用 ISqlInjector 接口负责SQL注入工作
 
 ![image-20221203161601088](picture/image-20221203161601088.png)
@@ -495,14 +481,11 @@
   <==      Total: 13
   ```
 
-  
 
 # 五、插件
 
 ## 1.拦截器核心代码
 
->
->
 >## MybatisPlusInterceptor
 >
 >该插件是核心插件,目前代理了 `Executor#query` 和 `Executor#update` 和 `StatementHandler#prepare` 方法
@@ -658,8 +641,6 @@
 
 ## 4.防全表更新与删除插件
 
->
->
 >## BlockAttackInnerInterceptor
 >
 >针对 update 和 delete 语句 作用: 阻止恶意的全表更新删除

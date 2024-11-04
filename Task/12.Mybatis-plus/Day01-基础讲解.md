@@ -278,6 +278,18 @@
 
 ### 1.4@TableId
 
+> `@TableId` 注解用于标识实体类中的主键字段。它可以配置主键的生成策略，例如自增、UUID等。
+>
+> #### 常见属性：
+>
+> - **value**：指定数据库表中的字段名，默认为属性名。
+> - **type**：指定主键生成策略，常见的有：
+>   - `IdType.AUTO`：自动增长（适用于 MySQL 的 `auto_increment`）
+>   - `IdType.NONE`：无主键生成策略，需要手动赋值
+>   - `IdType.UUID`：使用 UUID 生成主键
+>   - `IdType.ASSIGN_ID`：使用雪花算法生成主键
+>   - `IdType.ASSIGN_UUID`：使用 UUID 生成主键（字符串形式）
+
 - @TableId修改User 类实体
 
   ```java
@@ -293,6 +305,25 @@
   ```
 
 ### 1.5@TableField
+
+> `@TableField` 注解用于标识实体类中的非主键字段。它可以配置字段的各种属性，如是否忽略、是否更新等。
+>
+> #### 常见属性：
+>
+> - **value**：指定数据库表中的字段名，默认为属性名。
+> - **exist**：指定该字段是否存在，默认为 `true`。
+> - **fill**：指定字段填充策略，常见的有：
+>   - `FieldFill.INSERT`：插入时填充字段
+>   - `FieldFill.UPDATE`：更新时填充字段
+>   - `FieldFill.INSERT_UPDATE`：插入和更新时都填充字段
+> - **el**：指定字段值的表达式，常用于动态设置字段值。
+> - **update**：指定字段更新时的 SQL 片段。
+> - **insert**：指定字段插入时的 SQL 片段。
+> - **select**：指定该字段是否参与查询，默认为 `true`。
+> - **strategy**：指定字段的策略，常用的有：
+>   - `FieldStrategy.IGNORED`：忽略该字段
+>   - `FieldStrategy.NOT_NULL`：字段不为空时才进行操作
+>   - `FieldStrategy.NOT_EMPTY`：字段不为空字符串时才进行操作
 
 - @TableField 修改字段名称
 
@@ -383,7 +414,7 @@
 - 方法
 
   ```java
-  int delete(@Param("ew") Wrapper<T> queryWrapper);
+      int delete(@Param("ew") Wrapper<T> queryWrapper);
   ```
 
 - 测试
@@ -687,7 +718,7 @@
   <==      Total: 1
   ```
 
-### 4.6selectPage
+### 4.6selectPage(⭐️)
 
 - selectPage:查询出分页结果
 
@@ -697,11 +728,12 @@
   <P extends IPage<T>> P selectPage(P page, @Param("ew") Wrapper<T> queryWrapper);
   ```
 
-- 配置分页插件
+- 配置全局拦截器（启用相应功能）
+
+  > `MybatisPlusInterceptor` 是 MyBatis-Plus 提供的一个全局拦截器，用于增强 MyBatis 的功能。通过配置 `MybatisPlusInterceptor`，你可以启用一些内置的功能，如分页插件、性能分析插件等。（如果不配置全局拦截器，那分页功能无效）
 
   ```java
   @Configuration
-  @MapperScan("cn.sycoder.mapper")
   public class MybatisPlusConfig {
       @Bean
       public MybatisPlusInterceptor mybatisPlusInterceptor() {
@@ -709,11 +741,8 @@
           interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
           return interceptor;
       }
-  
   }
   ```
-
-  
 
 - 测试
 
@@ -731,6 +760,25 @@
   }
   ```
 
+  > **`Page` 对象**：
+  >
+  > ```java
+  > Page<User> page = new Page<>(currentPage, pageSize);
+  > ```
+  >
+  > - `currentPage`：当前页码，从 1 开始。
+  > - `pageSize`：每页显示的记录数。
+  >
+  > `IPage`**对象**：
+  >
+  > 包含了分页查询的结果和分页信息，你可以从中获取以下属性：
+  >
+  > - **getCurrent()**：当前页码。
+  > - **getSize()**：每页大小。
+  > - **getTotal()**：总记录数。
+  > - **getPages()**：总页数。
+  > - **getRecords()**：当前页的数据列表。
+
 - 结果
 
   ```java
@@ -745,8 +793,6 @@
 
 # 四、Service CRUD接口
 
->
->
 >说明：
 >
 >通用 Service CRUD 封装IService接口，进一步封装 CRUD 采用 `get 查询单行` `remove 删除` `list 查询集合` `page 分页` 前缀命名方式区分 `Mapper` 层避免混淆，
@@ -1313,10 +1359,8 @@
 
 - select 方法
 
-  >
-  >
   >例子 select("id", "name", "age")：具体需要查询的列
-
+  
 - 方法测试
 
   ```java
@@ -1342,13 +1386,11 @@
 
 - 更新 wrapper
 
-  >
-  >
   >说明:
   >
   >继承自 `AbstractWrapper` ,自身的内部属性 `entity` 也用于生成 where 条件
-  > 及 `LambdaUpdateWrapper`, 可以通过 `new UpdateWrapper().lambda()` 方法获取!
-
+  >及 `LambdaUpdateWrapper`, 可以通过 `new UpdateWrapper().lambda()` 方法获取!
+  
 - ### set
 
   ```java

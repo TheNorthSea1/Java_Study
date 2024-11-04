@@ -1824,33 +1824,44 @@ public class WebConfig implements WebMvcConfigurer {
 
 ![image-20221117165036933](picture/image-20221117165036933.png)
 
+![image-20241104133514927](./assets/image-20241104133514927.png)
+
 ### 详细执行流程
 
-1. **客户端请求**：
-   - 客户端（通常是浏览器）发送一个 HTTP 请求到服务器。
-2. **DispatcherServlet**：
-   - `DispatcherServlet` 是 Spring MVC 的前端控制器，负责接收所有的请求。
-   - 它是整个请求处理流程的入口点。
-3. **HandlerMapping**：
-   - `DispatcherServlet` 根据请求的 URL 查找合适的处理器（Handler），这个过程由 `HandlerMapping` 完成。
-   - `HandlerMapping` 返回一个处理器执行链（HandlerExecutionChain），其中包含处理器（Controller）和拦截器（Interceptor）。
-4. **HandlerAdapter**：
-   - `DispatcherServlet` 使用 `HandlerAdapter` 调用处理器（Controller）。
-   - `HandlerAdapter` 是一个适配器接口，用于调用不同类型处理器的方法。
-5. **Controller**：
-   - 控制器（Controller）处理请求，执行业务逻辑。
-   - 控制器返回一个 `ModelAndView` 对象，其中包含模型数据和视图名称。
-6. **Model and View**：
-   - `ModelAndView` 对象包含了模型数据（Model）和视图名称（View）。
-   - 模型数据用于传递给视图层，视图名称用于确定渲染哪个视图。
-7. **ViewResolver**：
-   - `DispatcherServlet` 使用 `ViewResolver` 解析视图名称，找到对应的视图对象。
-   - `ViewResolver` 将视图名称解析为实际的视图对象（如 JSP 页面）。
-8. **View**：
-   - 视图对象负责渲染视图，将模型数据填充到视图中。
-   - 渲染后的视图内容将作为 HTTP 响应返回给客户端。
-9. **响应客户端**：
-   - 最终，渲染后的视图内容通过 HTTP 响应返回给客户端
+1. 用户发送请求至前端控制器DispatcherServlet； 
+2. DispatcherServlet收到请求后，调用HandlerMapping处理器映射器，请求获取Handle；
+3. 处理器映射器根据请求url找到具体的处理器，生成处理器对象及处理器拦截器(如果有则生
+   成)一并返回给DispatcherServlet；
+4. DispatcherServlet 调用 HandlerAdapter处理器适配器；
+5. HandlerAdapter 经过适配调用 具体处理器(Handler/Controller，也叫后端控制器)；
+6. Handler/Controller 执行完成返回ModelAndView；
+7. HandlerAdapter将Handler执行结果ModelAndView返回给DispatcherServlet；
+8. DispatcherServlet将ModelAndView传给ViewResolver视图解析器进行解析；
+9. ViewResolver解析后返回具体View；
+10. DispatcherServlet对View进行渲染视图（即将模型数据填充至视图中）
+11. DispatcherServlet响应用户
+
+### Controller & Handler 
+
+#### 1. Controller
+
+`Controller` 是 Spring MVC 中最常见的后端控制器，用于处理 HTTP 请求。它通常是一个带有 `@Controller` 注解的类，并且包含多个带有 `@RequestMapping`（或其派生注解如 `@GetMapping`, `@PostMapping` 等）的方法，这些方法用于处理具体的请求。
+
+#### 2. Handler
+
+`Handler` 是一个更广泛的概念，它指的是任何能够处理请求的对象。在 Spring MVC 中，`Handler` 可以是 `Controller`，也可以是其他类型的处理器，如 `RequestMappingHandlerMapping` 和 `RequestMappingHandlerAdapter` 管理的处理器。
+
+- 处理器类型
+
+1. **Controller**：最常见的一种处理器，用于处理 HTTP 请求。
+2. **ExceptionHandler**：用于处理异常的处理器。
+3. **ViewResolver**：用于解析视图的处理器。
+4. **Interceptor**：用于拦截请求的处理器。
+
+#### 总结
+
+- **Controller**：是一种特定类型的 `Handler`，用于处理 HTTP 请求。它是 Spring MVC 中最常用的后端控制器。
+- **Handler**：是一个更广泛的概念，包括 `Controller` 以及其他类型的处理器，如异常处理器、视图解析器和拦截器。
 
 ## 3.执行流程原理分析
 

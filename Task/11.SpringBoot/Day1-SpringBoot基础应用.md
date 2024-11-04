@@ -45,7 +45,7 @@
 
 - 进入选择页面
 
-  ![image-20221122111440446](picture/image-20221122111440446.png)
+  <img src="picture/image-20221122111440446.png" alt="image-20221122111440446" style="zoom:67%;" />
 
 - 选一个 SpringWeb 依赖
 
@@ -126,7 +126,7 @@
 
 - 自己手动标记
 
-  ![image-20221122122809062](picture/image-20221122122809062.png)
+  <img src="picture/image-20221122122809062.png" alt="image-20221122122809062" style="zoom:67%;" />
 
 ### 2.4新建Controller测试
 
@@ -342,12 +342,29 @@
 
 ## 1.parent
 
-- 前言：之前是使用spring/springmvc 开发，整合不同的组件会有很多依赖，这些依赖会涉及到很多的版本信息，版本信息多了之后可能会导致版本冲突问题
-- 概述：把很多组件技术的搭配放到一起，名字就叫 parent
+> - 前言：之前是使用spring/springmvc 开发，整合不同的组件会有很多依赖，这些依赖会涉及到很多的版本信息，版本信息多了之后可能会导致版本冲突问题。在 Spring Boot 项目中，使用 `parent` 标签可以指定一个父项目，这通常用于继承 Spring Boot 的依赖管理和插件管理。这种方式可以简化项目的依赖管理和构建过程。
+> - 概述：把很多组件技术的搭配放到一起，名字就叫 parent
+>
 
 ### 1.1实际开发中会引入 parent
 
-- 引入parent
+- 用parent引入父项目
+
+  > #### `spring-boot-starter-parent`
+  >
+  > Spring Boot 提供了一个标准的父项目 `spring-boot-starter-parent`，它包含了许多常用的依赖版本和插件配置。
+  >
+  > 作用：
+  >
+  > 1. 定义了 Java 编译版本为 1.8 。
+  > 2. 使用 UTF-8 格式编码。
+  > 3. **继承自 spring-boot-dependencies，这个里边定义了依赖的版本，也正是因为继承了这个依**
+  > **赖，所以我们在写依赖时才不需要写版本号。**
+  > 4. 执行打包操作的配置。
+  > 5. 自动化的资源过滤。
+  > 6. 自动化的插件配置。
+  > 7. 针对 application.properties 和 application.yml 的资源过滤，包括通过 proﬁle 定义的不同
+  > 环境的配置文件，例如 application-dev.properties 和 application-dev.yml。
 
   ```java
   <parent>
@@ -573,8 +590,6 @@
 - 提供如下配置
   - SpringConfig
   - SpringMvcConfig
-
-
 
 ### 3.2引导类作用
 
@@ -1580,11 +1595,11 @@ public class ConfigService {
 
 - 通过浏览器访问idea
 
-  ![image-20221123203628476](picture/image-20221123203628476.png)
+  <img src="picture/image-20221123203628476.png" alt="image-20221123203628476" style="zoom: 50%;" />
 
 - 将jar部署到服务器
 
-  ![image-20221123203740130](picture/image-20221123203740130.png)
+  <img src="picture/image-20221123203740130.png" alt="image-20221123203740130" style="zoom:50%;" />
 
 
 
@@ -1633,7 +1648,7 @@ public class ConfigService {
 
 - 如果不加插件，打包只是打自己，代码量很少
 
-  ![image-20221123204729555](picture/image-20221123204729555.png)
+  <img src="picture/image-20221123204729555.png" alt="image-20221123204729555" style="zoom:67%;" />
 
 - 解压后对比
 
@@ -1691,3 +1706,12 @@ java -jar myapp.jar
    - `JarLauncher` 初始化一个 `LaunchedURLClassLoader`，用于加载 JAR 文件中的类和资源。
 4. **启动应用程序**：
    - `JarLauncher` 调用 `SpringApplication.run` 方法，启动 Spring Boot 应用程序。
+
+## 5. Spring Boot 打成的 jar 和普通的 jar 有什么区别 ?
+
+- Spring Boot 项目最终打包成的 jar 是可执行 jar ，这种 jar 可以直接通过 java -jar xxx.jar 命
+  令来运行，这种 jar 不可以作为普通的 jar 被其他项目依赖，即使依赖了也无法使用其中的类。
+- Spring Boot 的 jar 无法被其他项目依赖，主要还是他和普通 jar 的结构不同。普通的 jar 包，解压
+  后直接就是包名，包里就是我们的代码，而 Spring Boot 打包成的可执行 jar 解压后，在 \BOOT-
+  INF\classes 目录下才是我们的代码，因此无法被直接引用。如果非要引用，可以在 pom.xml
+  文件中增加配置，将 Spring Boot 项目打包成两个 jar ，一个可执行，一个可引用

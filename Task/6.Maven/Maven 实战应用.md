@@ -1,5 +1,3 @@
-<font size="20" color="blue">学完SpringMVC再来学实战应用</font>
-
 # 一、Maven分模块开发
 
 ## 1.场景介绍
