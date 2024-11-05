@@ -98,7 +98,7 @@
 
     ```java
     @Configuration
-    @ComponentScan(value = {"cn.sycoder.controller"})
+    @ComponentScan(value = {"cn.bwhcoder.controller"})
     @EnableWebMvc
     public class SpringMvcConfig {
     }
@@ -215,13 +215,13 @@
 
 - 新建好结构图
 
-  ![image-20221118161731118](picture/image-20221118161731118.png)
+  <img src="picture/image-20221118161731118.png" alt="image-20221118161731118" style="zoom:67%;" />
 
 #### 2.2.3<font color="red">创建订单中心</font>
 
 - 新建订单中心模块
 
-  ![image-20221118161930069](picture/image-20221118161930069.png)
+  <img src="picture/image-20221118161930069.png" alt="image-20221118161930069" style="zoom:67%;" />
 
 - 目前的项目结构
 
@@ -231,17 +231,17 @@
 
 - 新建支付模块
 
-  ![image-20221118162520015](picture/image-20221118162520015.png)
+  <img src="picture/image-20221118162520015.png" alt="image-20221118162520015" style="zoom:67%;" />
 
 - 项目结构
 
-  ![image-20221118162745911](picture/image-20221118162745911.png)
+  <img src="picture/image-20221118162745911.png" alt="image-20221118162745911" style="zoom:67%;" />
 
 # 二、聚合和继承
 
 ## 1.聚合
 
-- 概述：将多个模块组织成一个整体，同时进行项目构建的过程（聚合用于管理整个项目）
+> **聚合**是指将多个子模块项目组合在一起进行构建。聚合项目通常是一个父项目，它的主要目的是确保所有子模块在一次构建命令中被一起构建。聚合项目本身通常不会生成任何实际的输出文件（如JAR、WAR等），而只是一个用于管理多个子模块的容器。
 
 ### 1.1.聚合工程
 
@@ -257,24 +257,32 @@
 
 
 
-### 1.3.实际开发应用
+### 1.3.实际开发应用（⭐️）
 
 #### 1.3.1创建公共服务
 
 - 打包方式
-  - jar 默认（表名这是一个java项目）
-  - war (表名这是一个web项目)
-  - pom(表名这是一个聚合或继承项目)
+  - **jar**：
+    - **用途**：用于打包Java类库。
+    - **描述**：生成一个包含编译后的类文件和资源文件的JAR文件。通常用于创建可重用的库。
+  - **war**：
+    - **用途**：用于打包Web应用程序。
+    - **描述**：生成一个包含Web应用的所有资源文件（如HTML、CSS、JavaScript等）以及编译后的类文件的WAR文件。通常用于部署到Servlet容器（如Tomcat、Jetty等）。
+  - **pom**：
+    - **用途**：用于聚合项目和管理多模块项目的父项目。
+    - **描述**：不生成实际的输出文件，而是作为一个容器或父项目，用于组织和管理多个子模块。常用于多模块项目的依赖管理和版本控制。
+  
+- 先设置打包方式 & 创建通过服务模块
 
-- 创建通过服务模块
+  ![image-20241105214849696](./assets/image-20241105214849696.png)
 
-  ![image-20221118211757041](picture/image-20221118211757041.png)
+  <img src="picture/image-20221118211757041.png" alt="image-20221118211757041" style="zoom:67%;" />
 
   
 
 - 提供一个工具类
 
-  ![image-20221118211830680](picture/image-20221118211830680.png)
+  ![image-20241105220329636](./assets/image-20241105220329636.png)
 
   
 
@@ -286,13 +294,15 @@
   mvn install
   ```
 
+  <img src="./assets/image-20241105215843700.png" alt="image-20241105215843700" style="zoom: 67%;" />
+
   ![image-20221118212156913](picture/image-20221118212156913.png)
 
 - 在用户中心引用公共服务
 
   ```java
   <dependency>
-      <groupId>cn.sycoder</groupId>
+      <groupId>cn.bwhcoder</groupId>
       <artifactId>commons-server</artifactId>
       <version>1.0-SNAPSHOT</version>
   </dependency>
@@ -300,15 +310,21 @@
 
   ![image-20221118212326877](picture/image-20221118212326877.png)
 
+- 使用我们自己写的jar包中的工具类
+
+  ![image-20241105220422706](./assets/image-20241105220422706.png)
+  
 - maven 依赖的细节
 
-  ![image-20221118212951957](picture/image-20221118212951957.png)
+  ![image-20241105220953579](./assets/image-20241105220953579.png)
+  
+  <img src="picture/image-20221118212951957.png" alt="image-20221118212951957" style="zoom: 67%;" />
 
 
 
 ## 2.继承
 
-- 概述：子工程可以继承父工程中的配置信息，常见于依赖关系的继承
+> **继承**是指子模块项目从父项目继承配置信息。父项目可以定义一些公共的配置（如依赖管理、插件配置等），子模块通过继承这些配置来避免重复声明，从而简化配置管理。
 
 ### 2.1没有使用继承的问题
 
@@ -415,7 +431,14 @@
   </project>
   ```
 
-#### 2.3.2定义依赖管理
+#### 2.3.2定义依赖管理dependencyManagement 
+
+> 1. **版本集中管理**：
+>    - 在父项目的 `<dependencyManagement>` 中声明依赖时，需要指定版本号。子模块在引用这些依赖时，**不需要再指定版本号**，直接继承父项目中的版本。
+> 2. **依赖范围和属性**：
+>    - 可以在 `<dependencyManagement>` 中声明依赖的范围（如 `compile`, `test` 等）和其他属性（如 `classifier`, `type` 等）。子模块在引用时可以选择覆盖这些属性。
+> 3. **灵活性**：
+>    - 子模块仍然可以覆盖父项目中声明的依赖版本，如果需要使用不同版本的依赖。
 
 - 通过 dependencyManagement 标签，可以配置供子类选用的依赖jar包
 
@@ -428,34 +451,30 @@
               <version>1.0-SNAPSHOT</version>
           </dependency>
       </dependencies>
-  
   </dependencyManagement>
   ```
-
   
-
-- 子类可以正常引用
+- 子类可以正常引用，且无需提供版本信息
 
   ```java
   <dependencies>
       <dependency>
           <groupId>cn.sycoder</groupId>
           <artifactId>commons-server</artifactId>
-          <version>1.0-SNAPSHOT</version>
       </dependency>
   </dependencies>
   ```
-
   
+
 
 ## 3.聚合和继承区别
 
 - 作用
 
   - 聚合
-    - 用于对项目整体管理
+    - 管理多个子模块，确保它们在一次构建命令中被一起构建。
   - 继承
-    - 配置子项目的依赖
+    - 管理公共配置，避免重复声明，保持一致性。
 
 - 异同
 
@@ -464,6 +483,10 @@
   - 不同点
     - 聚合通过父项目管理子项目，并且能够知道聚合的具体的模块
     - 继承通过父项目管理子项目的依赖，无法感知子模块需要哪些依赖
+  
+- **总结**
+
+  > 父项目通过 `<modules>` 标签聚合子模块，同时通过 `<dependencyManagement>` 和 `<build>` 标签管理公共配置，子模块通过 `<parent>` 标签继承这些配置。这样可以有效地管理和构建复杂的多模块项目。
 
 
 # 三、属性和版本管理
@@ -579,13 +602,13 @@
 
 ## 3.解决办法
 
-- 通过跳过测试解决
+- 方法一：通过跳过测试解决
 
   - 通过idea maven 工具实现跳过
 
     <img src="picture/image-20221119113852462.png" alt="image-20221119113852462" style="zoom:50%;" />
 
-- 通过命令行
+- 方法二：通过命令行
 
   ```java
   mvn package -D skipTests=true
@@ -599,15 +622,9 @@
 
 - 概述：公司内部搭建的用于存储Maven资源的服务器
 
-
-
 ### 1.2.中央仓库
 
 - Maven开发团队维护的用于存储Maven资源的服务器
-
-
-
-
 
 ### 1.3.目前开发现状
 
@@ -619,11 +636,11 @@
 
 - 目前团队共享jar资源只能通过网络传输
 
-  ![image-20221119164557396](picture/image-20221119164557396.png)
+  <img src="picture/image-20221119164557396.png" alt="image-20221119164557396" style="zoom: 50%;" />
 
 - 有私服之后
 
-  ![image-20221119164811086](picture/image-20221119164811086.png)
+  <img src="picture/image-20221119164811086.png" alt="image-20221119164811086" style="zoom: 50%;" />
 
 ## 2.私服下载与安装
 
@@ -647,7 +664,7 @@
 
   
 
-  - 执行命令
+  - 执行命令 用DOS窗口
 
     ```java
     nexus.exe /run nexus

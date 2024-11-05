@@ -437,3 +437,187 @@ public class FactoryBeanExample {
 - **`FactoryBean`**：用于创建复杂的 Bean，允许自定义 Bean 的创建逻辑，可以返回任何类型的对象。
 
 通过理解和使用这两个概念，你可以更好地管理和创建 Spring 容器中的 Bean，从而构建更加灵活和复杂的应用程序。
+
+# ApplicationContext 和BeanFactory区别
+
+### 主要区别
+
+1. **功能丰富程度**：
+   - **BeanFactory**：提供基本的依赖注入功能，是一个简单的容器，主要负责初始化和管理Bean。
+   - **ApplicationContext**：除了提供BeanFactory的所有功能外，还提供了更多的企业级功能，如AOP支持、事件发布、国际化消息等。
+2. **启动性能**：
+   - **BeanFactory**：启动速度快，因为它只加载必要的配置信息。
+   - **ApplicationContext**：启动速度相对较慢，因为它在启动时会预加载所有的单例Bean，并初始化更多的企业级功能。
+3. **使用场景**：
+   - **BeanFactory**：适用于小型系统或对启动性能要求较高的场景。
+   - **ApplicationContext**：适用于大型企业级应用，因为它提供了更多的高级功能。
+4. **事件处理**：
+   - **BeanFactory**：不支持事件处理。
+   - **ApplicationContext**：支持事件监听器和事件发布，可以注册事件监听器并发布事件。
+5. **国际化支持**：
+   - **BeanFactory**：不支持国际化。
+   - **ApplicationContext**：支持国际化消息源，可以读取和解析国际化消息文件。
+6. **资源加载**：
+   - **BeanFactory**：不提供资源加载的功能。
+   - **ApplicationContext**：提供资源加载的功能，可以读取和解析各种资源文件。
+
+# Spring循环依赖是什么，怎么解决
+
+在Spring框架中，循环依赖（Circular Dependency）是指两个或多个Bean之间相互依赖，形成一个闭环。这种情况会导致Spring在初始化Bean时出现问题，因为每个Bean都需要另一个Bean已经初始化完毕才能完成自己的初始化。
+
+### 循环依赖的例子
+
+假设有两个Bean：`A` 和 `B`，它们互相依赖：
+
+```java
+@Service
+public class A {
+    private final B b;
+
+    @Autowired
+    public A(B b) {
+        this.b = b;
+    }
+
+    public void doSomething() {
+        b.doSomething();
+    }
+}
+
+@Service
+public class B {
+    private final A a;
+
+    @Autowired
+    public B(A a) {
+        this.a = a;
+    }
+
+    public void doSomething() {
+        // Do something
+    }
+}
+```
+
+在这个例子中，`A` 需要 `B`，而 `B` 又需要 `A`，形成了一个循环依赖。
+
+### Spring如何处理循环依赖
+
+Spring框架通过三级缓存机制来解决循环依赖问题。这三级缓存分别是：
+
+1. **一级缓存（Singleton Objects Cache）**：
+   - 存放完全初始化好的单例Bean对象。
+2. **二级缓存（Early Singleton Objects Cache）**：
+   - 存放早期暴露的对象，即已经完成了构造函数调用但尚未完成属性注入的Bean对象。
+3. **三级缓存（Singleton Factories Cache）**：
+   - 存放Bean的工厂对象，用于生成早期暴露的对象。
+
+### 解决循环依赖的方法
+
+1. **构造器注入**：
+   - 构造器注入是Spring推荐的依赖注入方式，但在存在循环依赖的情况下，构造器注入会导致Spring无法初始化Bean，因为每个Bean都需要另一个Bean已经初始化完毕才能完成自己的初始化。
+   - **解决方案**：避免使用构造器注入来解决循环依赖问题，改用设值注入（Setter Injection）或其他方式。
+
+2. **设值注入（Setter Injection）**：
+   - 设值注入允许Spring在Bean初始化过程中逐步注入依赖，从而避免构造器注入的循环依赖问题。
+   - **示例**：
+     ```java
+     @Service
+     public class A {
+         private B b;
+     
+         @Autowired
+         public void setB(B b) {
+             this.b = b;
+         }
+     
+         public void doSomething() {
+             b.doSomething();
+         }
+     }
+     
+     @Service
+     public class B {
+         private A a;
+     
+         @Autowired
+         public void setA(A a) {
+             this.a = a;
+         }
+     
+         public void doSomething() {
+             // Do something
+         }
+     }
+     ```
+
+3. **字段注入（Field Injection）**：
+   - 字段注入虽然不推荐使用，但在某些情况下可以解决循环依赖问题。
+   - **示例**：
+     ```java
+     @Service
+     public class A {
+         @Autowired
+         private B b;
+     
+         public void doSomething() {
+             b.doSomething();
+         }
+     }
+     
+     @Service
+     public class B {
+         @Autowired
+         private A a;
+     
+         public void doSomething() {
+             // Do something
+         }
+     }
+     ```
+
+4. **手动管理依赖**：
+   - 在某些极端情况下，可以通过手动管理依赖来避免循环依赖。
+   - **示例**：
+     ```java
+     @Service
+     public class A {
+         private B b;
+     
+         @Autowired
+         public void setB(B b) {
+             this.b = b;
+         }
+     
+         public void doSomething() {
+             b.doSomething();
+         }
+     }
+     
+     @Service
+     public class B {
+         private A a;
+     
+         @Autowired
+         public void init(A a) {
+             this.a = a;
+         }
+     
+         public void doSomething() {
+             // Do something
+         }
+     }
+     ```
+
+### 最佳实践
+
+1. **避免不必要的循环依赖**：
+   - 重新设计类结构，尽量避免循环依赖。例如，可以通过引入第三个类来解耦两个类之间的直接依赖。
+
+2. **使用设值注入**：
+   - 在存在循环依赖的情况下，优先使用设值注入而不是构造器注入。
+
+3. **使用依赖注入的最佳实践**：
+   - 尽量使用构造器注入来保证不可变性和强制依赖，但在必要时可以使用设值注入来解决循环依赖问题。
+
+通过以上方法，可以有效地解决Spring中的循环依赖问题，确保应用程序的健壮性和可维护性。
