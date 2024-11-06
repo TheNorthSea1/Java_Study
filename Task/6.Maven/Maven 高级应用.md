@@ -694,35 +694,38 @@
 
 - 登录
 
-  ![image-20221119170017162](picture/image-20221119170017162.png)
+  <img src="picture/image-20221119170017162.png" alt="image-20221119170017162" style="zoom:67%;" />
 
 - 密码位置
 
-  ![image-20221119170113540](picture/image-20221119170113540.png)
+  <img src="picture/image-20221119170113540.png" alt="image-20221119170113540" style="zoom:67%;" />
 
 - 重置密码
 
-  ![image-20221119170154184](picture/image-20221119170154184.png)
+  <img src="picture/image-20221119170154184.png" alt="image-20221119170154184" style="zoom:67%;" />
 
 - 匿名访问设置
 
-  ![image-20221119170235316](picture/image-20221119170235316.png)
+  <img src="picture/image-20221119170235316.png" alt="image-20221119170235316" style="zoom:67%;" />
 
 ## 3.仓库分类
 
 - 如果端口占用，请修改端口信息重启即可
-  - etc/nexus-default.properties
+  - nexus-3.31.1-01-win64\nexus-3.31.1-01\etc\nexus-default-properties
 
+    ![image-20241106150618094](./assets/image-20241106150618094.png)
+  
 - 分类
-  - 宿主仓库hosted
+  - **Hosted Repositories（托管/宿主仓库）**：
     - 存放一些无法从中央仓库获取的jar
     - 公司内容开发的jar
     - 收费的jar
-  - 代理仓库proxy
+  - **Proxy Repositories（代理仓库）**：
     - 代理访问远程仓库的，比如访问阿里云镜像仓库
-  - 仓库组group 
-    - 将多个仓库设置成一个组群，可以有效的简化配置
-    - 不去保存资源的，只不过做协调工作
+  - **Group Repositories（组仓库）**：
+    - 组仓库将多个仓库（包括托管仓库和代理仓库）组合在一起，形成一个虚拟仓库。
+    - 它允许开发人员通过单一的URL访问多个仓库中的组件，简化了构建配置。
+    - 组仓库中的搜索顺序可以根据需要进行配置，优先级高的仓库会被首先检查。
 
 
 
@@ -730,13 +733,13 @@
 
 - 配置仓库
 
-  ![image-20221119172444312](picture/image-20221119172444312.png)
+  <img src="picture/image-20221119172444312.png" alt="image-20221119172444312" style="zoom:67%;" />
 
   
 
 - 新创建两个不同版本的仓库
 
-  ![image-20221119172931278](picture/image-20221119172931278.png)
+  <img src="picture/image-20221119172931278.png" alt="image-20221119172931278" style="zoom:67%;" />
 
   ![image-20221119172957412](picture/image-20221119172957412.png)
 
@@ -748,7 +751,7 @@
 
   
 
-  ![image-20221119173209839](picture/image-20221119173209839.png)
+  <img src="picture/image-20221119173209839.png" alt="image-20221119173209839" style="zoom:67%;" />
 
 
 
@@ -760,20 +763,15 @@
 
 ### 5.1配置本地对neuxs 私服的访问信息
 
+- 打开maven的setting.xml文件
+
+  ![image-20241106153345037](./assets/image-20241106153345037.png)
+
 - 配置访问信息
 
   ```xml
    <servers>
-        <server>
-            <id>sy-Release</id>
-            <username>admin</username>
-            <password>123456</password>
-        </server>
-        <server>
-            <id>sy-Snapshot</id>
-            <username>admin</username>
-            <password>123456</password>
-        </server>
+       <!-- 注意此处的id要和镜像保持一致 -->
         <server>
             <id>maven-public</id>
             <username>admin</username>
@@ -782,7 +780,7 @@
     </servers>
   ```
 
-- 配置私服访问地址
+- 配置私服访问地址（下载jar的地址）
 
   ```xml
   <mirror>
@@ -804,43 +802,106 @@
 
   ![image-20221119174816191](picture/image-20221119174816191.png)
 
-### 6.1自动上传
+### 6.1自动上传`distributionManagement`
 
-- distributionManagement
+- **distributionManagement**: 主要用于指定项目构建输出（如 JAR 文件、WAR 文件等）的部署目标位置
+
+  - `repository` 元素用于指定正式发布版本的部署位置。
+  - `snapshotRepository` 元素用于指定快照版本的部署位置。
+  - `id` 是仓库的唯一标识符，通常与 `settings.xml` 文件中的服务器配置相关联。
+  - `name` 是仓库的名称，用于描述仓库。
+  - `url` 是仓库的 URL 地址，Maven 将使用这个地址来上传构建产物。
 
 - 在需要上传的pom 中添加如下配置(注意配置一定要和setting.xml 中的一致)
 
-  ```java
+  ```xml
   <distributionManagement>
       <repository>
-          <id>sy-Release</id>
-          <url>http://localhost:8081/repository/sy-Release/</url>
+          <id>maven-public</id>
+          <url>http://localhost:8081/repository/bwh-Release/</url>
       </repository>
       <snapshotRepository>
-          <id>sy-Snapshot</id>
-          <url>http://localhost:8081/repository/sy-Snapshot/</url>
+          <id>maven-public</id>
+          <!-- 需要上传的对应仓库地址-->
+          <url>http://localhost:8081/repository/bwh-Snapshot/</url>
       </snapshotRepository>
   </distributionManagement>
   ```
 
 - 发布项目到nexus
 
-  ![image-20221119175326676](picture/image-20221119175326676.png)
+  <img src="picture/image-20221119175326676.png" alt="image-20221119175326676" style="zoom:50%;" />
 
   ![image-20221119175745694](picture/image-20221119175745694.png)
 
 ### 6.2修改中央代理的地址
 
-![image-20221119175952261](picture/image-20221119175952261.png)
+<img src="picture/image-20221119175952261.png" alt="image-20221119175952261" style="zoom: 50%;" />
 
 
 
 ## 7.获取仓库的包
 
-- 直接配置jar pom 地址即可
+### RELEASES版:
 
-  ![image-20221119181153745](picture/image-20221119181153745.png)
+​	可以直接配置直接配置jar pom 地址即可
 
+<img src="picture/image-20221119181153745.png" alt="image-20221119181153745" style="zoom:67%;" />
 
+### SnapShots版：`repositories`
 
-<font size="40" color="red">风里雨里，云哥在 SpringBoot 等你</font>
+- 需要配置`repositories`
+
+  > `repositories` 元素用于指定 Maven 构建过程中可以从哪些地方下载依赖和插件。这些仓库可以是本地的、远程的或者是私有的。通过配置 `repositories`，您可以告诉 Maven 在哪里查找和下载项目所需的依赖项。
+  >
+  > ### 作用
+  >
+  > 1. **依赖解析**：Maven 使用仓库中的信息来解析和下载项目声明的依赖项。
+  > 2. **插件解析**：Maven 也使用仓库中的信息来解析和下载项目声明的插件。
+  > 3. **版本管理**：仓库中存储了不同版本的依赖和插件，Maven 可以根据项目的配置自动选择合适的版本。
+  > 4. **缓存管理**：Maven 会将从远程仓库下载的依赖和插件缓存到本地仓库中，以便后续构建时更快地访问。
+  >
+  > ### 主要属性
+  >
+  > - **id**：仓库的唯一标识符。
+  >
+  > - **name**：仓库的名称。
+  >
+  > - **url**：仓库的 URL 地址。
+  >
+  > - **layout**：仓库的布局，默认为 `default`。
+  >
+  > - releases
+  >
+  >   ：配置如何处理发布版本的依赖。
+  >
+  >   - **enabled**：是否启用发布版本的下载。
+  >   - **checksumPolicy**：校验和策略。
+  >   - **updatePolicy**：更新策略。
+  >
+  > - snapshots
+  >
+  >   ：配置如何处理快照版本的依赖。
+  >
+  >   - **enabled**：是否启用快照版本的下载。
+  >   - **checksumPolicy**：校验和策略。
+  >   - **updatePolicy**：更新策略。
+
+​	在需要导入依赖的项目的pom.xml中加入这个，并打包。打包（package）后，就能导入快照版本的jar了
+
+```xml
+<repositories>
+            <repository>
+                <id>maven-public</id>
+                <url>http://localhost:8081/repository/bwh-Snapshot/</url>
+                <releases>
+                    <enabled>true</enabled>
+                </releases>
+                <snapshots>
+                    <enabled>true</enabled>
+<!--                    <updatePolicy>always</updatePolicy>-->
+                </snapshots>
+            </repository>
+        </repositories>
+```
+
