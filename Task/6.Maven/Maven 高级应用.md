@@ -769,6 +769,17 @@
 
 - 配置访问信息
 
+  > `<servers>` 元素用于配置服务器相关的认证信息。这些信息主要用于当你需要将构建的项目部署到远程仓库（例如公司的内部仓库或公共仓库如 Sonatype Nexus, Artifactory 等）时提供必要的认证凭据。
+  >
+  > 每个 `<server>` 元素包含以下子元素：
+  >
+  > - `<id>`：这是仓库的唯一标识符，它必须与你在 `pom.xml` 文件中的 `<distributionManagement>` 部分定义的仓库 ID 相匹配。这样 Maven 才能知道使用哪个服务器配置来进行部署操作。
+  > - `<username>`：用于登录远程仓库的用户名。
+  > - `<password>`：与用户名对应的密码。
+  > - `<privateKey>`：可选，如果你使用的是 SSH 密钥对进行身份验证，这里可以指定私钥文件的位置。
+  > - `<passphrase>`：可选，如果私钥文件是加密的，这里可以提供解密所需的密码短语。
+  > - `<filePermissions>` 和 `<directoryPermissions>`：这两个属性可以用来设置当 Maven 将文
+
   ```xml
    <servers>
        <!-- 注意此处的id要和镜像保持一致 -->
@@ -842,58 +853,54 @@
 
 ## 7.获取仓库的包
 
-### RELEASES版:
+参考视频：
 
-​	可以直接配置直接配置jar pom 地址即可
+https://www.bilibili.com/video/BV1JN411G7gX?p=53&spm_id_from=333.788.videopod.episodes&vd_source=ad4f8b7bf024b8f8819493104aa6e94f
 
-<img src="picture/image-20221119181153745.png" alt="image-20221119181153745" style="zoom:67%;" />
+### 需要配置`repositories`
 
-### SnapShots版：`repositories`
+> `repositories` 元素用于指定 Maven 构建过程中可以从哪些地方下载依赖和插件。这些仓库可以是本地的、远程的或者是私有的。通过配置 `repositories`，您可以告诉 Maven 在哪里查找和下载项目所需的依赖项。
+>
+> ### 作用
+>
+> 1. **依赖解析**：Maven 使用仓库中的信息来解析和下载项目声明的依赖项。
+> 2. **插件解析**：Maven 也使用仓库中的信息来解析和下载项目声明的插件。
+> 3. **版本管理**：仓库中存储了不同版本的依赖和插件，Maven 可以根据项目的配置自动选择合适的版本。
+> 4. **缓存管理**：Maven 会将从远程仓库下载的依赖和插件缓存到本地仓库中，以便后续构建时更快地访问。
+>
+> ### 主要属性
+>
+> - **id**：仓库的唯一标识符。
+>
+> - **name**：仓库的名称。
+>
+> - **url**：仓库的 URL 地址。
+>
+> - **layout**：仓库的布局，默认为 `default`。
+>
+> - releases
+>
+>   ：配置如何处理发布版本的依赖。
+>
+>   - **enabled**：是否启用发布版本的下载。
+>   - **checksumPolicy**：校验和策略。
+>   - **updatePolicy**：更新策略。
+>
+> - snapshots
+>
+>   ：配置如何处理快照版本的依赖。
+>
+>   - **enabled**：是否启用快照版本的下载。
+>   - **checksumPolicy**：校验和策略。
+>   - **updatePolicy**：更新策略。
 
-- 需要配置`repositories`
-
-  > `repositories` 元素用于指定 Maven 构建过程中可以从哪些地方下载依赖和插件。这些仓库可以是本地的、远程的或者是私有的。通过配置 `repositories`，您可以告诉 Maven 在哪里查找和下载项目所需的依赖项。
-  >
-  > ### 作用
-  >
-  > 1. **依赖解析**：Maven 使用仓库中的信息来解析和下载项目声明的依赖项。
-  > 2. **插件解析**：Maven 也使用仓库中的信息来解析和下载项目声明的插件。
-  > 3. **版本管理**：仓库中存储了不同版本的依赖和插件，Maven 可以根据项目的配置自动选择合适的版本。
-  > 4. **缓存管理**：Maven 会将从远程仓库下载的依赖和插件缓存到本地仓库中，以便后续构建时更快地访问。
-  >
-  > ### 主要属性
-  >
-  > - **id**：仓库的唯一标识符。
-  >
-  > - **name**：仓库的名称。
-  >
-  > - **url**：仓库的 URL 地址。
-  >
-  > - **layout**：仓库的布局，默认为 `default`。
-  >
-  > - releases
-  >
-  >   ：配置如何处理发布版本的依赖。
-  >
-  >   - **enabled**：是否启用发布版本的下载。
-  >   - **checksumPolicy**：校验和策略。
-  >   - **updatePolicy**：更新策略。
-  >
-  > - snapshots
-  >
-  >   ：配置如何处理快照版本的依赖。
-  >
-  >   - **enabled**：是否启用快照版本的下载。
-  >   - **checksumPolicy**：校验和策略。
-  >   - **updatePolicy**：更新策略。
-
-​	在需要导入依赖的项目的pom.xml中加入这个，并打包。打包（package）后，就能导入快照版本的jar了
+在需要导入依赖的项目的pom.xml中加入这个，并打包。打包（package）后，就能导入快照版本的jar了
 
 ```xml
 <repositories>
             <repository>
                 <id>maven-public</id>
-                <url>http://localhost:8081/repository/bwh-Snapshot/</url>
+                <url>http://localhost:8081/repository/maven-public/</url>
                 <releases>
                     <enabled>true</enabled>
                 </releases>
@@ -904,4 +911,33 @@
             </repository>
         </repositories>
 ```
+
+<img src="picture/image-20221119181153745.png" alt="image-20221119181153745" style="zoom:67%;" />
+
+# 六、Maven拉包过程
+
+**1.解析 `pom.xml` 文件**
+
+Maven 构建过程首先会解析项目的 `pom.xml` 文件，提取出项目的依赖信息。这些依赖信息包括依赖的组 ID、 artifact ID、版本号等。
+
+**2.查找本地仓库**：
+
+- 检查本地仓库（默认路径为 `~/.m2/repository`）中是否已有所需的依赖。
+- 如果找到，直接使用。
+
+**3.查找远程仓库**：
+
+- 如果本地仓库中没有所需的依赖，Maven 会根据 `pom.xml` 或 `settings.xml` 中配置的远程仓库列表依次尝试下载。
+- 常见的远程仓库包括 Maven 中央仓库和其他私有仓库。
+
+**4.下载依赖**：
+
+- 向远程仓库发送请求，获取依赖的元数据（如 `pom` 文件）。
+- 解析元数据，确定依赖的具体版本和路径。
+- 下载具体的依赖文件（如 JAR 文件）。
+- 校验下载的文件完整性（可配置校验和策略）。
+
+**5.存储到本地仓库**：
+
+- 将下载的依赖文件存储到本地仓库中，以便后续使用
 

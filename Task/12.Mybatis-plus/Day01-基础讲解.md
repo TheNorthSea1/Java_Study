@@ -80,7 +80,7 @@
 
 - 添加 springboot依赖
 
-  ```java
+  ```xml
   <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
@@ -90,7 +90,7 @@
 
 - 引入 `spring-boot-starter`、`spring-boot-starter-test`、`mybatis-plus-boot-starter`、`mysql` 依赖
 
-  ```java
+  ```xml
   <dependencies>
           <dependency>
               <groupId>org.springframework.boot</groupId>
@@ -346,6 +346,10 @@
 
 ## 2.删除
 
+### 使用navicate备份数据
+
+![image-20241107165141061](./assets/image-20241107165141061.png)
+
 ### 2.1根据主键删除
 
 - deleteById方法:根据主键id删除
@@ -375,7 +379,7 @@
 
   
 
-### 2.2根据列删除通过Map方式
+### 2.2根据列删除(通过Map方式)
 
 - deleteByMap：根据列删除
 
@@ -407,7 +411,7 @@
   <==    Updates: 1
   ```
 
-### 2.2根据列删除通过包装方式
+### 2.2根据列删除(通过包装方式)
 
 - delete:根据 entity 对象的条件进行删除
 
@@ -1091,11 +1095,11 @@
 
 ## 1.allEq
 
-- AbstractWrapper
+- **AbstractWrapper**
 
   ![image-20221202193654533](picture/image-20221202193654533.png)
 
-- 常用方法
+- **普通 Wrapper (`QueryWrapper`)**
 
   ```java
   allEq(Map<R, V> params)
@@ -1126,13 +1130,18 @@
   <==      Total: 1
   ```
 
-- 带过滤的常用方法
+- **带过滤器的普通 Wrapper (`QueryWrapper`)**：
 
   ```java
   allEq(BiPredicate<R, V> filter, Map<R, V> params)
   allEq(BiPredicate<R, V> filter, Map<R, V> params, boolean null2IsNull)
   allEq(boolean condition, BiPredicate<R, V> filter, Map<R, V> params, boolean null2IsNull) 
   ```
+
+  > - `params`：一个 `Map`，其中 `key` 是数据库字段名，`value` 是对应的字段值。
+  > - `null2IsNull`：如果设置为 `true`，当 `Map` 中的 `value` 为 `null` 时，会调用 `isNull` 方法；如果设置为 `false`，则会忽略 `value` 为 `null` 的键值对。
+  > - `filter`：一个 `BiPredicate`，用于过滤哪些字段应该被包含在查询条件中。（⭐️）
+  > - `condition`：一个布尔值，用于控制是否应用这些条件。
 
 - 测试
 

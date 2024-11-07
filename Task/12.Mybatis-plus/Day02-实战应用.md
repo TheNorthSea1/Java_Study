@@ -39,6 +39,7 @@
   mybatis-plus:
     global-config:
       db-config:
+        logic-delete-field: deleted # 全局逻辑删除字段名
         logic-delete-value: 1 # 逻辑已删除值(默认为 1)
         logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
   ```
@@ -76,6 +77,8 @@
 
 - 结果
 
+  > 可以发现删除操作变成了更新
+
   ```java
   ==>  Preparing: UPDATE user SET deleted=1 WHERE id=? AND deleted=0
   ==> Parameters: 3(Long)
@@ -107,7 +110,15 @@
 
 # 二、通用枚举
 
->解决了繁琐的配置，让 mybatis 优雅的使用枚举属性！ 从 3.5.2 版本开始只需完成 `步骤1: 声明通用枚举属性` 即可使用
+>解决了繁琐的配置，让 mybatis 优雅的使用枚举属性！ 从 3.5.2 版本开始只需完成 `步骤1: 声明通用枚举属性` 即可使用。
+
+> ### 作用
+>
+> 1. **类型安全**：通过使用枚举类型来表示数据库中的某些字段值，可以避免使用字符串或整数等原始类型带来的潜在错误，比如拼写错误或者非法值。枚举提供了有限的选择集合，确保了数据的正确性和一致性。
+> 2. **代码可读性**：枚举可以为程序提供更好的可读性和可维护性。相比直接使用数字或字符串常量，使用枚举可以更清晰地表达代码意图。
+> 3. (⭐️）**自动映射**：MyBatis-Plus 支持自动将数据库中的值映射到枚举对象，反之亦然。这意味着你可以在实体类中直接定义枚举类型的属性，框架会自动处理好数据库值与枚举值之间的转换。
+> 4. **减少硬编码**：使用枚举可以减少代码中的硬编码值，使得代码更加灵活，更容易适应需求变化。
+> 5. **业务逻辑封装**：枚举可以包含方法，实现特定的业务逻辑。例如，可以通过枚举的方法来决定某个状态是否有效，或者返回某种状态的具体描述。
 
 ## 1.修改表结构
 
@@ -166,7 +177,7 @@
   }
   ```
 
-## 4.额外补充
+## 4.额外补充(到时候，用到回来看)
 
 >如果是3.5.2版本之后的不需要配置了
 
@@ -178,9 +189,10 @@
       typeEnumsPackage: com.baomidou.springboot.entity.enums
   ```
 
-- 序列化给前端按如下两种方式都可以实现
 
-### 4.1Fastjson
+### 4.1序列化给前端按如下两种方式都可以实现
+
+#### Fastjson
 
 - 添加如下注解
 
@@ -189,7 +201,7 @@
   private UserStatus status;
   ```
 
-### 4.2 jackson
+####  jackson
 
 - 添加如下注解
 
@@ -210,7 +222,7 @@
       entity.setEmail("erew");
       entity.setAge(19);
       entity.setName("小红");
-      entity.setSex(SexEnum.MAN);
+      entity.setSex(SexEnum.MAN);  // MyBatis-Plus自动处理好数据库值与枚举值之间的转换
       int insert = userMapper.insert(entity);
       System.out.println("受影响行数为："+insert);
   }
@@ -278,6 +290,15 @@
 
 ## 3.自定义实现类 MyMetaObjectHandler
 
+> `MyMetaObjectHandler` 是 MyBatis-Plus 框架中的一个接口，用于自定义字段填充逻辑。
+>
+> ### 实现步骤
+>
+> 1. **创建自定义的 `MetaObjectHandler` 类**： 继承 `MyMetaObjectHandler` 接口并实现其方法。
+> 2. **重写 `insertFill` 和 `updateFill` 方法**： 这两个方法分别用于在插入和更新记录时填充字段。
+> 3. **在实体类中使用注解**： 使用 `@TableField` 注解标记需要自动填充的字段。
+> 4. **配置 Spring Boot**： 将自定义的 `MetaObjectHandler` 注册为 Spring Bean。
+
 - 自定义实现类 MyMetaObjectHandler
 
   ```JAVA
@@ -287,16 +308,62 @@
       @Override
       public void insertFill(MetaObject metaObject) {
           log.info("start insert fill ....");
-          setFieldValByName("createTime",new Date(),metaObject);
+          this.setFieldValByName("createTime",new Date(),metaObject);
+          // 或者
+           this.strictInsertFill(metaObject, "createTime", Date.class, new Date());  // 注意此处类型类型要匹配
       }
   
       @Override
       public void updateFill(MetaObject metaObject) {
           log.info("start update fill ....");
-          setFieldValByName("updateTime",new Date(),metaObject);
+          this.setFieldValByName("updateTime",new Date(),metaObject);
+          // 或者
+          this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
       }
   }
   ```
+  
+  > **注意**⚠️
+  >
+  > 如果，你给update设置为 `INSERT_UPDATE`。那么，在重写insertFill方法时，需要写入**更新时间** 和 **创建时间**两个操作。
+  >
+  > ```java
+  >  @Override
+  >     public void insertFill(MetaObject metaObject) {
+  >         log.info("start insert fill ....");
+  > 		this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
+  >          this.strictInsertFill(metaObject, "createTime", Date.class, new Date());
+  >     }
+  > ```
+
+### 3.1MetaObject
+
+> `MetaObject` 是 MyBatis 框架中的一个重要工具类，用于封装和操作对象的属性。它通过反射机制提供了一种统一的方式来访问和修改对象的属性，无论这些属性是通过字段、getter/setter 方法还是其他方式来表示的。
+>
+> ### 核心概念
+>
+> 1. **对象封装**：
+>    - `MetaObject` 封装了一个对象，提供了统一的接口来访问和修改该对象的属性。
+>    - 它可以处理不同类型的对象，如普通的 JavaBean、集合（List、Set、Map）等。
+> 2. ⭐️**反射机制**：
+>    - `MetaObject` 内部使用反射机制来操作对象的属性，使得开发者可以更加方便地进行属性的读写操作。
+> 3. **属性表达式**：
+>    - `MetaObject` 支持通过属性表达式来访问深层次的属性，如 `user.address.city`，它会自动处理多级属性访问，不需要手动逐级访问属性
+>
+> ### 使用场景
+>
+> 1. **对象属性的动态访问**：
+>    - 在 MyBatis 的结果映射中，`MetaObject` 用于将查询结果的列值填充到 Java 对象的属性中。
+>    - 在参数处理中，`MetaObject` 用于从传入的参数对象中读取属性值。
+> 2. **对象属性的动态修改**：
+>    - 在 MyBatis 的插入和更新操作中，`MetaObject` 用于设置对象的属性值。
+>    - 在 MyBatis-Plus 中，`MetaObject` 用于实现字段的自动填充，如创建时间和更新时间。
+> 3. **集合和映射的处理**：
+>    - `MetaObject` 可以操作集合（List、Set、Map）中的元素，或者操作 JavaBean 中的属性。
+>
+> ### 总结
+>
+> `MetaObject` 是 MyBatis 框架中的一个重要工具类，通过封装对象的元数据信息，提供了一种灵活的方式来访问和操作对象的属性。它在 MyBatis 的结果映射、参数处理、字段自动填充等场景中发挥着重要作用。通过使用 `MetaObject`，开发者可以更加方便地进行对象属性的动态访问和修改，提高开发效率和代码的可维护性。
 
 ## 4.测试
 
@@ -352,7 +419,7 @@
   ![image-20221203113830320](picture/image-20221203113830320.png)
 
 
-# 四、SQL注入器
+# 四、SQL注入器（⭐️）
 
 ## 1.SQL注入的原理分析
 
@@ -366,26 +433,38 @@
 
   ```java
   public void inspectInject(MapperBuilderAssistant builderAssistant, Class<?> mapperClass) {
-          Class<?> modelClass = ReflectionKit.getSuperClassGenericType(mapperClass, Mapper.class, 0);
-          if (modelClass != null) {
-              String className = mapperClass.toString();
-              Set<String> mapperRegistryCache = GlobalConfigUtils.getMapperRegistryCache(builderAssistant.getConfiguration());
-              if (!mapperRegistryCache.contains(className)) {
-                  TableInfo tableInfo = TableInfoHelper.initTableInfo(builderAssistant, modelClass);
-                  List<AbstractMethod> methodList = this.getMethodList(mapperClass, tableInfo);
-                  if (CollectionUtils.isNotEmpty(methodList)) {
-                      methodList.forEach((m) -> {
-                          m.inject(builderAssistant, mapperClass, modelClass, tableInfo);
-                      });
-                  } else {
-                      this.logger.debug(mapperClass.toString() + ", No effective injection method was found.");
-                  }
-  
-                  mapperRegistryCache.add(className);
+      // 获取 Mapper 接口对应的实体类
+      Class<?> modelClass = ReflectionKit.getSuperClassGenericType(mapperClass, Mapper.class, 0);
+      if (modelClass != null) {
+          // 获取 Mapper 接口的名称
+          String className = mapperClass.toString();
+          
+          // 获取全局配置中的 Mapper 注册缓存
+          Set<String> mapperRegistryCache = GlobalConfigUtils.getMapperRegistryCache(builderAssistant.getConfiguration());
+          
+          // 检查该 Mapper 接口是否已经被处理过
+          if (!mapperRegistryCache.contains(className)) {
+              // 初始化表信息
+              TableInfo tableInfo = TableInfoHelper.initTableInfo(builderAssistant, modelClass);
+              
+              // 获取需要注入的方法列表
+              List<AbstractMethod> methodList = this.getMethodList(mapperClass, tableInfo);
+              
+              // 如果方法列表不为空，则逐个注入方法
+              if (CollectionUtils.isNotEmpty(methodList)) {
+                  methodList.forEach((m) -> {
+                      m.inject(builderAssistant, mapperClass, modelClass, tableInfo);
+                  });
+              } else {
+                  // 如果没有有效的注入方法，记录日志
+                  this.logger.debug(mapperClass.toString() + ", No effective injection method was found.");
               }
+              
+              // 将该 Mapper 接口添加到缓存中，避免重复处理
+              mapperRegistryCache.add(className);
           }
-  
       }
+  }
   ```
 
 - 实际的实现代码
@@ -408,7 +487,7 @@
 
 ## 2.扩充BaseMapper中方法
 
-### 2.1编写自己的BaseMapper
+### 步骤 1:编写自己的BaseMapper
 
 - 编写MyBaseMapper
 
@@ -421,18 +500,36 @@
 - 需要用到的mapper 直接继承即可
 
   ```java
-  @Repository
   public interface UserMapper extends MyBaseMapper<User> {
       
   }
   ```
 
-### 2.2编写MySqlInjector
+### 步骤 2:定义SQL&编写自定义方法
 
-- MySqlInjector
+- 需要定义自定义方法的SQL语句。这通常在继承了`AbstractMethod`的类中完成
+
+- 创建ListAll 类 
 
   ```java
-  @Component	
+  public class ListAll extends AbstractMethod {
+      @Override
+      public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
+          String sqlMethod = "listAll"; // 必须和baseMapper的自定义方法名一致
+          String sql = "select * from "+tableInfo.getTableName();
+          SqlSource sqlSource = this.languageDriver.createSqlSource(this.configuration, sql, modelClass);
+          return this.addSelectMappedStatementForTable(mapperClass,sqlMethod,sqlSource,tableInfo);
+      }
+  }
+  ```
+
+### 步骤 3:注册自定义方法
+
+- 创建一个类来继承`DefaultSqlInjector`，并重写`getMethodList`方法来注册你的自定义方法。
+
+- 创建MySqlInjector类
+
+  ```java
   public class MySqlInjector extends DefaultSqlInjector {
       @Override
       public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {
@@ -445,23 +542,40 @@
   }
   ```
 
-### 2.3编写ListAll类
+### 步骤 4:配置SqlInjector
 
-- 创建ListAll 类
+最后，你需要在配置文件中指定你的自定义SQL注入器。
 
-  ```java
-  public class ListAll extends AbstractMethod {
-      @Override
-      public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
-          String sqlMethod = "listAll";
-          String sql = "select * from "+tableInfo.getTableName();
-          SqlSource sqlSource = this.languageDriver.createSqlSource(this.configuration, sql, modelClass);
-          return this.addSelectMappedStatementForTable(mapperClass,sqlMethod,sqlSource,tableInfo);
-      }
-  }
-  ```
+> 注意⚠️： 此方法已经废弃。
+>
+> #### 在 application.yml 中配置
+>
+> ```xml
+> mybatis-plus:
+>   global-config:
+>     sql-injector: com.example.MyLogicSqlInjector
+> ```
+>
+> <img src="./assets/image-20241107230957613.png" alt="image-20241107230957613" style="zoom:67%;" />
 
-### 2.4测试
+```java
+// 将MySqlInjector 交给容器管理
+@Component
+public class MySqlInjector extends DefaultSqlInjector {
+    @Override
+    public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {
+        //默认的mybatis-plus 的注入方法
+        List<AbstractMethod> methodList = super.getMethodList(mapperClass, tableInfo);
+        //添加自己的 listAll 类
+        methodList.add(new ListAll());
+        return methodList;
+    }
+}
+```
+
+
+
+### 2.5测试
 
 - 测试
 
@@ -541,15 +655,13 @@
 
 ## 3.乐观锁插件
 
->
->
 >## OptimisticLockerInnerInterceptor
 >
 >> 当要更新一条记录的时候，希望这条记录没有被别人更新
 >>  乐观锁实现方式：
->>
+>
 >> > - 取出记录时，获取当前 version
->> > - 更新时，带上这个 version
+>>> > - 更新时，带上这个 version
 >> > - 执行更新时， set version = newVersion where version = oldVersion
 >> > - 如果 version 不对，就更新失败
 
@@ -693,7 +805,7 @@
 
 - 依赖
 
-  ```java
+  ```xml
   <parent>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-parent</artifactId>
