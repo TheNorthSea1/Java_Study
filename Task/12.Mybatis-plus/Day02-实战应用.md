@@ -475,6 +475,10 @@
                       });
   ```
 
+  ![image-20241108100734062](./assets/image-20241108100734062.png)
+
+  ![image-20241108100841405](./assets/image-20241108100841405.png)
+
 - m.inject 调用具体方法
 
   ```java
@@ -483,7 +487,9 @@
 
 - 最终具体的执行就是自己定义的类
 
-  ![image-20221203162803951](picture/image-20221203162803951.png)
+  > 调用实现类各自实现的injectMappedStatement方法。 （多态的体现）
+  
+  ![image-20241108100949323](./assets/image-20241108100949323.png)
 
 ## 2.扩充BaseMapper中方法
 
@@ -511,6 +517,8 @@
 
 - 创建ListAll 类 
 
+  > 可以参考官方是怎么写的
+  
   ```java
   public class ListAll extends AbstractMethod {
       @Override
@@ -533,7 +541,7 @@
   public class MySqlInjector extends DefaultSqlInjector {
       @Override
       public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {
-          //默认的mybatis-plus 的注入方法
+          //默认的mybatis-plus 的注入方法（⭐️）
           List<AbstractMethod> methodList = super.getMethodList(mapperClass, tableInfo);
           //添加自己的 listAll 类
           methodList.add(new ListAll());
@@ -572,8 +580,6 @@ public class MySqlInjector extends DefaultSqlInjector {
     }
 }
 ```
-
-
 
 ### 2.5测试
 
@@ -653,21 +659,27 @@ public class MySqlInjector extends DefaultSqlInjector {
   }
   ```
 
-## 3.乐观锁插件
+## 3.乐观锁插件（⭐️）
 
->## OptimisticLockerInnerInterceptor
->
->> 当要更新一条记录的时候，希望这条记录没有被别人更新
->>  乐观锁实现方式：
->
->> > - 取出记录时，获取当前 version
->>> > - 更新时，带上这个 version
->> > - 执行更新时， set version = newVersion where version = oldVersion
->> > - 如果 version 不对，就更新失败
+> 乐观锁是一种并发控制机制，用于确保在更新记录时，该记录未被其他事务修改。MyBatis-Plus 提供了 `OptimisticLockerInnerInterceptor` 插件，使得在应用中实现乐观锁变得简单。
 
+### 3.1实现原理
 
+乐观锁的实现通常包括以下步骤：
 
-### 3.1乐观锁补充
+1. 读取记录时，获取当前的版本号（version）。
+
+2. 在更新记录时，将这个版本号一同传递。
+
+3. 执行更新操作时，设置 `version = newVersion` 的条件为 `version = oldVersion`。
+
+   > `oldVersion`: 更新前的版本号
+   >
+   > `newVersion`: 更新操作后，修改version，表明这条数据更新过了。 
+
+4. 如果版本号不匹配，则更新失败。
+
+### 3.2乐观锁补充
 
 - 在数据库增加一个 version 字段来管理数据，假设没有其它人操作过这条数据，先读取本条数据的version,然后再修改的时候，判断之前拿出来的version 和现在的version是否一致，如果不一致，则表示被人操作过，不能够正常实现更新
 
@@ -679,7 +691,7 @@ public class MySqlInjector extends DefaultSqlInjector {
 
   ![image-20221203173656602](picture/image-20221203173656602.png)
 
-### 3.2添加乐观锁配置
+### 3.3添加乐观锁配置
 
 - 添加配置
 
@@ -699,7 +711,7 @@ public class MySqlInjector extends DefaultSqlInjector {
 
   
 
-### 3.3修改表结构
+### 3.4修改表结构
 
 - 表结构
 
@@ -720,7 +732,7 @@ public class MySqlInjector extends DefaultSqlInjector {
 
   
 
-### 3.4添加 version 字段
+### 3.5添加 version 字段
 
 - 实体添加字段
 
@@ -729,7 +741,7 @@ public class MySqlInjector extends DefaultSqlInjector {
   private Integer version;
   ```
 
-### 3.5测试
+### 3.6测试
 
 - 测试乐观锁
 
@@ -737,7 +749,7 @@ public class MySqlInjector extends DefaultSqlInjector {
   @Test
   public void testVersion(){
       User user = userMapper.selectById(16L);
-      user.setName("云哥666");
+      user.setName("BWH666");
       int count = userMapper.updateById(user);
       System.out.println("受影响行数："+count);
   }
@@ -795,16 +807,20 @@ public class MySqlInjector extends DefaultSqlInjector {
 
 - 简化开发流程，提高开发效率，让程序写很少的代码就能实现开发
 
-## 1.创建 mybatis-plus-02 模块
-
-- 任选创建方式创建
-
-
-
-## 2.添加依赖
+## 1.添加依赖
 
 - 依赖
 
+  > **mybatis-plus generator 依赖**
+  >
+  > ```xml
+  > <dependency>
+  >     <groupId>com.baomidou</groupId>
+  >     <artifactId>mybatis-plus-generator</artifactId>
+  >     <version>3.5.9</version>
+  > </dependency>
+  > ```
+  
   ```xml
   <parent>
           <groupId>org.springframework.boot</groupId>
@@ -863,12 +879,17 @@ public class MySqlInjector extends DefaultSqlInjector {
               <artifactId>springfox-swagger2</artifactId>
               <version>2.10.1</version>
           </dependency>
+          <dependency>
+              <groupId>com.alibaba</groupId>
+              <artifactId>druid-spring-boot-starter</artifactId>
+              <version>1.2.15</version>
+          </dependency>
       </dependencies>
   ```
 
-## 3.使用
+## 2.使用
 
-- 使用
+- 旧版
 
   ```java
   public static void main(String[] args) {
@@ -892,6 +913,33 @@ public class MySqlInjector extends DefaultSqlInjector {
                   .execute();
   
       }
+  ```
+
+- **新版**(更加简洁)
+
+  ```java
+  FastAutoGenerator.create("jdbc:mysql://localhost:3306/springboot_ssm", "root", "123456")
+                  .globalConfig(builder -> builder
+                          .author("bwh") // 设置作者
+                          .outputDir("D:\\ideaProject\\MyBatis-plus\\test\\src\\main\\java") // 指定输出目录
+                          .commentDate("yyyy-MM-dd") 
+                  )
+                  .packageConfig(builder -> builder
+                          .parent("cn.bwhcoder") // 设置父包名
+                          .entity("entity")
+                          .mapper("mapper")
+                          .service("service")
+                          .serviceImpl("service.impl")
+                          .pathInfo(Collections.singletonMap(OutputFile.xml, "D:\\ideaProject\\MyBatis-plus\\test\\src\\main\\resources\\cn\\bwhcoder"))// 设置mapperXml生成路径
+  
+  
+                  )
+                  .strategyConfig(builder -> builder  // 将数据库下的所有表进行生成
+                          .entityBuilder()
+                          .enableLombok()
+                  )
+                  .templateEngine(new FreemarkerTemplateEngine())
+                  .execute();
   ```
 
   
