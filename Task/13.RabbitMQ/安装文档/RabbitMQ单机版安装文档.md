@@ -1,11 +1,3 @@
--------
-
-**讲师：上云**
-
-**网址：www.sycoder.cn**
-
-------
-
 # RabbitMQ安装文档
 
 RabbitMQ官网下载地址：https://www.rabbitmq.com/download.html
@@ -27,7 +19,7 @@ RabbitMQ官网下载地址：https://www.rabbitmq.com/download.html
 ### 2.1安装erlang环境
 
 ```java
-rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
+rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm	
 ```
 
 - 如果出现如下错误
@@ -66,15 +58,33 @@ rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
   /bin/systemctl start rabbitmq-server.service
   ```
 
+- 查看rabbitmq进程
+
+  ```shell
+  ps -ef|grep rabbitmq;
+  ```
+
 ### 	2.3rabbitMQ操作
 
 - 开放端口
 
+  > Note:
+  >
+  > 如果是阿里云作为服务器，需要去开放端口。
+
   ```shell
+  sudo systemctl start firewalld  // 开启防火墙。
+  sudo systemctl enable firewalld // 设置 Firewalld 开机启动
+  
   firewall-cmd --zone=public --add-port=15672/tcp --permanent
-  firewall-cmd --zone=public --add-port=5672/tcp --permanent
   firewall-cmd --reload
   ```
+
+  > <img src="./assets/image-20241109215256364.png" alt="image-20241109215256364" style="zoom:67%;" />
+  >
+  > 使用http://118.31.104.65:15672 地址访问。（注意：ip地址根据你的）
+  >
+  > **发现只能通过本地登入，移步下面添加用户密码。**
 
 - 查看服务状态
 
@@ -101,19 +111,19 @@ rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
 - 添加账户密码
 
   ```shell
-  rabbitmqctl add_user sy 123456
+  rabbitmqctl add_user bwh 123456
   ```
 
 - 设置角色
 
   ```java
-  rabbitmqctl set_user_tags sy administrator
+  rabbitmqctl set_user_tags bwh administrator
   ```
 
 - 设置用户权限
 
   ```shell
-  rabbitmqctl set_permissions -p "/" sy ".*" ".*" ".*"
+  rabbitmqctl set_permissions -p "/" bwh ".*" ".*" ".*"
   ```
 
 - 查看用户和角色
@@ -121,6 +131,10 @@ rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
   ```shell
   rabbitmqctl list_users
   ```
+
+- 使用账号密码登入
+
+  <img src="./assets/image-20241109215928397.png" alt="image-20241109215928397" style="zoom:67%;" />
 
 ## 4.重置命令
 
@@ -131,6 +145,8 @@ rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
   ```
 
 - 重置命令
+
+  > 需要先停止RabbitMQ
 
   ```shell
   rabbitmqctl reset

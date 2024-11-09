@@ -1,11 +1,3 @@
--------
-
-**讲师：上云**
-
-**网址：www.sycoder.cn**
-
-------
-
 # RabbitMQ安装文档
 
 官方文档：https://www.rabbitmq.com/clustering.html
