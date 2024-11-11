@@ -77,6 +77,7 @@ rpm -ivh erlang-23.3.4.5-1.el7.x86_64.rpm
   sudo systemctl enable firewalld // 设置 Firewalld 开机启动
   
   firewall-cmd --zone=public --add-port=15672/tcp --permanent
+  firewall-cmd --zone=public --add-port=5672/tcp --permanent  // 用于AMQP
   firewall-cmd --reload
   ```
 

@@ -42,7 +42,7 @@
 
   - 给项目添加依赖
 
-    ```java
+    ```xml
      <dependencies>
             <dependency>
                 <groupId>mysql</groupId>
@@ -240,7 +240,7 @@
 
 ​	
 
-```java
+```xml
 <groupId>org.example</groupId>
 <artifactId>MavenProject01</artifactId>
 <packaging>jar</packaging>
@@ -270,7 +270,7 @@
 
 - 使用坐标引入 jar
 
-  ```java
+  ```xml
   <dependencies>
           <dependency>
               <groupId>mysql</groupId>
@@ -279,8 +279,6 @@
           </dependency>
       </dependencies>
   ```
-
-  
 
 - 刷新依赖导入的快捷键是 ctrl + shift + O
 
