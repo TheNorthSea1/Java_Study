@@ -1,0 +1,6 @@
+spring:
+  rabbitmq:
+    host: 118.31.104.65
+    port: 5672
+    username: bwh
+    password: 123456

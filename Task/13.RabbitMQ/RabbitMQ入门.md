@@ -116,7 +116,9 @@ A系统处理完再传递给MQ就直接返回成功了，用户以为你这个�
 >
 > 4. Connection:生产者，消费者，Broker之间的TCP连接
 >
-> 5. Channel:通信连接信道，降低TCP连接开销
+> 5. Channel:通信连接信道，降低TCP连接开销。在客户端的每个连接里，可建立多个channel，每个channel代表一个会话
+>
+>    任务。
 >
 > 6. Virtual host：虚拟主机
 >
@@ -124,7 +126,77 @@ A系统处理完再传递给MQ就直接返回成功了，用户以为你这个�
 >
 > 8. Queue:队列，消费者从这里获取消息
 >
-> 9. Binding:交换机与队列之间的虚拟连接，用于消息分发
+> 9. Binding:它的作用就是把exchange和queue按照路由规则绑定起来，用于消息分发。
+>
+> 10. Routing Key： 路由关键字，exchange根据这个关键字进行消息投递
+>
+> `由Exchange、Queue、RoutingKey三个才能决定一个从Exchange到Queue的唯一的线路。`
+
+## 常用方法
+
+### `queueDeclare`:用于声明一个队列
+
+![image-20241110175053322](./assets/image-20241110175053322.png)
+
+> ### 参数说明
+>
+> 1. **queue**: 队列的名称。如果传入空字符串 `""`，RabbitMQ 会自动生成一个唯一的队列名称。
+> 2. **durable**: 是否持久化队列。如果设置为 `true`，队列将在 RabbitMQ 重启后仍然存在。
+> 3. **exclusive**: 是否独占队列。如果设置为 `true`，队列只允许当前连接使用，且在连接断开后自动删除。
+> 4. **autoDelete**: 是否自动删除队列。如果设置为 `true`，队列在没有任何消费者订阅时自动删除。
+> 5. **arguments**: 队列的其他属性，如 TTL（Time-To-Live）、死信交换等。这是一个 `Map<String, Object>` 类型的参数。
+>
+> ### 返回值
+>
+> `queueDeclare` 方法返回一个 `Queue.DeclareOk` 对象，该对象包含以下信息：
+>
+> - **queue**: 实际使用的队列名称。如果传入的是空字符串，这里会是 RabbitMQ 自动生成的队列名称。
+> - **messageCount**: 队列中当前的消息数量。
+
+### `exchangeDeclare`:用于声明一个交换机
+
+![image-20241112143918404](./assets/image-20241112143918404.png)
+
+### `basicPublish`:用于发布消息到指定的交换机
+
+![image-20241110180006392](./assets/image-20241110180006392.png)
+
+> ### 参数说明
+>
+> 1. **exchange**: 交换机的名称。如果传入空字符串 `""`，表示使用默认交换机（default exchange）。
+> 2. **routingKey**: 路由键。路由键用于将消息路由到特定的队列。对于默认交换机，路由键就是队列的名称。(其实，就是在多个队列和一个交换机绑定时，通过路由键，去确定将消息交给哪个队列)
+> 3. **props**: 消息的属性。这是一个 `BasicProperties` 对象，可以包含各种属性，如消息的持久性、内容类型、头信息等。
+> 4. **body**: 消息的主体内容，是一个字节数组。
+
+### `basicConsume`:用于开始消费指定队列中的消息
+
+![image-20241110180409091](./assets/image-20241110180409091.png)
+
+> ### 参数说明
+>
+> 1. **queue**: 要消费的队列名称。
+> 2. **autoAck**: 是否自动确认消息。如果设置为 `true`，消费者接收到消息后会自动向 RabbitMQ 发送确认。如果设置为 `false`，则需要手动确认消息。
+> 3. **deliverCallback**: 消息到达时的回调函数。每当有新的消息到达时，这个回调函数会被调用。
+> 4. **cancelCallback**: 取消消费时的回调函数。当消费者被取消（例如，队列被删除或消费者被显式取消）时，这个回调函数会被调用。
+>
+> ### 返回值
+>
+> `basicConsume` 方法返回一个 `consumerTag` 字符串，这是 RabbitMQ 分配给消费者的唯一标识符。你可以使用这个标识符来取消消费。
+
+### `queueBind`:Bind a queue to an exchange.
+
+![image-20241112144327162](./assets/image-20241112144327162.png)
+
+> #### Params:
+>
+> - **queue** – the name of the queue
+> -  **exchange** – the name of the exchange
+> -  **routingKey** – the routing key to use for the binding 
+> - **arguments** – other properties (binding parameters)
+>
+> #### Returns:
+>
+> - a binding-confirm method if the binding was successfully created
 
 ## 工作模式
 
@@ -134,8 +206,14 @@ A系统处理完再传递给MQ就直接返回成功了，用户以为你这个�
 
 **描述**：
 
-- 生产者将消息发送到队列，消费者从队列中接收消息。
-- 这是最简单的模式，适用于一对一的通信场景。
+- 消息产生消息，将消息放入队列。
+- 消息的消费者(consumer) 监听 消息队列,如果队列中有消息,就消费掉,消息被拿走后,自动从队列中
+
+  删除(隐患 消息可能没有被消费者正确处理,已经从队列中消失了,造成消息的丢失，这里可以设置
+
+  成手动的ack,但如果设置成手动ack，处理完后要及时发送ack消息给队列，否则会造成内存溢
+
+  出)。
 
 #### Sending
 
@@ -188,60 +266,13 @@ public class ConsumerDemo1 {
 }
 ```
 
-#### 方法说明
-
-##### `queueDeclare`:用于声明一个队列
-
-![image-20241110175053322](./assets/image-20241110175053322.png)
-
-> ### 参数说明
->
-> 1. **queue**: 队列的名称。如果传入空字符串 `""`，RabbitMQ 会自动生成一个唯一的队列名称。
-> 2. **durable**: 是否持久化队列。如果设置为 `true`，队列将在 RabbitMQ 重启后仍然存在。
-> 3. **exclusive**: 是否独占队列。如果设置为 `true`，队列只允许当前连接使用，且在连接断开后自动删除。
-> 4. **autoDelete**: 是否自动删除队列。如果设置为 `true`，队列在没有任何消费者订阅时自动删除。
-> 5. **arguments**: 队列的其他属性，如 TTL（Time-To-Live）、死信交换等。这是一个 `Map<String, Object>` 类型的参数。
->
-> ### 返回值
->
-> `queueDeclare` 方法返回一个 `Queue.DeclareOk` 对象，该对象包含以下信息：
->
-> - **queue**: 实际使用的队列名称。如果传入的是空字符串，这里会是 RabbitMQ 自动生成的队列名称。
-> - **messageCount**: 队列中当前的消息数量。
-
-##### `basicPublish`:用于发布消息到指定的交换机
-
-![image-20241110180006392](./assets/image-20241110180006392.png)
-
-> ### 参数说明
->
-> 1. **exchange**: 交换机的名称。如果传入空字符串 `""`，表示使用默认交换机（default exchange）。
-> 2. **routingKey**: 路由键。路由键用于将消息路由到特定的队列。对于默认交换机，路由键就是队列的名称。(其实，就是在多个队列和一个交换机绑定时，通过路由键，去确定将消息交给哪个队列)
-> 3. **props**: 消息的属性。这是一个 `BasicProperties` 对象，可以包含各种属性，如消息的持久性、内容类型、头信息等。
-> 4. **body**: 消息的主体内容，是一个字节数组。
-
-##### `basicConsume`:用于开始消费指定队列中的消息
-
-![image-20241110180409091](./assets/image-20241110180409091.png)
-
-> ### 参数说明
->
-> 1. **queue**: 要消费的队列名称。
-> 2. **autoAck**: 是否自动确认消息。如果设置为 `true`，消费者接收到消息后会自动向 RabbitMQ 发送确认。如果设置为 `false`，则需要手动确认消息。
-> 3. **deliverCallback**: 消息到达时的回调函数。每当有新的消息到达时，这个回调函数会被调用。
-> 4. **cancelCallback**: 取消消费时的回调函数。当消费者被取消（例如，队列被删除或消费者被显式取消）时，这个回调函数会被调用。
->
-> ### 返回值
->
-> `basicConsume` 方法返回一个 `consumerTag` 字符串，这是 RabbitMQ 分配给消费者的唯一标识符。你可以使用这个标识符来取消消费。
-
 ### **Work Queues** 工作队列
 
 <img src="./assets/image-20241110183825859.png" alt="image-20241110183825859"  />
 
 **描述**
 
-用于将任务分发给多个工作者（worker）进行处理。这种模式也被称为任务队列（Task Queues）或负载均衡队列（Load Balancing Queues）。通过这种方式，可以有效地分配任务，避免单个工作者的过载，并提高整体系统的吞吐量。
+消息产生者将消息放入队列消费者可以有多个,消费者1,消费者2同时监听同一个队列,消息被消费。C1 C2共同争抢当前的消息队列内容,谁先拿到谁负责消费消息(隐患：高并发情况下,默认会产生某一个消息被多个消费者共同使用,可以设置一个开关(syncronize) 保证一条消息只能被一个消费者使用)。
 
 **关键特性**
 
@@ -443,6 +474,12 @@ public class Subscriber {
 1. **Direct Exchange**: 根据路由键将消息路由到特定的队列。只有路由键完全匹配的队列才能接收到消息。
 2. **Topic Exchange**: 根据路由键的模式匹配将消息路由到多个队列。路由键可以包含通配符。
 
+**业务场景**
+
+- error 通知;EXCEPTION;错误通知的功能;传统意义的错误通知;客户通知;利用key路由,可
+
+  以将程序中的错误封装成消息传入到消息队列中,开发者可以自定义消费者,实时接收错误;
+
 #### 生产者（Publisher）
 
 ```java
@@ -623,7 +660,7 @@ public class Subscriber {
 
 # SpringBoot整合RabbitMQ
 
-### 1. 添加依赖
+## 1. 添加依赖
 
 ```xml
 <dependencies>
@@ -647,7 +684,7 @@ public class Subscriber {
 </dependencies>
 ```
 
-### 2. 配置 RabbitMQ 连接
+## 2. 配置 RabbitMQ 连接
 
 **application.yml**
 
@@ -660,7 +697,7 @@ spring:
     password: 123456
 ```
 
-### 3. 创建 RabbitMQ 配置类
+## 3. 创建 RabbitMQ 配置类
 
 创建一个配置类来定义交换机、队列和绑定关系。
 
@@ -694,7 +731,7 @@ public class RabbitMQConfig {
 }
 ```
 
-### 4. 创建生产者
+## 4. 创建生产者
 
 创建一个生产者类，用于发送消息到 RabbitMQ。
 
@@ -716,7 +753,7 @@ public class MessageSender {
 }
 ```
 
-### 5. 创建消费者
+## 5. 创建消费者
 
 创建一个消费者类，用于接收和处理消息。
 
@@ -734,7 +771,7 @@ public class MessageReceiver {
 }	
 ```
 
-### 6. 测试
+## 6. 测试
 
 你可以在主应用类中测试生产者和消费者的功能。
 
@@ -764,7 +801,7 @@ public class RabbitmqApplication implements CommandLineRunner {
 
 > `CommandLineRunner` 是 Spring Boot 提供的一个接口，用于在应用启动后立即执行一些初始化或启动任务。实现 `CommandLineRunner` 接口的方法会在 `SpringApplication.run` 方法执行完成后调用。这使得你可以在应用启动时执行一些必要的操作，比如发送一条消息、初始化数据库等。
 
-### `RabbitTemplate`
+# `RabbitTemplate`
 
 是 Spring AMQP 提供的一个核心类，用于简化与 RabbitMQ 的交互。它提供了发送消息、接收消息以及管理连接等功能。下面详细介绍 `RabbitTemplate` 的主要功能和用法。
 
@@ -776,7 +813,7 @@ public class RabbitmqApplication implements CommandLineRunner {
 4. **事务管理**：支持事务管理，确保消息的可靠发送和接收。
 5. **确认模式**：支持多种确认模式，如 `CORRELATION_DATA`、`MANDATORY` 等。
 
-### `@RabbitListener`
+# `@RabbitListener`
 
 是 Spring AMQP 提供的一个注解，用于简化消息监听和处理。通过在方法上使用 `@RabbitListener` 注解，你可以指定该方法作为消息的接收处理器，监听特定的队列或交换机。
 
