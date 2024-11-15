@@ -534,6 +534,7 @@ public class RabbitConfig {
     public static final String DELAYED_QUEUE_NAME = "delayed_queue";
     public static final String ROUTING_KEY = "delayed_routing_key";
 
+    // 自定义交换机
     @Bean
     public CustomExchange delayedExchange() {
         Map<String, Object> arguments = new HashMap<>();
@@ -569,7 +570,149 @@ public class RabbitConfig {
                 return message;
             }
         };
-        rabbitTemplate.convertAndSend("plugs-delayed-exchange","ack","1111111",processor,data);
+        rabbitTemplate.convertAndSend("delayed_exchange","ack","1111111",processor,data);
     }
 ```
 
+# RabbitMQ实战场景
+
+## 日志与可视化监控查看
+
+**日志文件：**
+
+```shell
+cd /var/log/rabbitmq/rabbit@localhost.log
+```
+
+**停止服务：**
+
+```shell
+/sbin/service rabbitmq-server stop
+```
+
+**查看进程：**
+
+```shell
+ps -ef|grep rabbitmq
+```
+
+**重新启动:** (有问题)
+
+```shell
+rabbitmqctl start_app
+```
+
+**开启服务：**
+
+```shell
+/bin/systemctl start rabbitmq-server.service
+```
+
+**监控日志：**
+
+```shell
+tail -n 500 -f 
+```
+
+## **消息追踪**
+
+`amq.rabbitmq.trace` 是 RabbitMQ 内置的一个特殊交换机，它主要用于调试目的，可以帮助开发者或运维人员追踪消息在 RabbitMQ 中的流动情况。通过启用 `amq.rabbitmq.trace`，可以捕获发送到指定队列的消息及其属性，这对于理解复杂的路由规则、诊断消息传递问题非常有帮助。
+
+### 使用场景
+
+1. **开发调试**：在开发阶段，可以利用 `amq.rabbitmq.trace` 来验证消息是否按照预期的路径正确传递，确保消息格式和内容符合要求。
+2. **故障排查**：当生产环境中遇到消息传递异常时，启用 `amq.rabbitmq.trace` 可以帮助快速定位问题所在，例如检查消息是否被正确路由到了目标队列。
+3. **性能优化**：通过分析消息流动的数据，可以识别潜在的性能瓶颈，为优化系统提供依据
+
+### 注意事项
+
+- **性能影响**：启用 `amq.rabbitmq.trace` 会增加系统的开销，因为它需要额外复制并处理每条消息。因此，在生产环境中应谨慎使用，仅在必要时启用，并在调试完成后关闭。
+- **安全性**：由于 `amq.rabbitmq.trace` 会捕获所有消息的内容，因此可能存在泄露敏感信息的风险。确保只在受控环境中使用，并且限制访问权限。
+- **数据量**：如果系统中有大量消息传递，`trace_queue` 可能会迅速积累大量的消息，导致磁盘空间不足等问题。建议定期清理或限制队列大小。
+
+### 启用方式
+
+1. **Firehose：生产者给交换机发送消息时，会按照指定的格式发送到amq.rabbitmq.trace（Topic）**交换机上
+
+   **开启Firehose命令：**
+
+   ```shell
+   rabbitmqctl trace_on
+   ```
+
+   **关闭Firehose命令**
+
+   ```shell
+   rabbitmqctl trace_off
+   ```
+
+2. **使用数据可视化插件**
+
+查看插件列表
+
+```shell
+rabbitmq-plugins list
+```
+
+开启可视化插件
+
+```shell
+rabbitmq-plugins enable rabbitmq_tracing
+```
+
+关闭可视化插件
+
+```shell
+rabbitmq-plugins disable rabbitmq_tracing
+```
+
+
+
+<img src="./assets/image-20241114195934550.png" alt="image-20241114195934550" style="zoom: 67%;" />
+
+## 幂等性保障
+
+**幂等性：**是分布式中比较重要的一个概念，是指在多作业操作时候避免造成重复影响，其实就是保证同一个消息不被
+
+消费者重复消费两次。但是实际开发中可能存在网络波动等问题，生产者无法接受消费者发送的ack信息，因此这条消
+
+息将会被重复发送给其他消费者进行消费，实际上这条消息已经被消费过了，这就是重复消费的问题。
+
+**如何去避免重复消费问题：**
+
+1. 数据库乐观锁机制
+
+   ```sql
+   update items set count=count-1 where count= #{count} and id = #{id}
+   
+   update items set count=count-1,version=version+1 where version=#{version} and id = #{id}
+   ```
+
+   > 可以省略version，通过比较更新操作前后count的值，来判断是否可以修改。
+
+2. 生成全局唯一id+redis锁机制:操作之前先判断是否抢占了分布式锁 setNx 命名
+
+# RabbitMQ集群
+
+**单节点存在的问题**
+
+- 单节点的RabbitMQ如果内存崩溃、机器掉电或者主板故障，会影响整个业务线正常使用
+- 单机吞吐性能会受内存、带宽大小限制
+
+![image-20241114204409242](./assets/image-20241114204409242.png)
+
+**集群模式**
+
+​	<img src="./assets/image-20241114204506764.png" alt="image-20241114204506764" style="zoom:67%;" />
+
+**集群存在的问题**
+
+ **高可用性问题**：单点故障导致集群不可用。
+
+![image-20241115212820192](./assets/image-20241115212820192.png)
+
+# **HAProxy** 
+
+HAProxy 是一个高性能的开源负载均衡器，常用于提高应用程序的可用性和扩展性。在 RabbitMQ 集群中使用 HAProxy 可以实现客户端请求的负载均衡，提高系统的可靠性和性能。
+
+<img src="./assets/image-20241115213440625.png" alt="image-20241115213440625" style="zoom:67%;" />
