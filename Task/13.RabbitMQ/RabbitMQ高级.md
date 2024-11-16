@@ -363,7 +363,11 @@ public class RabbitMqConfig {
 
 - ### 图形界面方式设置
 
+  队列TTL
+
 <img src="./assets/image-20241113155214191.png" alt="image-20241113155214191" style="zoom:67%;" />
+
+​	消息TTL
 
 <img src="./assets/image-20241113161505743.png" alt="image-20241113161505743" style="zoom:67%;" />
 
@@ -616,7 +620,7 @@ tail -n 500 -f
 
 ## **消息追踪**
 
-`amq.rabbitmq.trace` 是 RabbitMQ 内置的一个特殊交换机，它主要用于调试目的，可以帮助开发者或运维人员追踪消息在 RabbitMQ 中的流动情况。通过启用 `amq.rabbitmq.trace`，可以捕获发送到指定队列的消息及其属性，这对于理解复杂的路由规则、诊断消息传递问题非常有帮助。
+`amq.rabbitmq.trace` 是 RabbitMQ 内置的一**个特殊交换机**，它主要用于调试目的，可以帮助开发者或运维人员追踪消息在 RabbitMQ 中的流动情况。通过启用 `amq.rabbitmq.trace`，可以捕获发送到指定队列的消息及其属性，这对于理解复杂的路由规则、诊断消息传递问题非常有帮助。
 
 ### 使用场景
 
