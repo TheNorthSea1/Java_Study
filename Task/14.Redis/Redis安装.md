@@ -70,7 +70,7 @@ redis-server
    cp redis.conf redis_1.conf
    ```
 
-2. 使用vi 编辑redis.conf文件，将daemonize的no改成yes，允许后台启动(vi 查找 / 查找内容，向下n。按insert在插入模式下修改 :wq保存退出)
+2. **使用vi 编辑redis.conf文件，将daemonize的no改成yes**，允许后台启动(vi 查找 / 查找内容，向下n。按insert在插入模式下修改 :wq保存退出)
 
 3. 启动redis （⭐️）
 
@@ -96,7 +96,7 @@ redis-cli
 
 > Note:
 >
-> 如果，启动不起，就把进场先给杀了。
+> 如果，启动不起，就把redis进程给杀了。
 
 # 退出redis
 
