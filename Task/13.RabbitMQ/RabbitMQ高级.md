@@ -652,25 +652,23 @@ tail -n 500 -f
 
 2. **使用数据可视化插件**
 
-查看插件列表
+   查看插件列表
 
-```shell
-rabbitmq-plugins list
-```
+   ```shell
+   rabbitmq-plugins list
+   ```
 
-开启可视化插件
+   开启可视化插件
 
-```shell
-rabbitmq-plugins enable rabbitmq_tracing
-```
+   ```shell'
+   rabbitmq-plugins enable rabbitmq_tracing
+   ```
 
-关闭可视化插件
+   关闭可视化插件
 
-```shell
-rabbitmq-plugins disable rabbitmq_tracing
-```
-
-
+   ```shell
+   rabbitmq-plugins disable rabbitmq_tracing
+   ```
 
 <img src="./assets/image-20241114195934550.png" alt="image-20241114195934550" style="zoom: 67%;" />
 

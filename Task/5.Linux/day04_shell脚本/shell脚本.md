@@ -709,5 +709,3 @@ tail -n 500 -f ../logs/catalina.out
   - ping 查看ip 是否通
   - telnet 检查端口是否通
 - linux 软件安装
-
-希望大家能够在成为程序员这条道路上尼，继续加把劲，不希望大家**功败垂成**

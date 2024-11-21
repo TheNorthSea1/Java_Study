@@ -1,4 +1,4 @@
-# 1. redis概述
+# 1.redis概述
 
 ## **1.1** 简介
 
@@ -742,7 +742,7 @@ auto-aof-rewrite-min-size 64mb
 
 ## 主从同步原理(⭐️)
 
-<img src="./assets/image-20241118220946978.png" alt="image-20241118220946978" style="zoom:150%;" />
+<img src="./assets/image-20241118220946978.png" alt="image-20241118220946978" style="zoom: 200%;" />
 
 - **第一阶段**
 
@@ -1802,7 +1802,7 @@ aof文件，将未完成事务操作从aof清除，从而保证原子性
 
 **旁路型缓存：**
 
-<img src="./assets/image-20241120221124078.png" alt="image-20241120221124078" style="zoom:80%;" />
+<img src="./assets/image-20241120221124078.png" alt="image-20241120221124078"  />
 
 1. 服务先到缓存中读取数据，如果数据存在，就直接返回
 
@@ -1974,7 +1974,7 @@ redis中每一个value对应一个内存地址，在expires，一个内存地址
 
   redis启动服务时，读取server.hz的值，默认为10，可以通过info server指令查看。
 
-  每秒钟执行server.hz次定时轮询，调用serverCron()函数，函数中又执行databasesCron()，对16数据库进行轮询，执行了activeExpireCycle()，检测其中元素的过期情况。每次轮询都执行250ms/server.hz时长。随机从对应的库中抽取20个(默认)key进行检测。
+  每秒钟执行server.hz次定时轮询，调用serverCron()函数，函数中又执行databasesCron()，对16个数据库（redis中有16个库）进行轮询，执行了activeExpireCycle()，检测其中元素的过期情况。每次轮询都执行250ms/server.hz时长。随机从对应的库中抽取20个(默认)key进行检测。
 
   如果key已过期，则删除key
 
@@ -1983,3 +1983,391 @@ redis中每一个value对应一个内存地址，在expires，一个内存地址
   如果一轮中删除的key数量<=20*25%，则开始检查下一个库。
 
 > redis中使用惰性删除和定期删除
+
+## 逐出算法
+
+通过 配置文件 maxmemory < bytes>来设置最大缓存容量。一般情况，建议设置为总数据的15%到30%，在实际生产环境下，可以设置50%。如果不设置，默认全部使用。
+
+![image-20241121171858950](./assets/image-20241121171858950.png)
+
+```mermaid
+graph LR
+A(淘汰策略)-->B(noevction不淘汰)
+A-->C(进行数据淘汰)
+C-->D(过期数据淘汰)
+C-->E(所有数据淘汰)
+D-->F(volatile-lru)
+D-->G(volatile-lfu)
+D-->H(volatile-tt1)
+D-->I(volatile-random)
+E-->J(a11keys-lru)
+E-->K(a1keys-1fu)
+E-->L(a11keys-random)
+```
+
+
+
+在redis默认情况下，不进行数据淘汰noevction,一旦缓存被写满了，再有写请求，redis直接返回错误。
+
+**过期数据淘汰策略**，先限定了，数据都是在过期范围。
+
+- valotile-ttl：在进行筛选时，根据过期时间先后顺序进行一个删除，越早过期的越先被删除
+- valotile-random：在设置了过期时间的键值对中，进行随机删除
+- valotile-lru：会使用LRU算法筛选设置了过期的键值对
+- valotile-lfu：会使用LFU算法筛选设置了过期的键值对
+
+**所有数据淘汰策略**：
+
+- allkeys-random：从所有键值对中随机筛选并删除
+- allkeys-lru：从所有键值对中采用LRU算法进行筛选删除
+- allkeys-lfu：从所有键值对中采用LFU算法进行筛选删除
+
+**LRU算法**
+
+- 算法Least Recently Used，最近最少使用原则，最近不用的数据会被筛选出来，最近频繁使用的数据会保留
+
+- lru算法，需要使用链表来管理所有缓存数据，带来内存开销。有数据被访问时，需要执行链表数据的移动，会降低redis性能。
+
+- 记录数据最后一次访问的时间截，第一次会随机选出N个数据,作为一个候选集合，作一个排序，再把lru最小的数据进行淘汰
+
+  N的配置
+
+  maxmemory-samples 5
+
+  ![image-20241121174359809](./assets/image-20241121174359809.png)
+
+**LFU算法**
+
+- 算法Least Frequently Used，最不常用原则。根据历史访问频率来淘汰数据。
+- 每个数据块都有一个引用计数,按引用计数来排序。如果引用计数相同，按照时间排序
+  - 新加入的数据放在队尾，引用计为1
+  - 当数据被访问，引用计数增加，队列重排
+  - 当需要淘汰数据时，将队列尾部的数据块删除
+
+**逐出算法选择**
+
+maxmemory-policy noeviction
+
+优先使用allkeys-lru策略。
+
+如果业务数据访问频率差别不大，可以建议使用allkeys-random。
+
+首推的新闻、置顶视频，不设置过期时间，可以建议使得volatile-lru。
+
+# 13.缓存异常
+
+## 数据不一致
+
+**一致性包括两种情况**
+
+- 缓存中有数据，需要和数据库值相同
+- 缓存中没有数据，数据库中的数据是最新值
+
+如果不符合以上两种情况，则出现数据不一致的问题。
+
+**读写缓存**
+
+- 同步直写
+- 异步写回
+
+**只读缓存**
+
+1. 新增数据
+
+   数据直接写到数据库中，缓存不做操作。满足一致性两种情况的第2种。
+
+2. 删改数据
+
+   - **先删除缓存，后更新数据库。**可能会导致，缓存删除成功，数据库更新失败。业务逻辑去访问数据时，缓存中查不到数据，缓存缺失，到数据库中查询，所以只拿到旧的数据。
+   - **先更新数据库，后删除缓存**。可能会导致，数据库更新成功，缓存删除失败。数据库中的数据是新的值，缓存中存储的是旧值。再读取时，先从缓存中读取，读取到了旧值。
+
+**解决数据不一致的方案**
+
+重试机制：把删除的缓存值或要更新数据库值先存储到消息队列中(kafka消息队列)。
+
+
+
+**多线程访问的情况**
+
+1. 先删除缓存，再更新数据库。
+
+   假设T1线程先删除缓存，再执行更新数据库。还未更新成功时，T2线程进行读取，发现缓存中没有数据，到数据库中读取，会读取到旧的数据。如果T2还将旧数据更新到缓存中，那T1线程再进行读取，也读到的旧值。
+
+   解决办法：**延迟双删**，让T1线程先执行休眠一段时间。T1线程在休眠时间，让T2线程执行结束，会将数据重新写入缓存。T1线
+
+   程再做一次缓存删除操作。
+
+   ```java
+   redis.delCache() //第一次删除
+       
+   db.update()
+       
+   Thread.sleep(2000) // T1线程休眠，让T2线程执行完。
+       
+   redis.delCache()// 第二次删除
+   ```
+
+2. .**先更新数据库值，再去删除缓存**<font color='#C0392B'>(推荐)</font>
+
+   假设T1线程先删除或更新数据库中的值，还没来得及删除缓存时，T2线程就开始读取数据。T2会先从缓存中读取，缓存命中，T2拿到的就是旧的数据。直到T1将缓存中数据删除，其他线程再次读取，可以拿到新值。（所以会出现小段数据不一致的情况）
+
+| 并发操作 | 顺序                       | 可能出现的问题                               | 问题描述                                                     | 解决方案                   |
+| -------- | -------------------------- | -------------------------------------------- | ------------------------------------------------------------ | -------------------------- |
+| 没有     | 先删除缓存，后再更新数据库 | 缓存删除成功，数据库更新失败                 | 从数据库读到旧值                                             | 重试（消息队列）           |
+| 有       | 先删除缓存，后再更新数据库 | 缓存删除，未更新数据库，其他线程并发访问     | 并发线程从数据库读到旧值，并更新了缓存，其他线程都从缓存中读到旧值 | 延迟双删                   |
+| 没有     | 先更新数据库，后删除缓存   | 数据库更新成功，缓存删除失败                 | 从缓存中读到旧值                                             | 重试（消息队列）           |
+| 有       | 先更新数据库，后删除缓存   | 数据库更新成功，未删除缓存，其他进程并发访问 | 并发线程从缓存中读到旧值                                     | 会有数据不一致情况短暂存在 |
+
+
+
+## 缓存雪崩
+
+大量的应用请求无法在redis中完成处理。缓存中读取不到数据，直接进入到数据库服务器。数据库压力激增，数据库崩溃，请求堆积在redis，导致redis服务器崩溃，导致redis集群崩溃，应用服务器崩溃，称为雪崩。
+
+**原因1：**缓存中有大量数据同时过期
+
+解决方案：
+
+1. 页面静态化处理数据：对于不经常更换的数据，生成静态页
+
+2. 避免大量数据同时过期:为商品过期时间追加一个随机数，在一个较小的范围内(1~3分钟)。
+
+3. 构建多级缓存架构：redis缓存+nginx缓存+ehcache缓存
+
+4. 延长或取消热度超高的数据过期时间
+
+5. 服务降级
+
+   不同的数据采取不同的处理方式。
+
+**原因2：**redis实例故障
+
+解决方案：
+
+1. 服务熔断或限流处理
+
+2. 提前预防
+
+   灾难预警：监控redis服务器性能指标，包括数据库服务器性能指标，CPU、内存、平均响应时间、线程数等
+
+3. 集群：有节点出一故障，主从切换。
+
+
+
+## 缓存击穿
+
+缓存击穿是指在一个高并发的系统中，某个热点数据在缓存中失效，大量请求同时访问该数据，导致数据库压力激增，甚至可能导致数据库崩溃。这种情况通常发生在缓存过期或被删除后，大量请求直接打到数据库上。
+
+**解决方案：**
+
+- 预先设定：电商双11,商铺设定几款是主打商品，延长过期时间
+- 实时监控：监控访问量，避免访问量激增
+- 定时任务：启动任务调度器，后台刷新数据有效期
+- 分布式锁：可防止缓存击穿，但会有性能问题
+
+## 缓存穿透
+
+缓存穿透是指在缓存系统中，客户端请求一个不存在的数据，由于缓存中没有该数据，请求会直接穿透到数据库，导致数据库压力增大。这种情况不仅增加了数据库的负担，还可能导致系统性能下降。
+
+**原因：**
+
+1. 业务层误操作
+
+2. <font color='#E74C3C'>恶意攻击</font>
+
+**解决方案：**
+
+1. 缓存空值或缺省值
+   - 对于查询结果为空的数据，也缓存一个空值（如 `null`），并设置较短的过期时间。这样可以防止后续请求直接穿透到数据库。
+
+2. 使用布隆过滤器，快速判断数据是否存在
+   - 布隆过滤器是一个空间效率高的概率型数据结构，用于判断一个元素是否在一个集合中。虽然它可能会有误判（即假阳性），但不会产生假阴性。
+3. 在请求入口前端进行请求检测
+   - 在请求进入系统前，通过前端或网关层进行请求检测，过滤掉无效的请求。
+
+4. 实时监控: 通过实时监控系统性能指标，及时发现和处理缓存穿透问题。
+   - **监控缓存命中率**：定期检查缓存的命中率，如果命中率突然下降，可能意味着出现了缓存穿透。
+   - **数据库负载监控**：监控数据库的负载情况，如果发现数据库负载异常增加，可能需要检查缓存策略。
+
+5. key加密
+   - 对缓存的Key进行加密，防止恶意用户通过构造特定的Key来攻击系统。
+
+
+
+# 14.使用jedis操作
+
+## 连接redis
+
+**步骤1.**创建一个maven工程
+
+```xml
+<dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.22</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+    </dependencies>
+```
+
+**步骤2.**配置logback用到的xml文件 logback.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration
+        xmlns="http://ch.qos.logback/xml/ns/logback"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://ch.qos.logback/xml/ns/logback logback.xsd">
+
+    <!-- 定义一个名为 STDOUT 的控制台输出器 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %c [%t] - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 定义一个名为 c 的日志记录器，级别为 DEBUG，不继承父记录器的配置 -->
+    <logger name="c" level="debug" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!-- 定义根日志记录器，级别为 ERROR -->
+    <root level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
+```
+
+> 1. **Appender 定义**：
+>
+>    - `<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">`：定义了一个名为 `STDOUT` 的控制台输出器。
+>
+>    - `<encoder>`：定义了日志的输出格式。
+>
+>    - ```
+>      <pattern>%date{HH:mm:ss.SSS} %c [%t] - %m%n</pattern>
+>      ```
+>
+>      ：日志格式模板，其中：
+>
+>      - `%date{HH:mm:ss.SSS}`：日期和时间，格式为小时:分钟:秒.毫秒。
+>      - `%c`：日志记录器的名称。
+>      - `[%t]`：线程名。
+>      - `- %m%n`：日志消息，换行符。
+>
+> 2. **Logger 定义**：
+>
+>    - `<logger name="c" level="debug" additivity="false">`：定义了一个名为 `c` 的日志记录器，级别为 `DEBUG`，并且不继承父记录器的配置。
+>    - `<appender-ref ref="STDOUT"/>`：引用了上面定义的 `STDOUT` 控制台输出器。
+>
+> 3. **Root Logger 定义**：
+>
+>    - `<root level="ERROR">`：定义了根日志记录器，级别为 `ERROR`。
+>    - `<appender-ref ref="STDOUT"/>`：引用了上面定义的 `STDOUT` 控制台输出器。
+
+**步骤3：**修改redis.conf的配置文件 ，注释掉bind，开放所有的网路
+
+> 如果你不设置 `bind` 参数，Redis 默认会监听所有可用的网络接口上的 IP 地址。这通常不推荐，因为它会暴露 Redis 服务器给所有网络接口，增加安全风险。
+
+![image-20241121231513604](./assets/image-20241121231513604.png)
+
+**步骤4：**修改redis.conf的配置文件，将文件保护模式修改，原有默认值是yes，改成no
+
+![image-20241121222457430](./assets/image-20241121222457430.png)
+
+**步骤5：**开放防火墙
+
+```shell
+firewall-cmd --zone=public --add-port=6379/tcp --permanent
+firewall-cmd --reload
+```
+
+**步骤7：**测试连接
+
+```java
+package cn.bwhcoder;
+
+import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
+
+@Slf4j(topic = "c.TestConnection")
+public class TestConnection {
+    public static void main(String[] args) {
+        Jedis jedis = new Jedis("118.31.104.65", 6379);
+        String ping = jedis.ping();
+        log.info(ping);
+    }
+}
+```
+
+![image-20241121232233038](./assets/image-20241121232233038.png)
+
+## 应用案例
+
+需求：用户使用银行APP登录，要求动态发送手机验证码，验证码设定5分钟有效，1天内最多发送3次
+
+```java
+package cn.bwhcoder;
+
+import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
+
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Random;
+
+@Slf4j(topic = "c.TestConnection")
+public class TestConnection {
+    public static void main(String[] args) {
+        Jedis jedis = new Jedis("118.31.104.65", 6379);
+        send(jedis,"13012345678");
+//        verify(jedis,"13012345678","743200");
+    }
+
+
+    public static String getCode() {
+        return new DecimalFormat("000000").format(new
+                Random().nextInt(1000000));
+    }
+
+    public static void send(Jedis jedis, String phoneNumber) {
+        String count_key = "v:" + phoneNumber + ":count";//当前手机号已发送次数的key
+        String code_key = "v:" + phoneNumber + ":code";//当前手机号已收到的验证码key
+        String s = jedis.get(count_key);//获取手机号已发送的次数
+        if (s == null) {
+//如果没有获取，就表时该key不存在，第一次设置，有效时间为1天
+            jedis.setex(count_key, 60 * 60 * 24, "1");
+            log.debug("发送成功");
+        } else if (Integer.parseInt(s) < 3) {//如果不到3次，可以为用户发送，每发送一次，记数增加1
+            jedis.incr(count_key);
+            log.debug("发送成功");
+        } else {
+            log.debug("今日转帐3次，24小时后再试");
+            jedis.close();
+            return;
+        }
+        jedis.setex(code_key, 60 * 5, getCode());//发送验证码进行保存
+        log.debug("验证码为：" + jedis.get(code_key));
+        jedis.close();
+    }
+
+    public static void verify(Jedis jedis, String phoneNumber, String code) {
+        String code_key = "v:" + phoneNumber + ":code";
+        String redis_code = jedis.get(code_key);
+        log.debug(code.equals(redis_code) ? "成功" : "失败");
+    }
+    
+}
+
+```
+
