@@ -737,7 +737,7 @@
 
 - 添加依赖
 
-  ```java
+  ```xml
   <dependencies>
           <dependency>
               <groupId>org.springframework</groupId>
@@ -905,7 +905,7 @@
 
 - 需要修改代码生成器的数据库连接信息
 
-  ```java
+  ```xml
   <build>
           <plugins>
               <!--           引入 generator 插件-->
@@ -940,7 +940,7 @@
 
 - 解决方案
 
-  ```java
+  ```xml
   <dependency>
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis</artifactId>
@@ -952,7 +952,7 @@
 
 - 解决方案
 
-  ```java
+  ```xml
   <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>

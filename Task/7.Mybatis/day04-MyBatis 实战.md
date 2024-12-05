@@ -9,25 +9,36 @@
 
 ### 2.1导入插件
 
-```java
-<plugin>
-    <groupId>org.mybatis.generator</groupId>
-    <artifactId>mybatis-generator-maven-plugin</artifactId>
-    <version>1.4.1</version>
-    <dependencies>
-<!--                    引入插件需要的依赖-->
-        <dependency>
+```xml
+<build>
+    <plugins>
+      <!--           引入 generator 插件-->
+      <plugin>
+        <groupId>org.mybatis.generator</groupId>
+        <artifactId>mybatis-generator-maven-plugin</artifactId>
+        <version>1.4.2</version>
+
+        <configuration>
+          <verbose>true</verbose>
+          <overwrite>false</overwrite>
+        </configuration>
+        <dependencies>
+          <!--                    引入插件需要的依赖-->
+          <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.29</version>
-        </dependency>
-    </dependencies>
-</plugin>
+          </dependency>
+
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
 ```
 
 ### 2.2添加配置文件
 
-- 名称：generatorConfig.xml
+- 名称：**generatorConfig.xml**
 
 - 关于jdbcConnection属性配置（**对于XML配置我们可以查阅官方文档**）
 
@@ -81,7 +92,7 @@
 
 ### 1.1导入项目依赖
 
-```java
+```xml
 <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -309,7 +320,7 @@ create table product
 
 - 添加 fasterjson 依赖
 
-  ```java
+  ```xml
   <dependency>
        <groupId>com.alibaba.fastjson2</groupId>
        <artifactId>fastjson2</artifactId>
@@ -590,7 +601,7 @@ create table product
 
 ## **1.导入Maven依赖**
 
-```java
+```xml
  <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
     <dependency>
       <groupId>com.alibaba</groupId>

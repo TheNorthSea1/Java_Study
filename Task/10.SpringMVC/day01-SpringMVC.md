@@ -170,6 +170,7 @@ SpringMVC 提供了丰富的注解支持，简化了开发过程：
 - **@Controller**：标记在一个类上，表示这是一个控制器类。
 - **@RequestMapping**：可以放在类或方法上，用来映射HTTP请求。
 - **@RequestParam**：用于绑定web请求参数到控制器的方法参数上。
+- **@RequestBody**
 - **@PathVariable**：用于接收URL中的动态值。
 - **@ModelAttribute**：用于将请求参数绑定到模型中。
 - **@ResponseBody**：指示方法返回的结果直接写入HTTP响应体。
@@ -679,7 +680,7 @@ Spring MVC还提供了一些衍生注解，这些注解是 `@RequestMapping` 的
 
 ## 2.@RequestParam 
 
-`@RequestParam` 是Spring MVC中一个非常有用的注解，用于将请求参数绑定到控制器方法的参数上。它可以处理GET和POST请求中的查询参数或表单字段。下面是对 `@RequestParam` 注解的详细解释，包括其主要属性和使用示例。
+`@RequestParam` 是Spring MVC中一个非常有用的注解，用于将请求参数绑定到控制器方法的参数上。它可以**处理GET和POST请求中的查询参数或表单字**段。下面是对 `@RequestParam` 注解的详细解释，包括其主要属性和使用示例。
 
 ### 主要属性
 
@@ -969,6 +970,21 @@ public class UserController {
 
 假设请求URL为 `/users?names=John&names=Alice&names=Bob`，Spring MVC会将多个 `names` 参数值绑定到列表 `names` 上。
 
+
+
+### 5. 项目中实用(⭐️⭐️)
+
+用于处理 POST 请求并将请求参数映射到一个 `Map<String, String>`,这种方法非常适合处理动态的表单数据或不确定数量的参数
+
+```java
+@PostMapping("/User/save")
+public Resp save(@RequestParam Map<String,String> map){
+
+}
+```
+
+
+
 > ### 总结
 >
 > - **对象参数传递**：Spring MVC会自动将请求参数绑定到对象的属性上。
@@ -989,7 +1005,7 @@ public class UserController {
 
 - 依赖
 
-  ```java
+  ```xml
   <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring-webmvc</artifactId>
@@ -1268,11 +1284,24 @@ Spring MVC会自动将请求体中的JSON数组绑定到 `List<User>` 上。
 ## 5.@RequestParam 和 @RequestBody总结
 
 - 区别
-  - @RequestBody 用于接收json 数据的[application/json]
-  - @RequestParam 用于接收 url 地址参数的 [application/x-www-form]
+  - @RequestBody 用于接收json 数据的[**`application/json`**]
+  - @RequestParam 用于接收 url 地址参数的 [**`application/x-www-form-urlencoded`**]
+  
+  > **`application/x-www-form-urlencoded`**
+  >
+  > - **描述**：表示请求体中的数据是 URL 编码的表单数据。
+  > - **使用场景**：适用于传统的表单提交，特别是在 GET 请求和简单的 POST 请求中。
+  >
+  > **`application/json`**
+  >
+  > - **描述**：表示请求或响应体中的数据是 JSON 格式。
+  > - **使用场景**：适用于现代 Web API 和大多数 RESTful 服务。
 - 应用
+
+  - <font color='red'>根据前端的Http请求中的 Content-type来确定我们使用@RequestBody  还是@RequestParam。</font>
   - 后面的开发，都是前后端分离的，以 json 数据传输为主，所以 @RequestBody 使用更多
   - 如果不是使用json传输，就用 @RequestParam
+
 
 
 

@@ -83,7 +83,7 @@
 
 - 如果你的数据库**支持**自动生成主键的字段（比如 MySQL 和 SQL Server），那么你可以设置 useGeneratedKeys=”true”，然后再把 keyProperty 设置为目标属性（ Author 表已经在 id 列上使用了自动生成）
 
-  > `useGeneratedKeys`、`keyProperty` 和 `keyColumn` 这三个属性一起工作，使得 MyBatis 能够在插入操作后方便地返回数据库生成的主键值
+  > `useGeneratedKeys`、`keyProperty` 和 `keyColumn` 这三个属性一起工作，使得 MyBatis 能够在插入操作后方便地**返回数据库生成的主键值**
 
 ```xml
 <insert id="insertAuthor" useGeneratedKeys="true"
@@ -436,16 +436,16 @@
         </select>
     ```
 
-### 2.5多对一的处理(一对一)
+### 2.5多对一的处理(一对一)（association）
 
-- 关联（association）：如果我的类里面有其它对象的关联关系，可以使用 association 来进行操作
+- 关联（**association**）：如果我的类里面有其它对象的关联关系，可以使用 association 来进行操作
 
   | 属性        | 描述                                                         |
   | ----------- | ------------------------------------------------------------ |
   | `property`  | 指定 Java 对象中的属性名，该属性用于存储关联的对象。         |
   | `javaType`  | 指定关联对象的 Java 类型。                                   |
   | `column`    | 指定数据库结果集中的列名，用于匹配 Java 对象中的属性。对于一对一的关系，这通常是一个外键或能够唯一标识关联对象的列。 |
-  | `select`    | 用于加载复杂类型属性的映射语句的 ID，它会从 column 属性指定的列中检索数据，作为参数传递给目标 select 语句。注意：在使用复合主键的时候，你可以使用 `column="{prop1=col1,prop2=col2}"` 这样的语法来指定多个传递给嵌套 Select 查询语句的列名。这会使得 `prop1` 和 `prop2` 作为参数对象，被设置为对应嵌套 Select 语句的参数。 |
+  | `select`    | 用于加载复杂类型属性的映射语句的 ID，**它会从 column 属性指定的列中检索数据，作为参数传递给目标 select 语句**。注意：在使用复合主键的时候，你可以使用 `column="{prop1=col1,prop2=col2}"` 这样的语法来指定多个传递给嵌套 Select 查询语句的列名。这会使得 `prop1` 和 `prop2` 作为参数对象，被设置为对应嵌套 Select 语句的参数。 |
   | `fetchType` | 可选的。有效值为 `lazy` 和 `eager`。 指定属性后，将在映射中忽略全局配置参数 `lazyLoadingEnabled`，使用属性的值。 |
 
 
@@ -550,7 +550,7 @@
 
   | 属性            | 描述                                                         |
   | --------------- | ------------------------------------------------------------ |
-  | `column`        | 当使用多个结果集时，该属性指定结果集中用于与 `foreignColumn`                匹配的列（多个列名以逗号隔开），以识别关系中的父类型与子类型。 |
+  | `column`        | 当使用多个结果集时，该属性指定结果集中用于与 `foreignColumn`匹配的列（多个列名以逗号隔开），以识别关系中的父类型与子类型。 |
   | `foreignColumn` | 指定外键对应的列名，指定的列将与父类型中 `column` 的给出的列进行匹配。 |
   | `resultSet`     | 指定用于加载复杂类型的结果集名字。                           |
 
@@ -594,7 +594,7 @@
 ### 3.3 关联查询的总结
 
 - 优点：
-  - 可以实现延迟加载，前提是要配置
+  - 可以**实现延迟加载**，前提是要配置
   
     > - setting中 设置 lazyLoadingEnabled = true
     > -  特定关联关系中可通过设置 `fetchType` 属性来覆盖该项的开关状态。

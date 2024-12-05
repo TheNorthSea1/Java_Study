@@ -60,8 +60,6 @@
   apache-tomcat-9.0.67\work\Catalina\localhost\ROOT\org\apache\jsp
   ```
 
-  
-
 - 下载tomcat 的源码才能找到依赖关系
 
   <img src="./assets/image-20241013142204354.png" alt="image-20241013142204354" style="zoom:80%;" />
@@ -71,8 +69,6 @@
   > 可以发现HttpJspBase 继承HttpServlet 可以得出  **JSP是一种Java servlet**
 
   <img src="jsp.assets/image-20221010133107758.png" alt="image-20221010133107758" style="zoom: 33%;" />
-
-  
 
 - 通过jsp 我们可以少写很多 html 响应出去的代码
 
@@ -98,6 +94,20 @@
 - ##### 销毁阶段：
 
   调用与JSP对应的servlet实例的销毁方法，然后销毁servlet实例
+
+## 5.jsp内置对象
+
+在JSP中，有一些预定义的对象，称为内置对象或隐式对象，这些对象可以直接在JSP页面中使用，无需显式声明。这些内置对象为开发者提供了便利，可以简化Web应用的开发过程。
+
+1. **request**：代表客户端的请求，此对象包含了来自客户端的信息，如请求头、请求参数等。通过它可以获取用户提交的数据。
+2. **response**：代表服务器对客户端的响应。可以通过它来设置响应头、状态码和响应体的内容。
+3. **out**：用于向客户端输出数据。这是一个`javax.servlet.jsp.JspWriter`类型的对象，可以用来向客户端发送文本数据。
+4. **session**：代表用户的会话信息。每个访问者都会有一个唯一的session对象，可以用来存储特定于用户的属性或信息。
+5. **application**：代表整个Web应用程序，实际上是一个`ServletContext`对象。它可以用来存储所有用户共享的信息。
+6. **config**：代表Servlet的配置信息，即`ServletConfig`对象。可以用来获取初始化参数。
+7. **pageContext**：提供了一个访问JSP页面中所有其他对象的方法，如request、response等。此外，它还提供了一系列方法来处理页面的输出和错误信息。
+8. **page**：代表当前的JSP页面本身，实际上是指向该页面对应的Servlet实例的引用。通常不直接使用这个对象。
+9. **exception**：当JSP页面发生异常时，可以通过这个对象获取到异常信息。只有在错误页面中才能使用这个对象，即设置了`<%@ page isErrorPage="true" %>`的页面。
 
 ## 5.jsp 语法
 
@@ -252,11 +262,10 @@
 
 - **默认 el 表达式已经被禁用了，需要使用需要手动开启**
 
-  ```java
+  ```jsp
   <%@page isELIgnored="true" %>
   ```
 
-  
 
 ### 1.域对象
 
@@ -276,7 +285,7 @@
 
 - 导入依赖
 
-  ```java
+  ```xml
   <dependency>
       <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>

@@ -89,7 +89,7 @@
 
   - 添加依赖
 
-    ```java
+    ```xml
     <dependency>
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
@@ -447,7 +447,7 @@
     - **默认情况下无操作 30分钟**
     - 修改默认的配置(都是 web.xml 的配置)
 
-    ```java
+    ```xml
     <!DOCTYPE web-app PUBLIC
      "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
      "http://java.sun.com/dtd/web-app_2_3.dtd" >

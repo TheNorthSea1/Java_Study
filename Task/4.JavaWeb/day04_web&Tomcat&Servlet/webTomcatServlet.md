@@ -381,7 +381,7 @@
 
 #### 7.1.1 导包
 
-```java
+```xml
 <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -600,7 +600,7 @@ http://localhost:8080/myServlet
 
 > 在web.xml 文件中增加配置
 
-```java
+```xml
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
   <servlet>

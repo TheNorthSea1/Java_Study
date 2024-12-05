@@ -81,7 +81,7 @@
   > - **销毁**：在Web容器关闭时，会调用Filter的`destroy()`方法进行清理操作，如关闭资源连接等。
   >
 
-  - filterChain.doFilter(req,resp);    放行后访问资源访问完成还是会回到 filter
+  - **filterChain.doFilter(req,resp)**   放行后访问资源访问完成还是会回到 filter
 
     ```java
     A filter is an object that performs filtering tasks on either the request to a resource (a servlet or static content), or on the response from a resource, or both.

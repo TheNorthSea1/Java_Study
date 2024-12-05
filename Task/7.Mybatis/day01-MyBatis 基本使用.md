@@ -37,7 +37,7 @@
 
 - 引入 MyBatis 依赖
 
-  ```java
+  ```xml
   //MyBatis 依赖
   <dependency>
       <groupId>org.mybatis</groupId>
@@ -50,7 +50,7 @@
 
 - 引入数据库驱动依赖
 
-  ```java
+  ```xml
   <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -60,7 +60,7 @@
 
 - 引入 junit 测试依赖
 
-  ```java
+  ```xml
   <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -115,7 +115,7 @@
 
 - 创建 xml 映射文件
 
-  ```java
+  ```xml
   <?xml version="1.0" encoding="UTF-8" ?>
   <!DOCTYPE mapper
           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"

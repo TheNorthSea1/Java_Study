@@ -496,7 +496,7 @@
 
   
 
-# 三、分页查询
+# 三、分页查询（⭐️）
 
 ## 1.概述
 
@@ -509,7 +509,7 @@
 
 - 导入 maven 依赖 pom
 
-  ```java
+  ```xml
   <dependency>
       <groupId>com.github.pagehelper</groupId>
       <artifactId>pagehelper</artifactId>

@@ -295,6 +295,10 @@ yum install net-tools.x86_64
 
 ## 2.XShell 安装
 
+### 2.0也可以不下Xshell直接用阿里云的远程连接
+
+![image-20241125151005662](./assets/image-20241125151005662.png)
+
 ### 2.1双击exe 文件
 
 ![image-20221016145331377](linux 安装与使用.assets/image-20221016145331377.png)

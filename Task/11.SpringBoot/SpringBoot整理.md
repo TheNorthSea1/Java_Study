@@ -125,3 +125,13 @@ server:
 ```
 
 请注意，增加这些数值的同时也要考虑服务器资源的实际限制，确保服务器有足够的资源来支持更高的并发量。
+
+# @SpringBootApplication
+
+ 是 Spring Boot 框架中的一个注解，它用于标记一个类作为 Spring Boot 应用的入口点。这个注解是三个核心注解的组合：
+
+1. `@Configuration`: 允许在类中定义@Bean方法，以便将组件注册到Spring应用上下文中。
+2. `@EnableAutoConfiguration`: 告诉Spring Boot根据你添加的jar依赖自动配置你的应用程序。例如，如果你的应用程序连接到一个嵌入式的H2数据库，并且classpath中有必要的驱动程序，那么Spring Boot会自动配置数据源和JPA设置等。
+3. `@ComponentScan`: 自动扫描并加载所有带有`@Component`注解的类，以及它的衍生注解（如`@Service`, `@Repository`, `@Controller`等），并将它们注册为Spring应用上下文中的bean。
+
+使用`@SpringBootApplication`注解通常可以简化配置，因为它是上述三个注解的便捷形式。此外，它还默认从该注解所在的类的包开始进行组件扫描。如果你的应用结构遵循一定的规范，即所有的组件都位于主应用程序类的子包下，那么你就不需要额外指定`@ComponentScan`的`basePackages`属性。

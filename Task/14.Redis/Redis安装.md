@@ -96,7 +96,7 @@ redis-cli
 
 > Note:
 >
-> 如果，启动不起，就把redis进程给杀了。
+> 如果，启动不起来，就把redis进程给杀了。
 
 # 退出redis
 
